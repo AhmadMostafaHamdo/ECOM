@@ -1,0 +1,331 @@
+header {
+    position: fixed;
+    top: 0;
+    z-index: 1100;
+    width: 100%;
+    height: var(--header-height);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    background:
+        linear-gradient(
+            125deg,
+            color-mix(in srgb, var(--brand-strong) 96%, transparent),
+            color-mix(in srgb, var(--brand) 92%, transparent)
+        ),
+        radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.16), transparent 45%);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 12px 30px rgba(8, 28, 66, 0.28);
+}
+
+header .main_nav {
+    width: min(100%, var(--shell-max));
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+header nav .left {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+header .navlogo a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+header .navlogo img {
+    width: 112px;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.22));
+}
+
+header .navlogo span {
+    color: #ffffff;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+header .nav_searchbaar {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #d7e3fb;
+    border-radius: 999px;
+    box-shadow: 0 9px 18px rgba(7, 34, 77, 0.14);
+    overflow: visible;
+}
+
+header .search_leading_icon {
+    margin-left: 14px;
+    color: #6f7f9f;
+    font-size: 1.2rem;
+}
+
+header .left input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    height: 46px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    padding: 0 12px;
+    outline: none;
+}
+
+header .left input::placeholder {
+    color: #7e8bad;
+}
+
+header .search_icon {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    margin-right: 3px;
+    background: linear-gradient(135deg, #da8b1f, #ebad4d);
+    color: #1e2432;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+header .search_icon:hover {
+    transform: scale(1.04);
+    box-shadow: 0 7px 16px rgba(207, 136, 35, 0.42);
+}
+
+header .search_icon #search {
+    font-size: 1.3rem;
+}
+
+header .extrasearch {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    width: 100%;
+    max-height: 360px;
+    overflow-y: auto;
+    border-radius: 16px;
+    border: 1px solid #d7e3fb;
+    background: #ffffff;
+    box-shadow: var(--shadow-strong);
+    z-index: 1300;
+}
+
+header .extrasearch .MuiListItem-root {
+    border-bottom: 1px solid #eef2fa;
+    padding: 0;
+}
+
+header .extrasearch .MuiListItem-root:last-child {
+    border-bottom: 0;
+}
+
+header .extrasearch a {
+    width: 100%;
+    display: block;
+    text-decoration: none;
+    color: #1c2a45;
+    padding: 13px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+header .extrasearch a:hover {
+    color: #0b3d94;
+    background: #f2f6ff;
+}
+
+header .no_search_result {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    color: #6d7891;
+}
+
+header nav .right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+header .right a {
+    text-decoration: none;
+}
+
+header .right .nav_btn a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 116px;
+    height: 42px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+header .right .nav_btn a:hover {
+    border-color: #ffe0b7;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+header .right .cart_btn {
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #f7fbff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.09);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+header .right .cart_btn:hover {
+    border-color: #ffe0b7;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+header .right .cart_btn #icon {
+    color: #ffffff;
+    font-size: 1.08rem;
+}
+
+header .right .cart_btn p {
+    font-size: 0.87rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+}
+
+header nav .avtar,
+header nav .avtar2 {
+    cursor: pointer;
+    width: 38px !important;
+    height: 38px !important;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    background: linear-gradient(135deg, #0b3d94, #0e5ecc);
+    font-weight: 700;
+}
+
+header nav .avtar:hover,
+header nav .avtar2:hover {
+    box-shadow: 0 8px 16px rgba(7, 31, 74, 0.42);
+}
+
+header .profile_menu .MuiPaper-root {
+    border-radius: 14px;
+    border: 1px solid #dbe5fa;
+    box-shadow: 0 20px 40px rgba(12, 34, 75, 0.2);
+    margin-top: 8px;
+}
+
+header .hamburgur {
+    display: none;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.Toastify__toast {
+    border-radius: 12px !important;
+    font-family: "Manrope", sans-serif !important;
+}
+
+@media (max-width: 1120px) {
+    header .navlogo span {
+        display: none;
+    }
+}
+
+@media (max-width: 800px) {
+    header .main_nav {
+        padding: 0 12px;
+        gap: 10px;
+    }
+
+    header .hamburgur {
+        display: inline-flex;
+    }
+
+    header .right .nav_btn,
+    header .right .avtar2,
+    header .right .avtar {
+        display: none;
+    }
+
+    header .navlogo img {
+        width: 96px;
+    }
+
+    header .nav_searchbaar {
+        border-radius: 14px;
+    }
+
+    header .left input {
+        height: 40px;
+        font-size: 0.88rem;
+    }
+
+    header .search_icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    header .extrasearch {
+        top: 50px;
+    }
+}
+
+@media (max-width: 560px) {
+    header .navlogo img {
+        width: 84px;
+    }
+
+    header .left {
+        gap: 8px;
+    }
+
+    header .search_leading_icon {
+        margin-left: 10px;
+        font-size: 1rem;
+    }
+
+    header .left input {
+        font-size: 0.82rem;
+        padding: 0 8px;
+    }
+
+    header .right .cart_btn {
+        height: 38px;
+        padding: 0 12px;
+    }
+
+    header .right .cart_btn p {
+        display: none;
+    }
+}

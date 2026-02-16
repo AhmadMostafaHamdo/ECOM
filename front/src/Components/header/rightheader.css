@@ -1,0 +1,122 @@
+.rightheader {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    min-width: 280px;
+}
+
+.rightheader_profile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+}
+
+.profile_avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.profile_info h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.profile_info p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.nav_menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav_menu li {
+    margin-bottom: 4px;
+}
+
+.nav_menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--text-main);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.nav_menu a:hover {
+    background: var(--brand-soft);
+    color: var(--brand);
+}
+
+.nav_menu svg {
+    color: var(--text-muted);
+    font-size: 1.125rem;
+}
+
+.nav_menu a:hover svg {
+    color: var(--brand);
+}
+
+.logout_btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.logout_btn:hover {
+    background: var(--danger);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .rightheader {
+        min-width: 260px;
+        padding: 20px;
+    }
+    
+    .rightheader_profile {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+    }
+    
+    .profile_avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1.125rem;
+    }
+    
+    .nav_menu a {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+}

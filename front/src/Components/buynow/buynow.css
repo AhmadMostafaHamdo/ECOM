@@ -1,0 +1,152 @@
+.buynow_section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.buynow_container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 30px;
+}
+
+.buynow_left {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.buynow_right {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.section_title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 20px;
+}
+
+.cart_items_list {
+    margin-bottom: 30px;
+}
+
+.cart_item {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cart_item:last-child {
+    border-bottom: none;
+}
+
+.item_image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.item_details {
+    flex: 1;
+}
+
+.item_title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.item_price {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.item_quantity {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.empty_state_wrap {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.empty_state_wrap img {
+    width: 200px;
+    height: auto;
+    margin-bottom: 24px;
+    opacity: 0.6;
+}
+
+.empty_state_wrap h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 12px;
+}
+
+.empty_state_wrap p {
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+.empty_state_wrap a {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.empty_state_wrap a:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 1024px) {
+    .buynow_container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .buynow_right {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .buynow_section {
+        padding: 20px 15px;
+    }
+    
+    .cart_item {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .item_image {
+        width: 100%;
+        height: 150px;
+    }
+}

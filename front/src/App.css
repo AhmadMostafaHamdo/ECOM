@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap");
+
+:root {
+    /* === Backgrounds === */
+    --bg-main: #fafbfc;              /* رمادي فاتح جداً بدل الأبيض */
+    --bg-accent: #f3f4f6;            /* رمادي أوضح قليلاً */
+    --surface: #ffffff;              /* أبيض نقي للكروت */
+    --surface-alt: #f9fafb;          /* بديل خفيف */
+    
+    /* === Text === */
+    --text-main: #111827;            /* أسود مع لمسة زرقاء خفيفة */
+    --text-muted: #6b7280;           /* رمادي أنعم */
+    
+    /* === Lines === */
+    --line: #e5e7eb;                 /* حدود ناعمة */
+    
+    /* === Brand === */
+    --brand: #2563eb;                /* أزرق حديث */
+    --brand-strong: #1d4ed8;         /* أزرق داكن */
+    --brand-soft: #eff6ff;           /* أزرق فاتح جداً */
+    
+    /* === Accents === */
+    --highlight: #f59e0b;            /* برتقالي دافئ */
+    --success: #10b981;              /* أخضر عصري */
+    --danger: #ef4444;               /* أحمر واضح */
+    
+    /* === Shadows === */
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-strong: 0 10px 40px rgba(0, 0, 0, 0.1);
+    
+    /* === Radius === */
+    --radius-lg: 12px;
+    --radius-md: 8px;
+    --radius-sm: 6px;
+    
+    /* === Layout === */
+    --shell-max: 1440px;
+    --header-height: 64px;
+    --subnav-height: 52px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    font-family: "Manrope", sans-serif;
+    color: var(--text-main);
+    background:
+        radial-gradient(1200px 520px at 100% -10%, #dce8ff 0%, transparent 70%),
+        radial-gradient(900px 420px at -5% 10%, #edf2ff 0%, transparent 65%),
+        var(--bg-main);
+}
+
+a {
+    color: inherit;
+}
+
+.app_shell {
+    min-height: 100vh;
+}
+
+.app_main {
+    padding-top: 1rem;
+    animation: pageFade 0.55s ease-out;
+    will-change: transform, opacity;
+}
+
+.app_main_dashboard {
+    padding-top: calc(var(--header-height) + 20px);
+    padding-bottom: 20px;
+    animation: pageFade 0.55s ease-out;
+    will-change: transform, opacity;
+}
+
+@keyframes pageFade {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.circle {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--brand-strong);
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(14, 59, 140, 0.14), transparent 40%),
+        radial-gradient(circle at 80% 0%, rgba(218, 139, 31, 0.14), transparent 35%),
+        var(--bg-main);
+}
+
+.circle h2 {
+    font-size: 1.15rem;
+}
+
+@media (max-width: 1024px) {
+    :root {
+        --header-height: 72px;
+        --subnav-height: 50px;
+    }
+}
+
+@media (max-width: 800px) {
+    :root {
+        --subnav-height: 0px;
+    }
+}

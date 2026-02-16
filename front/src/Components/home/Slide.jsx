@@ -1,0 +1,93 @@
+import React from "react";
+import "../home/slide.css";
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
+import { NavLink } from "react-router-dom";
+import { ArrowForward, LocalOffer, StarRate, Visibility } from "@mui/icons-material";
+
+const responsive = {
+    desktop: {
+        breakpoint: { max: 3000, min: 1220 },
+        items: 4
+    },
+    tablet: {
+        breakpoint: { max: 1220, min: 640 },
+        items: 2
+    },
+    mobile: {   
+        breakpoint: { max: 640, min: 0 },
+        items: 1
+    }
+};
+
+const Slide = ({ title, products }) => {
+    const items = Array.isArray(products) ? products : [];
+
+    return (
+        <div className="products_section">
+            <div className="products_deal">
+                <div className="title_wrapper">
+                    <p className="title_tag">Curated</p>
+                    <h3>{title}</h3>
+                </div>
+                <button className="view_btn" type="button">
+                    <span>View all</span>
+                    <ArrowForward className="arrow_icon" />
+                </button>
+            </div>
+
+            {items.length > 0 ? (
+                <Carousel
+                    responsive={responsive}
+                    infinite={true}
+                    draggable={false}
+                    swipeable={true}
+                    autoPlay={true}
+                    autoPlaySpeed={4000}
+                    keyBoardControl={true}
+                    removeArrowOnDeviceType={["tablet", "mobile"]}
+                    itemClass="carousel-item-padding-40-px"
+                    containerClass="carousel-container"
+                >
+                    {items.map((e) => (
+                        <NavLink to={`/getproductsone/${e.id}`} key={e.id} className="product_link">
+                            <div className="products_items">
+                                <div className="product_img">
+                                    <img src={e.url} alt={e.title.shortTitle} />
+                                    {e.discount && (
+                                        <div className="discount_badge">
+                                            <LocalOffer className="offer_icon" />
+                                            {e.discount}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="product_info">
+                                    <p className="products_name">{e.title.shortTitle}</p>
+                                    <p className="products_explore">{e.tagline}</p>
+                                    <div className="meta_row">
+                                        <span className="rating_chip">
+                                            <StarRate className="rating_icon" />
+                                            {Number(e.rating || 0).toFixed(1)}
+                                        </span>
+                                        <span className="views_chip">
+                                            <Visibility className="views_icon" />
+                                            {e.views || 0} views
+                                        </span>
+                                    </div>
+                                    <div className="price_section">
+                                        <span className="price_value">Rs. {e.price.cost}</span>
+                                        <span className="strike_price">Rs. {e.price.mrp}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </NavLink>
+                    ))}
+                </Carousel>
+            ) : (
+                <div className="empty_products">Products are loading right now. Please refresh shortly.</div>
+            )}
+        </div>
+    );
+};
+
+export default Slide;
