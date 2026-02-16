@@ -73,7 +73,10 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                     </div>
                     <div className="loader_spinner_main"></div>
                     <h2>Preparing curated collections</h2>
-                    <p>Loading products and personalized offers...</p>
+                    <p>Loading products and personalized offers</p>
+                    <div className="loader_progress">
+                        <div className="loader_progress_bar"></div>
+                    </div>
                 </div>
             </div>
         );
@@ -153,7 +156,33 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                     </>
                 ) : (
                     <div className="category_empty_state">
-                        No products found in this category right now.
+                        <span className="floating_icon">🛍️</span>
+                        <span className="floating_icon">🔍</span>
+                        <span className="floating_icon">📱</span>
+                        <span className="floating_icon">💎</span>
+                        
+                        <h3 className="empty_title">No products found</h3>
+                        <p className="empty_description">
+                            We couldn't find any products in this category right now. Try browsing other categories or check back later for new arrivals.
+                        </p>
+                        <div className="empty_actions">
+                            <button 
+                                type="button" 
+                                className="action_btn primary_btn"
+                                onClick={() => setSelectedCategory(CATEGORY_ALL)}
+                            >
+                                <span>🏠</span>
+                                Browse All Products
+                            </button>
+                            <button 
+                                type="button" 
+                                className="action_btn secondary_btn"
+                                onClick={() => window.location.reload()}
+                            >
+                                <span>🔄</span>
+                                Refresh Page
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
