@@ -1005,7 +1005,7 @@ router.post("/login", async (req, res) => {
             if (!isMatch) {
                 res.status(400).json({ error: "invalid crediential pass" });
             } else {
-                
+
                 const token = await userlogin.generatAuthtoken();
                 console.log(token);
 
@@ -1138,6 +1138,343 @@ router.get("/remove/:id", authenicate, async (req, res) => {
     } catch (error) {
         console.log(error + "jwt provide then remove");
         res.status(400).json(error);
+    }
+});
+
+
+// ============================================
+// REVIEW SYSTEM API ENDPOINTS
+// ============================================
+
+const Review = require("../models/reviewSchema");
+
+// Helper function to update rating aggregation
+const updateRatingAggregation = async (targetType, targetId) => {
+    try {
+        const reviews = await Review.find({
+            targetType,
+            targetId,
+            status: "approved"
+        });
+
+        const totalReviews = reviews.length;
+        const averageRating = totalReviews > 0
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+            : 0;
+
+        const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        reviews.forEach(r => {
+            ratingDistribution[r.rating] = (ratingDistribution[r.rating] || 0) + 1;
+        });
+
+        if (targetType === "product") {
+            await products.findOneAndUpdate(
+                { id: targetId },
+                {
+                    averageRating: Math.round(averageRating * 10) / 10,
+                    totalReviews,
+                    ratingDistribution
+                }
+            );
+        } else if (targetType === "user") {
+            await User.findByIdAndUpdate(
+                targetId,
+                {
+                    averageRating: Math.round(averageRating * 10) / 10,
+                    totalReviews
+                }
+            );
+        }
+    } catch (error) {
+        console.log("Rating aggregation error:", error.message);
+    }
+};
+
+// Create a review
+router.post("/reviews", authenicate, async (req, res) => {
+    try {
+        const { targetType, targetId, rating, title, comment } = req.body;
+
+        if (!targetType || !targetId || !rating || !comment) {
+            return res.status(422).json({ error: "Missing required fields" });
+        }
+
+        if (!["product", "user"].includes(targetType)) {
+            return res.status(400).json({ error: "Invalid target type" });
+        }
+
+        if (rating < 1 || rating > 5) {
+            return res.status(400).json({ error: "Rating must be between 1 and 5" });
+        }
+
+        // Check if target exists
+        if (targetType === "product") {
+            const product = await products.findOne({ id: targetId });
+            if (!product) {
+                return res.status(404).json({ error: "Product not found" });
+            }
+        } else {
+            const user = await User.findById(targetId);
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+        }
+
+        const review = await Review.create({
+            targetType,
+            targetId,
+            reviewerId: req.userID,
+            rating: Number(rating),
+            title: title?.trim() || "",
+            comment: comment.trim()
+        });
+
+        await updateRatingAggregation(targetType, targetId);
+
+        const populated = await Review.findById(review._id)
+            .populate("reviewerId", "fname email isVerified");
+
+        res.status(201).json(populated);
+    } catch (error) {
+        if (error?.code === 11000) {
+            return res.status(409).json({ error: "You have already reviewed this item" });
+        }
+        console.log("Review creation error:", error.message);
+        res.status(500).json({ error: "Failed to create review" });
+    }
+});
+
+// Get reviews for a target (product or user)
+router.get("/reviews/:targetType/:targetId", async (req, res) => {
+    try {
+        const { targetType, targetId } = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const query = {
+            targetType,
+            targetId,
+            status: "approved"
+        };
+
+        const [reviews, total] = await Promise.all([
+            Review.find(query)
+                .populate("reviewerId", "fname email isVerified")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            Review.countDocuments(query)
+        ]);
+
+        // Get rating summary
+        const allReviews = await Review.find({ targetType, targetId, status: "approved" });
+        const totalReviews = allReviews.length;
+        const averageRating = totalReviews > 0
+            ? allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+            : 0;
+
+        const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        allReviews.forEach(r => {
+            ratingDistribution[r.rating] = (ratingDistribution[r.rating] || 0) + 1;
+        });
+
+        res.status(200).json({
+            reviews,
+            summary: {
+                totalReviews,
+                averageRating: Math.round(averageRating * 10) / 10,
+                ratingDistribution
+            },
+            pagination: {
+                page,
+                limit,
+                total,
+                hasMore: skip + reviews.length < total
+            }
+        });
+    } catch (error) {
+        console.log("Fetch reviews error:", error.message);
+        res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+});
+
+// Vote helpful/unhelpful on a review
+router.put("/reviews/:id/helpful", authenicate, async (req, res) => {
+    try {
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ error: "Review not found" });
+        }
+
+        const userId = req.userID.toString();
+        const helpfulIndex = review.helpfulVoters.findIndex(
+            id => id.toString() === userId
+        );
+
+        if (helpfulIndex > -1) {
+            // Remove vote
+            review.helpfulVoters.splice(helpfulIndex, 1);
+            review.helpful = Math.max(0, review.helpful - 1);
+        } else {
+            // Add vote
+            review.helpfulVoters.push(req.userID);
+            review.helpful = (review.helpful || 0) + 1;
+
+            // Remove from unhelpful if exists
+            const unhelpfulIndex = review.unhelpfulVoters.findIndex(
+                id => id.toString() === userId
+            );
+            if (unhelpfulIndex > -1) {
+                review.unhelpfulVoters.splice(unhelpfulIndex, 1);
+                review.unhelpful = Math.max(0, review.unhelpful - 1);
+            }
+        }
+
+        await review.save();
+        const populated = await Review.findById(review._id)
+            .populate("reviewerId", "fname email isVerified");
+
+        res.status(200).json(populated);
+    } catch (error) {
+        console.log("Vote error:", error.message);
+        res.status(500).json({ error: "Failed to vote" });
+    }
+});
+
+// Delete own review
+router.delete("/reviews/:id", authenicate, async (req, res) => {
+    try {
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ error: "Review not found" });
+        }
+
+        if (review.reviewerId.toString() !== req.userID.toString()) {
+            return res.status(403).json({ error: "Not authorized" });
+        }
+
+        const { targetType, targetId } = review;
+        await Review.findByIdAndDelete(req.params.id);
+        await updateRatingAggregation(targetType, targetId);
+
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.log("Delete review error:", error.message);
+        res.status(500).json({ error: "Failed to delete review" });
+    }
+});
+
+// Admin: Get all reviews
+router.get("/admin/reviews", authenicate, requireAdmin, async (req, res) => {
+    try {
+        const status = req.query.status;
+        const query = status ? { status } : {};
+
+        const reviews = await Review.find(query)
+            .populate("reviewerId", "fname email")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json(reviews);
+    } catch (error) {
+        console.log("Admin fetch reviews error:", error.message);
+        res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+});
+
+// Admin: Moderate review
+router.put("/admin/reviews/:id/moderate", authenicate, requireAdmin, async (req, res) => {
+    try {
+        const { status, moderationNote } = req.body;
+
+        if (!["pending", "approved", "rejected"].includes(status)) {
+            return res.status(400).json({ error: "Invalid status" });
+        }
+
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ error: "Review not found" });
+        }
+
+        const { targetType, targetId } = review;
+        review.status = status;
+        if (moderationNote) {
+            review.moderationNote = moderationNote;
+        }
+
+        await review.save();
+        await updateRatingAggregation(targetType, targetId);
+
+        res.status(200).json(review);
+    } catch (error) {
+        console.log("Moderate review error:", error.message);
+        res.status(500).json({ error: "Failed to moderate review" });
+    }
+});
+
+// Like/Unlike a product
+router.post("/products/:id/like", authenicate, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await products.findOne({ id });
+
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        const userId = req.userID;
+        const likedIndex = product.likedBy.findIndex(
+            likeId => likeId.toString() === userId.toString()
+        );
+
+        if (likedIndex > -1) {
+            // Unlike
+            product.likedBy.splice(likedIndex, 1);
+            product.likeCount = Math.max(0, product.likeCount - 1);
+        } else {
+            // Like
+            product.likedBy.push(userId);
+            product.likeCount = (product.likeCount || 0) + 1;
+        }
+
+        await product.save();
+        res.status(200).json({
+            liked: likedIndex === -1,
+            likeCount: product.likeCount
+        });
+    } catch (error) {
+        console.log("Like product error:", error.message);
+        res.status(500).json({ error: "Failed to like product" });
+    }
+});
+
+// Get trending products
+router.get("/products/trending", async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const trending = await products.find()
+            .sort({ popularity: -1, views: -1, likeCount: -1 })
+            .limit(limit);
+
+        res.status(200).json(trending.map(resolveProductCategory));
+    } catch (error) {
+        console.log("Trending products error:", error.message);
+        res.status(500).json({ error: "Failed to fetch trending products" });
+    }
+});
+
+// Get top-rated products
+router.get("/products/top-rated", async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const topRated = await products.find({ totalReviews: { $gt: 0 } })
+            .sort({ averageRating: -1, totalReviews: -1 })
+            .limit(limit);
+
+        res.status(200).json(topRated.map(resolveProductCategory));
+    } catch (error) {
+        console.log("Top-rated products error:", error.message);
+        res.status(500).json({ error: "Failed to fetch top-rated products" });
     }
 });
 

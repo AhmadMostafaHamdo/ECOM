@@ -14,6 +14,7 @@ import { useHistory } from "react-router";
 import { Drawer, IconButton, List, ListItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Rightheader from "./Rightheader";
 import { getProducts } from "../redux/actions/action";
 import { useSelector, useDispatch } from "react-redux";
@@ -173,7 +174,7 @@ const Navbaar = () => {
                         </div>
                     )}
 
-                   { !account&&<div className="nav_btn">
+                    {!account && <div className="nav_btn">
                         <NavLink to="/login">
                             <span>Sign in</span>
                         </NavLink>
@@ -182,7 +183,7 @@ const Navbaar = () => {
                     <NavLink to={account ? "/buynow" : "/login"}>
                         <div className="cart_btn">
                             <Badge badgeContent={account ? account.carts.length : 0} color="secondary">
-                                <i className="fas fa-shopping-cart" id="icon"></i>
+                                <ShoppingCartIcon id="icon" />
                             </Badge>
                             <p>Cart</p>
                         </div>

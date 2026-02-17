@@ -217,11 +217,11 @@ const UsersManagement = () => {
                         />
 
                         <div className="admin_form_actions">
-                            <button type="submit" disabled={saving}>
+                            <button type="submit" className="admin_btn" disabled={saving}>
                                 {submitLabel}
                             </button>
                             {isEditing ? (
-                                <button type="button" className="secondary_btn" onClick={resetForm} disabled={saving}>
+                                <button type="button" className="admin_btn secondary" onClick={resetForm} disabled={saving}>
                                     Cancel Edit
                                 </button>
                             ) : null}
@@ -229,19 +229,19 @@ const UsersManagement = () => {
                     </form>
                 </section>
 
-                <section className="admin_table_card">
-                    <div className="admin_table_header">
-                        <h2>User List</h2>
-                        <span>{loading ? "..." : `${users.length} users`}</span>
+                <section className="admin_form_card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+                        <h2 style={{ marginBottom: 0 }}>User List</h2>
+                        <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>{loading ? "..." : `${users.length} users`}</span>
                     </div>
 
                     {message ? <p className="admin_notice success">{message}</p> : null}
                     {error ? <p className="admin_notice error">{error}</p> : null}
 
                     {loading ? (
-                        <p className="admin_loading">Loading users...</p>
+                        <p style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading users...</p>
                     ) : (
-                        <div className="admin_table_wrap">
+                        <div className="admin_table_container">
                             <table className="admin_table">
                                 <thead>
                                     <tr>
@@ -255,18 +255,22 @@ const UsersManagement = () => {
                                 <tbody>
                                     {users.map((user) => (
                                         <tr key={user._id}>
-                                            <td>{user.fname}</td>
+                                            <td style={{ fontWeight: 500 }}>{user.fname}</td>
                                             <td>{user.email}</td>
                                             <td>{user.mobile}</td>
-                                            <td>{user.role}</td>
                                             <td>
-                                                <div className="table_actions">
-                                                    <button type="button" onClick={() => handleEdit(user)} disabled={saving}>
+                                                <span className={`admin_badge ${user.role === 'admin' ? 'info' : 'warning'}`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button type="button" className="admin_btn secondary sm" onClick={() => handleEdit(user)} disabled={saving}>
                                                         Edit
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="danger_btn"
+                                                        className="admin_btn danger sm"
                                                         onClick={() => handleDelete(user)}
                                                         disabled={saving}
                                                     >

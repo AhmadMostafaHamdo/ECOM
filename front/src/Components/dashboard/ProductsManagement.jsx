@@ -260,11 +260,11 @@ const ProductsManagement = () => {
                         <input id="detailUrl" name="detailUrl" value={form.detailUrl} onChange={updateField} />
 
                         <div className="admin_form_actions">
-                            <button type="submit" disabled={saving}>
+                            <button type="submit" className="admin_btn" disabled={saving}>
                                 {submitLabel}
                             </button>
                             {isEditing ? (
-                                <button type="button" className="secondary_btn" onClick={resetForm} disabled={saving}>
+                                <button type="button" className="admin_btn secondary" onClick={resetForm} disabled={saving}>
                                     Cancel Edit
                                 </button>
                             ) : null}
@@ -272,13 +272,13 @@ const ProductsManagement = () => {
                     </form>
                 </section>
 
-                <section className="admin_table_card">
-                    <div className="admin_table_header">
-                        <h2>Product List</h2>
-                        <span>{loading ? "..." : `${products.length} products`}</span>
+                <section className="admin_form_card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+                        <h2 style={{ marginBottom: 0 }}>Product List</h2>
+                        <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>{loading ? "..." : `${products.length} products`}</span>
                     </div>
 
-                    <div className="admin_form inline">
+                    <div className="admin_form inline" style={{ marginBottom: 'var(--space-4)' }}>
                         <select
                             value={selectedCategory}
                             onChange={(event) => {
@@ -300,34 +300,39 @@ const ProductsManagement = () => {
                     {error ? <p className="admin_notice error">{error}</p> : null}
 
                     {loading ? (
-                        <p className="admin_loading">Loading products...</p>
+                        <p style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading products...</p>
                     ) : (
-                        <div className="admin_table_wrap">
+                        <div className="admin_table_container">
                             <table className="admin_table">
                                 <thead>
                                     <tr>
                                         <th>Name</th>
                                         <th>Category</th>
                                         <th>Price</th>
-                                        <th>Created By</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {products.map((product) => (
                                         <tr key={product._id}>
-                                            <td>{product?.title?.shortTitle}</td>
-                                            <td>{product.category}</td>
-                                            <td>Rs. {product?.price?.cost}</td>
-                                            <td>{product?.createdBy?.fname || "-"}</td>
+                                            <td style={{ fontWeight: 500 }}>{product?.title?.shortTitle}</td>
                                             <td>
-                                                <div className="table_actions">
-                                                    <button type="button" onClick={() => handleEdit(product)} disabled={saving}>
+                                                <span className="admin_badge info">{product.category}</span>
+                                            </td>
+                                            <td>Rs. {product?.price?.cost}</td>
+                                            <td>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button
+                                                        type="button"
+                                                        className="admin_btn secondary sm"
+                                                        onClick={() => handleEdit(product)}
+                                                        disabled={saving}
+                                                    >
                                                         Edit
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="danger_btn"
+                                                        className="admin_btn danger sm"
                                                         onClick={() => handleDelete(product)}
                                                         disabled={saving}
                                                     >
@@ -348,4 +353,3 @@ const ProductsManagement = () => {
 };
 
 export default ProductsManagement;
-

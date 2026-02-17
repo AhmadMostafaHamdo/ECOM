@@ -94,14 +94,21 @@ const StatisticsPage = () => {
                 </article>
             </section>
 
-            <section className="admin_form_card compact">
-                <div className="admin_stats_footer">
-                    <button type="button" onClick={fetchStats} disabled={loading}>
-                        {loading ? "Refreshing..." : "Refresh Statistics"}
-                    </button>
-                    <span>Last updated: {lastUpdated || "Not yet"}</span>
+            <section className="admin_form_card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h2 style={{ marginBottom: 'var(--space-2)' }}>Data Freshness</h2>
+                        <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '13px' }}>
+                            Last updated: {lastUpdated || 'Never'}
+                        </p>
+                    </div>
+                    <div>
+                        <button type="button" className="admin_btn" onClick={fetchStats} disabled={loading}>
+                            {loading ? "Refreshing..." : "Refresh Statistics"}
+                        </button>
+                    </div>
                 </div>
-                {error ? <p className="admin_notice error">{error}</p> : null}
+                {error ? <p className="admin_notice error" style={{ marginTop: 'var(--space-4)' }}>{error}</p> : null}
             </section>
         </div>
     );

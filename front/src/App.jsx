@@ -1,21 +1,22 @@
-import React from 'react';
-import Navbaar from './Components/header/Navbaar';
-import Newnav from './Components/newnav/Newnav';
-import Maincomp from './Components/home/Maincomp';
-import Footer from './Components/footer/Footer';
-import Signup from './Components/signup_signin/SignUp';
-import SignIn from './Components/signup_signin/Sign_in';
-import Cart from './Components/cart/Cart';
-import Buynow from './Components/buynow/Buynow';
-import AdminDashboard from './Components/dashboard/AdminDashboard';
-import ProfilePage from './Components/profile/ProfilePage';
-import CreateProduct from './Components/products/CreateProduct';
-import './App.css';
-import { useCallback, useContext, useEffect, useState } from 'react';
-import CircularProgress from '@mui/material/CircularProgress';
+import React, { useCallback, useContext, useEffect, useState, Suspense, lazy } from 'react';
 import { Switch, Route, useLocation, Redirect } from "react-router-dom";
+import CircularProgress from '@mui/material/CircularProgress';
 import { apiUrl } from './api';
 import { Logincontext } from './Components/context/Contextprovider';
+import './App.css';
+
+// Lazy Load Components
+const Navbaar = lazy(() => import('./Components/header/Navbaar'));
+const Newnav = lazy(() => import('./Components/newnav/Newnav'));
+const Maincomp = lazy(() => import('./Components/home/Maincomp'));
+const Footer = lazy(() => import('./Components/footer/Footer'));
+const Signup = lazy(() => import('./Components/signup_signin/SignUp'));
+const SignIn = lazy(() => import('./Components/signup_signin/Sign_in'));
+const Cart = lazy(() => import('./Components/cart/Cart'));
+const Buynow = lazy(() => import('./Components/buynow/Buynow'));
+const AdminDashboard = lazy(() => import('./Components/dashboard/AdminDashboard'));
+const ProfilePage = lazy(() => import('./Components/profile/ProfilePage'));
+const CreateProduct = lazy(() => import('./Components/products/CreateProduct'));
 
 const CATEGORY_ALL = "All Categories";
 
@@ -117,7 +118,12 @@ function App() {
     <div className="app_shell">
       {
         data && authChecked ? (
-          <>
+          <Suspense fallback={
+            <div className="circle">
+              <CircularProgress />
+              <h2>Loading...</h2>
+            </div>
+          }>
             <Navbaar />
             {!isDashboardRoute && isHomeRoute && (
               <Newnav
@@ -135,9 +141,9 @@ function App() {
                 <Route exact path="/signup">
                   {account ? <Redirect to="/" /> : <Signup />}
                 </Route>
-              <Route exact path="/login">
-                {account ? <Redirect to="/" /> : <SignIn />}
-              </Route>
+                <Route exact path="/login">
+                  {account ? <Redirect to="/" /> : <SignIn />}
+                </Route>
                 <Route exact path="/getproductsone/:id">
                   {isAdmin ? <Redirect to="/dashboard" /> : <Cart />}
                 </Route>
@@ -165,7 +171,7 @@ function App() {
               </Switch>
             </main>
             {!isDashboardRoute && <Footer />}
-          </>
+          </Suspense>
         ) : (
           <div className="circle">
             <CircularProgress />

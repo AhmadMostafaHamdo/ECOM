@@ -4,12 +4,14 @@ const path = require("path");
 const app = express();
 const port = process.env.PORT || 5007;
 const cookieParser = require("cookie-parser");
+const compression = require("compression");
 const DefaultData = require("./defaultdata");
 const connectDB = require("./db/conn");
 const router = require("./routes/router");
 
 
 // middleware
+app.use(compression());
 app.use(express.json());
 app.use(cookieParser(""));
 app.use((req, res, next) => {
@@ -32,9 +34,12 @@ app.use(router);
 // });
 
 
-if(process.env.NODE_ENV == "production"){
+if (process.env.NODE_ENV == "production") {
     const distPath = path.join(__dirname, "client", "dist");
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+        maxAge: '1y',
+        etag: false
+    }));
     app.get("*", (req, res) => {
         res.sendFile(path.join(distPath, "index.html"));
     });

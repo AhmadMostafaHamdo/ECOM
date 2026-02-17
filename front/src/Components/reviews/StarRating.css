@@ -1,0 +1,77 @@
+.star-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.star-rating-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.star-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-fast);
+}
+
+.star-button:hover:not(:disabled) {
+    transform: scale(1.1);
+}
+
+.star-button:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.star-button-static {
+    cursor: default;
+    pointer-events: none;
+}
+
+.star-icon {
+    display: block;
+    transition: color var(--transition-fast);
+}
+
+.star-filled {
+    color: var(--color-star-filled);
+}
+
+.star-half {
+    color: var(--color-star-filled);
+}
+
+.star-empty {
+    color: var(--color-star-empty);
+}
+
+/* Sizes */
+.star-rating-sm .star-icon {
+    font-size: 16px;
+}
+
+.star-rating-md .star-icon {
+    font-size: 20px;
+}
+
+.star-rating-lg .star-icon {
+    font-size: 28px;
+}
+
+.star-rating-value {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    margin-left: var(--space-1);
+}
+
+/* Hover effect for interactive ratings */
+.star-button:not(.star-button-static):hover .star-empty {
+    color: hsl(45, 100%, 70%);
+}

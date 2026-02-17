@@ -41,15 +41,42 @@ const userSchema = new mongoose.Schema({
         enum: ["user", "admin"],
         default: "user"
     },
-    tokens:[
+    tokens: [
         {
-            token:{
-                type:String,
-                required:true
+            token: {
+                type: String,
+                required: true
             }
         }
     ],
-    carts:Array
+    carts: Array,
+    // User rating system
+    averageRating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
+    },
+    totalReviews: {
+        type: Number,
+        default: 0
+    },
+    reputationScore: {
+        type: Number,
+        default: 0
+    },
+    // Profile enhancements
+    profileImage: String,
+    bio: {
+        type: String,
+        maxlength: 500
+    },
+    location: String,
+    // Verification
+    isVerified: {
+        type: Boolean,
+        default: false
+    }
 }, {
     timestamps: true
 });
@@ -65,12 +92,12 @@ userSchema.pre("save", async function (next) {
 });
 
 // generting token
-userSchema.methods.generatAuthtoken = async function(){
+userSchema.methods.generatAuthtoken = async function () {
     try {
-        let token = jwt.sign({ _id:this._id},keysecret,{
+        let token = jwt.sign({ _id: this._id }, keysecret, {
             expiresIn: TOKEN_EXPIRES_IN
         });
-        this.tokens = this.tokens.concat({token:token});
+        this.tokens = this.tokens.concat({ token: token });
         await this.save();
         return token;
 
@@ -80,7 +107,7 @@ userSchema.methods.generatAuthtoken = async function(){
 }
 
 // addto cart data
-userSchema.methods.addcartdata = async function(cart){
+userSchema.methods.addcartdata = async function (cart) {
     try {
         this.carts = this.carts.concat(cart);
         await this.save();

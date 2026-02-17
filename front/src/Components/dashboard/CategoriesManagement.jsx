@@ -3,7 +3,7 @@ import { apiUrl } from "../../api";
 
 const UNCATEGORIZED = "Uncategorized";
 
-const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
+const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     const [categories, setCategories] = useState([]);
     const [categoryName, setCategoryName] = useState("");
     const [editingId, setEditingId] = useState("");
@@ -167,7 +167,7 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
                         placeholder="Category name"
                         maxLength={50}
                     />
-                    <button type="submit" disabled={saving}>
+                    <button type="submit" className="admin_btn" disabled={saving}>
                         {saving ? "Saving..." : "Add Category"}
                     </button>
                 </form>
@@ -176,16 +176,16 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
                 {error ? <p className="admin_notice error">{error}</p> : null}
             </section>
 
-            <section className="admin_table_card">
-                <div className="admin_table_header">
-                    <h2>Category List</h2>
-                    <span>{loading ? "..." : `${categories.length} categories`}</span>
+            <section className="admin_form_card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+                    <h2 style={{ marginBottom: 0 }}>Category List</h2>
+                    <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>{loading ? "..." : `${categories.length} categories`}</span>
                 </div>
 
                 {loading ? (
-                    <p className="admin_loading">Loading categories...</p>
+                    <p style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading categories...</p>
                 ) : (
-                    <div className="admin_table_wrap">
+                    <div className="admin_table_container">
                         <table className="admin_table">
                             <thead>
                                 <tr>
@@ -204,23 +204,26 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
                                                     value={editName}
                                                     onChange={(event) => setEditName(event.target.value)}
                                                     disabled={saving}
+                                                    style={{ marginBottom: 0 }}
                                                 />
                                             ) : (
                                                 category.name
                                             )}
                                         </td>
-                                        <td>{category.productCount}</td>
+                                        <td>
+                                            <span className="admin_badge info">{category.productCount}</span>
+                                        </td>
                                         <td>
                                             {category.name === UNCATEGORIZED ? (
-                                                <span className="protected_badge">Protected</span>
+                                                <span className="admin_badge warning">Protected</span>
                                             ) : editingId === category._id ? (
-                                                <div className="table_actions">
-                                                    <button type="button" onClick={saveEdit} disabled={saving}>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button type="button" className="admin_btn sm" onClick={saveEdit} disabled={saving}>
                                                         Save
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="secondary_btn"
+                                                        className="admin_btn secondary sm"
                                                         onClick={() => {
                                                             setEditingId("");
                                                             setEditName("");
@@ -231,13 +234,13 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <div className="table_actions">
-                                                    <button type="button" onClick={() => startEdit(category)} disabled={saving}>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button type="button" className="admin_btn secondary sm" onClick={() => startEdit(category)} disabled={saving}>
                                                         Edit
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="danger_btn"
+                                                        className="admin_btn danger sm"
                                                         onClick={() => deleteCategory(category)}
                                                         disabled={saving}
                                                     >

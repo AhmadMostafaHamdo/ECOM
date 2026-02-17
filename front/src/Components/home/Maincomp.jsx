@@ -98,6 +98,7 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                                 <img
                                     src="https://images-eu.ssl-images-amazon.com/images/G/31/img21/Wireless/Jupiter/Launches/T3/DesktopGateway_CategoryCard2x_758X608_T3._SY608_CB639883570_.jpg"
                                     alt="Latest launch"
+                                    loading="lazy"
                                 />
                             </div>
                             <button type="button" className="explore_link">
@@ -148,6 +149,7 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                             <img
                                 src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"
                                 alt="Special offers"
+                                loading="lazy"
                             />
                         </div>
 
@@ -160,22 +162,22 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                         <span className="floating_icon">🔍</span>
                         <span className="floating_icon">📱</span>
                         <span className="floating_icon">💎</span>
-                        
+
                         <h3 className="empty_title">No products found</h3>
                         <p className="empty_description">
                             We couldn't find any products in this category right now. Try browsing other categories or check back later for new arrivals.
                         </p>
                         <div className="empty_actions">
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="action_btn primary_btn"
                                 onClick={() => setSelectedCategory(CATEGORY_ALL)}
                             >
                                 <span>🏠</span>
                                 Browse All Products
                             </button>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="action_btn secondary_btn"
                                 onClick={() => window.location.reload()}
                             >

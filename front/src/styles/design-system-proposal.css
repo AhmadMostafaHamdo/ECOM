@@ -1,0 +1,297 @@
+/* 
+  Design System Proposal - Modern & Clean 
+  Reflecting professional, global standards.
+*/
+
+:root {
+    /* =========================================
+     1. Color Palette (HSL for perfect harmony)
+     ========================================= */
+
+    /* Brand Colors - Professional Blue */
+    --color-primary-50: 210, 100%, 98%;
+    --color-primary-100: 210, 100%, 94%;
+    --color-primary-200: 210, 98%, 88%;
+    --color-primary-300: 210, 96%, 78%;
+    --color-primary-400: 210, 92%, 65%;
+    --color-primary-500: 210, 85%, 50%;
+    /* Main Brand Color */
+    --color-primary-600: 210, 90%, 42%;
+    --color-primary-700: 210, 85%, 35%;
+    --color-primary-800: 210, 80%, 28%;
+    --color-primary-900: 210, 75%, 15%;
+
+    /* Neutral Colors - Clean & readable Slate */
+    --color-neutral-50: 210, 40%, 98%;
+    --color-neutral-100: 210, 40%, 96%;
+    --color-neutral-200: 210, 25%, 90%;
+    --color-neutral-300: 210, 20%, 82%;
+    --color-neutral-400: 210, 15%, 70%;
+    --color-neutral-500: 210, 12%, 55%;
+    --color-neutral-600: 210, 14%, 40%;
+    --color-neutral-700: 210, 18%, 30%;
+    --color-neutral-800: 210, 22%, 20%;
+    --color-neutral-900: 210, 30%, 10%;
+    /* Main Text Color */
+
+    /* Semantic Colors */
+    --color-success: 142, 70%, 45%;
+    --color-warning: 38, 92%, 50%;
+    --color-danger: 0, 84%, 60%;
+    --color-info: 200, 90%, 50%;
+
+    /* Token Mapping */
+    --bg-app: hsl(var(--color-neutral-50));
+    --bg-surface: #ffffff;
+    --bg-surface-hover: hsl(var(--color-neutral-50));
+
+    --text-primary: hsl(var(--color-neutral-900));
+    --text-secondary: hsl(var(--color-neutral-600));
+    --text-tertiary: hsl(var(--color-neutral-400));
+    --text-on-primary: #ffffff;
+
+    --border-subtle: hsl(var(--color-neutral-200));
+    --border-default: hsl(var(--color-neutral-300));
+    --border-focus: hsl(var(--color-primary-500));
+
+    /* =========================================
+     2. Typography (Inter / System)
+     ========================================= */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Type Scale (Major Third - 1.25) */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 1.875rem;
+    /* 30px */
+    --text-4xl: 2.25rem;
+    /* 36px */
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* =========================================
+     3. Spacing & Sizing
+     ========================================= */
+    --space-1: 0.25rem;
+    /* 4px */
+    --space-2: 0.5rem;
+    /* 8px */
+    --space-3: 0.75rem;
+    /* 12px */
+    --space-4: 1rem;
+    /* 16px */
+    --space-5: 1.25rem;
+    /* 20px */
+    --space-6: 1.5rem;
+    /* 24px */
+    --space-8: 2rem;
+    /* 32px */
+    --space-10: 2.5rem;
+    /* 40px */
+    --space-12: 3rem;
+    /* 48px */
+
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
+    /* =========================================
+     4. Effects
+     ========================================= */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+}
+
+/* Base Styles */
+.ds-container {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background-color: var(--bg-app);
+    padding: var(--space-8);
+    min-height: 100vh;
+}
+
+.ds-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ds-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Typography Helpers */
+.ds-heading-1 {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-6);
+}
+
+.ds-heading-2 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.01em;
+    margin-bottom: var(--space-5);
+}
+
+.ds-heading-3 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-4);
+}
+
+.ds-subtitle {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+}
+
+.ds-body {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Buttons */
+.ds-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    gap: var(--space-2);
+}
+
+.ds-btn-primary {
+    background-color: hsl(var(--color-primary-500));
+    color: var(--text-on-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ds-btn-primary:hover {
+    background-color: hsl(var(--color-primary-600));
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.ds-btn-secondary {
+    background-color: var(--bg-surface);
+    border-color: var(--border-default);
+    color: var(--text-primary);
+}
+
+.ds-btn-secondary:hover {
+    border-color: hsl(var(--color-primary-500));
+    color: hsl(var(--color-primary-600));
+    background-color: var(--bg-surface-hover);
+}
+
+.ds-btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.ds-btn-ghost:hover {
+    background-color: var(--bg-surface-hover);
+    color: var(--text-primary);
+}
+
+/* Form Elements */
+.ds-input-group {
+    margin-bottom: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.ds-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+}
+
+.ds-input {
+    width: 100%;
+    padding: var(--space-3);
+    font-size: var(--text-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ds-input:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px hsl(var(--color-primary-500) / 0.1);
+}
+
+/* Grid Layout */
+.ds-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+}
+
+.ds-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+}
+
+.ds-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-6);
+}
+
+@media (max-width: 768px) {
+
+    .ds-grid-2,
+    .ds-grid-3,
+    .ds-grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Swatches for showcase */
+.ds-swatch {
+    height: 60px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs);
+    color: white;
+    margin-bottom: var(--space-2);
+    box-shadow: var(--shadow-sm);
+}

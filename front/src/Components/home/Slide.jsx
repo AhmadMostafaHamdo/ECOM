@@ -14,7 +14,7 @@ const responsive = {
         breakpoint: { max: 1220, min: 640 },
         items: 2
     },
-    mobile: {   
+    mobile: {
         breakpoint: { max: 640, min: 0 },
         items: 1
     }
@@ -53,7 +53,7 @@ const Slide = ({ title, products }) => {
                         <NavLink to={`/getproductsone/${e.id}`} key={e.id} className="product_link">
                             <div className="products_items">
                                 <div className="product_img">
-                                    <img src={e.url} alt={e.title.shortTitle} />
+                                    <img src={e.url} alt={e.title.shortTitle} loading="lazy" />
                                     {e.discount && (
                                         <div className="discount_badge">
                                             <LocalOffer className="offer_icon" />

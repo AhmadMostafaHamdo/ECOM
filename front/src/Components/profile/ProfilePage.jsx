@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import { apiUrl } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
-import "./profile.css";
+import "../../styles/design-system-proposal.css";
 
 const ProfilePage = () => {
     const history = useHistory();
@@ -103,67 +103,86 @@ const ProfilePage = () => {
 
     if (loading) {
         return (
-            <section className="profile_page">
-                <div className="profile_card">
-                    <h2>Loading profile...</h2>
+            <section className="ds-container">
+                <div className="ds-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+                    <h2 className="ds-heading-3">Loading profile...</h2>
                 </div>
             </section>
         );
     }
 
     return (
-        <section className="profile_page">
-            <div className="profile_grid">
-                <article className="profile_card">
-                    <header className="profile_header">
-                        <p className="profile_kicker">Account</p>
-                        <h1>{account?.fname || "Your Profile"}</h1>
-                        <p>Manage your personal details and account settings.</p>
+        <section className="ds-container">
+            <div className="ds-grid-2">
+                <article className="ds-card">
+                    <header style={{ marginBottom: 'var(--space-6)' }}>
+                        <p className="ds-subtitle">Account</p>
+                        <h1 className="ds-heading-2">{account?.fname || "Your Profile"}</h1>
+                        <p className="ds-body">Manage your personal details and account settings.</p>
                     </header>
 
-                    <form className="profile_form" onSubmit={saveProfile}>
-                        <label htmlFor="fname">Name</label>
-                        <input id="fname" name="fname" value={form.fname} onChange={updateField} required />
+                    <form onSubmit={saveProfile} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                        <div className="ds-input-group">
+                            <label htmlFor="fname" className="ds-label">Name</label>
+                            <input id="fname" name="fname" className="ds-input" value={form.fname} onChange={updateField} required />
+                        </div>
 
-                        <label htmlFor="email">Email</label>
-                        <input id="email" name="email" type="email" value={form.email} onChange={updateField} required />
+                        <div className="ds-input-group">
+                            <label htmlFor="email" className="ds-label">Email</label>
+                            <input id="email" name="email" type="email" className="ds-input" value={form.email} onChange={updateField} required />
+                        </div>
 
-                        <label htmlFor="mobile">Mobile</label>
-                        <input id="mobile" name="mobile" value={form.mobile} onChange={updateField} required />
+                        <div className="ds-input-group">
+                            <label htmlFor="mobile" className="ds-label">Mobile</label>
+                            <input id="mobile" name="mobile" className="ds-input" value={form.mobile} onChange={updateField} required />
+                        </div>
 
-                        <button type="submit" disabled={saving}>
+                        <button type="submit" disabled={saving} className="ds-btn ds-btn-primary" style={{ marginTop: 'var(--space-2)' }}>
                             {saving ? "Saving..." : "Save Profile"}
                         </button>
                     </form>
 
-                    {message ? <p className="profile_notice success">{message}</p> : null}
-                    {error ? <p className="profile_notice error">{error}</p> : null}
+                    {message ? <p className="ds-body" style={{ color: 'hsl(var(--color-success))', marginTop: 'var(--space-4)' }}>{message}</p> : null}
+                    {error ? <p className="ds-body" style={{ color: 'hsl(var(--color-danger))', marginTop: 'var(--space-4)' }}>{error}</p> : null}
                 </article>
 
-                <article className="profile_card">
-                    <div className="profile_products_head">
-                        <h2>Your Products</h2>
-                        <NavLink to="/products/new" className="create_product_btn">
+                <article className="ds-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
+                        <h2 className="ds-heading-3" style={{ margin: 0 }}>Your Products</h2>
+                        <NavLink to="/products/new" className="ds-btn ds-btn-secondary">
                             Create Product
                         </NavLink>
                     </div>
 
                     {myProducts.length ? (
-                        <ul className="profile_products_list">
+                        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                             {myProducts.map((product) => (
-                                <li key={product._id}>
+                                <li key={product._id} style={{
+                                    padding: 'var(--space-4)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-md)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
                                     <div>
-                                        <h3>{product?.title?.shortTitle || "Untitled"}</h3>
-                                        <p>{product.category}</p>
+                                        <h3 className="ds-heading-3" style={{ fontSize: 'var(--text-base)', marginBottom: 'var(--space-1)' }}>
+                                            {product?.title?.shortTitle || "Untitled"}
+                                        </h3>
+                                        <p className="ds-body" style={{ fontSize: 'var(--text-sm)', margin: 0 }}>
+                                            {product.category}
+                                        </p>
                                     </div>
-                                    <NavLink to={`/getproductsone/${product.id}`}>View</NavLink>
+                                    <NavLink to={`/getproductsone/${product.id}`} className="ds-btn ds-btn-ghost" style={{ fontSize: 'var(--text-xs)' }}>
+                                        View
+                                    </NavLink>
                                 </li>
                             ))}
                         </ul>
                     ) : (
-                        <p className="profile_empty">
-                            You have not created products yet.
-                        </p>
+                        <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--text-tertiary)' }}>
+                            <p>You have not created products yet.</p>
+                        </div>
                     )}
                 </article>
             </div>
