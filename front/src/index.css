@@ -1,7 +1,11 @@
+/* Tailwind CSS Directives */
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
 /* Import Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
-@import './styles/design-tokens.css';
-@import './styles/animations.css';
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap");
+@import "./styles/design-tokens.css";
+@import "./styles/animations.css";
 
 /* Modern CSS Reset */
 *,
