@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./cart.css";
 import { Divider } from "@mui/material";
 import { useHistory, useParams } from "react-router";
@@ -7,6 +8,7 @@ import { ShoppingCart, LocalShipping, Verified, LocalOffer, StarRate, Visibility
 import { apiUrl } from "../../api";
 
 const Cart = () => {
+    const { t } = useTranslation();
     const { setAccount } = useContext(Logincontext);
     const { id } = useParams("");
     const history = useHistory();
@@ -30,7 +32,7 @@ const Cart = () => {
                 const data = await res.json();
 
                 if (res.status !== 201) {
-                    alert("No data available");
+                    alert(t('errors.somethingWentWrong'));
                 } else {
                     setIndedata(data);
                 }
@@ -117,13 +119,13 @@ const Cart = () => {
                                 ) : (
                                     <>
                                         <ShoppingCart className="btn_icon" />
-                                        <span>Add to Cart</span>
+                                        <span>{t('cart.addToCart')}</span>
                                     </>
                                 )}
                             </button>
                             <button className="cart_btn2">
                                 <Verified className="btn_icon" />
-                                <span>Buy Now</span>
+                                <span>{t('cart.buyNow')}</span>
                             </button>
                         </div>
                     </div>
@@ -139,7 +141,7 @@ const Cart = () => {
                                 </span>
                                 <span className="views_chip">
                                     <Visibility />
-                                    {inddata.views || 0} views
+                                    {inddata.views || 0} {t('product.views')}
                                 </span>
                             </div>
                         </div>
@@ -151,11 +153,11 @@ const Cart = () => {
                                 MRP: <del>Rs. {inddata.price.mrp}</del>
                             </p>
                             <div className="deal_price">
-                                <span className="deal_label">Today&apos;s Price:</span>
+                                <span className="deal_label">{t('cart.todayPrice')}:</span>
                                 <span className="price_value">Rs. {inddata.price.cost}</span>
                             </div>
                             <div className="savings">
-                                <span>You save:</span>
+                                <span>{t('cart.youSave')}:</span>
                                 <span className="save_value">
                                     Rs. {inddata.price.mrp - inddata.price.cost} ({inddata.price.discount})
                                 </span>
@@ -167,7 +169,7 @@ const Cart = () => {
                                 <LocalOffer className="discount_icon" />
                                 <div>
                                     <h5>
-                                        Discount: <span>{inddata.discount}</span>
+                                        {t('cart.discount')}: <span>{inddata.discount}</span>
                                     </h5>
                                 </div>
                             </div>
@@ -175,17 +177,17 @@ const Cart = () => {
                                 <LocalShipping className="discount_icon" />
                                 <div>
                                     <h4>
-                                        Free delivery: <span>Within 3 to 5 business days</span>
+                                        {t('cart.freeDelivery')}: <span>{t('cart.deliveryTime')}</span>
                                     </h4>
                                     <p>
-                                        Priority shipping option available at checkout.
+                                        {t('cart.priorityShipping')}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
                         <div className="description_box">
-                            <h5>About this item</h5>
+                            <h5>{t('cart.aboutItem')}</h5>
                             <p>{inddata.description}</p>
                         </div>
                     </div>

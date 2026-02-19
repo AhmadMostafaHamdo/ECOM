@@ -19,9 +19,11 @@ import Rightheader from "./Rightheader";
 import { getProducts } from "../redux/actions/action";
 import { useSelector, useDispatch } from "react-redux";
 import { apiUrl } from "../../api";
+import { useCallback } from 'react';
 import './Navbaar.css';
+import LanguageSwitcher from '../common/LanguageSwitcher';
 
-const Navbaar = () => {
+const Navbaar = React.memo(() => {
     const history = useHistory("");
     const [text, setText] = useState("");
     const { products } = useSelector((state) => state.getproductsdata);
@@ -36,18 +38,18 @@ const Navbaar = () => {
     const [dropen, setDropen] = useState(false);
     const { account, setAccount } = useContext(Logincontext);
 
-    const handleClick = (event) => {
+    const handleClick = useCallback((event) => {
         setAnchorEl(event.currentTarget);
-    };
+    }, []);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         setAnchorEl(null);
-    };
+    }, []);
 
-    const handleMyAccountClick = () => {
+    const handleMyAccountClick = useCallback(() => {
         handleClose();
         history.push("/profile");
-    };
+    }, [handleClose, history]);
 
     useEffect(() => {
         const getdetailsvaliduser = async () => {
@@ -73,7 +75,7 @@ const Navbaar = () => {
 
     const isAdmin = account?.role === "admin";
 
-    const logoutuser = async () => {
+    const logoutuser = useCallback(async () => {
         const res2 = await fetch(apiUrl("/logout"), {
             method: "GET",
             headers: {
@@ -101,12 +103,12 @@ const Navbaar = () => {
             });
             history.push("/");
         }
-    };
+    }, [history, setAccount]);
 
-    const getText = (searchText) => {
+    const getText = useCallback((searchText) => {
         setText(searchText);
         setLiopen(searchText.trim().length === 0);
-    };
+    }, []);
 
     const filteredProducts = useMemo(() => {
         if (!text.trim()) {
@@ -166,6 +168,8 @@ const Navbaar = () => {
                 </div>
 
                 <div className="right">
+                    <LanguageSwitcher />
+                    
                     {isAdmin && (
                         <div className="nav_btn">
                             <NavLink to="/dashboard">
@@ -216,6 +220,6 @@ const Navbaar = () => {
             </nav>
         </header>
     );
-};
+});
 
 export default Navbaar;

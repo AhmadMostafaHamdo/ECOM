@@ -210,142 +210,225 @@ const ProductsManagement = () => {
 
     return (
         <div className="admin_page">
-            <header className="admin_page_header">
-                <p className="admin_page_kicker">Products</p>
-                <h1>Products Management</h1>
-                <p>Create, edit, filter, and remove products from catalog.</p>
+            <header className="admin_page_header" style={{ marginBottom: '40px' }}>
+                <p className="admin_page_kicker">Catalog</p>
+                <h1>Products Inventory</h1>
+                <p>Manage your product listings, pricing, and availability. Use filters to narrow down your search.</p>
             </header>
 
-            <div className="admin_split_layout">
-                <section className="admin_form_card">
-                    <h2>{isEditing ? "Edit Product" : "Add Product"}</h2>
-                    <form className="admin_form" onSubmit={handleSubmit}>
-                        <label htmlFor="shortTitle">Product Name</label>
-                        <input id="shortTitle" name="shortTitle" value={form.shortTitle} onChange={updateField} required />
-
-                        <label htmlFor="longTitle">Full Title</label>
-                        <input id="longTitle" name="longTitle" value={form.longTitle} onChange={updateField} required />
-
-                        <label htmlFor="category">Category</label>
-                        <select id="category" name="category" value={form.category} onChange={updateField} required>
-                            {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {category}
-                                </option>
-                            ))}
-                        </select>
-
-                        <label htmlFor="description">Description</label>
-                        <input id="description" name="description" value={form.description} onChange={updateField} />
-
-                        <label htmlFor="mrp">MRP</label>
-                        <input id="mrp" name="mrp" type="number" value={form.mrp} onChange={updateField} required />
-
-                        <label htmlFor="cost">Cost</label>
-                        <input id="cost" name="cost" type="number" value={form.cost} onChange={updateField} required />
-
-                        <label htmlFor="priceDiscount">Price Discount Text</label>
-                        <input id="priceDiscount" name="priceDiscount" value={form.priceDiscount} onChange={updateField} />
-
-                        <label htmlFor="offerText">Offer Badge</label>
-                        <input id="offerText" name="offerText" value={form.offerText} onChange={updateField} />
-
-                        <label htmlFor="tagline">Tagline</label>
-                        <input id="tagline" name="tagline" value={form.tagline} onChange={updateField} />
-
-                        <label htmlFor="url">Primary Image URL</label>
-                        <input id="url" name="url" value={form.url} onChange={updateField} required />
-
-                        <label htmlFor="detailUrl">Detail Image URL</label>
-                        <input id="detailUrl" name="detailUrl" value={form.detailUrl} onChange={updateField} />
-
-                        <div className="admin_form_actions">
-                            <button type="submit" className="admin_btn" disabled={saving}>
-                                {submitLabel}
-                            </button>
-                            {isEditing ? (
-                                <button type="button" className="admin_btn secondary" onClick={resetForm} disabled={saving}>
-                                    Cancel Edit
-                                </button>
-                            ) : null}
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 420px', gap: '32px', alignItems: 'start' }}>
+                {/* Product List Table */}
+                <section className="admin_table_container">
+                    <div style={{ padding: '32px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-surface)', flexWrap: 'wrap', gap: '20px' }}>
+                        <div>
+                            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Warehouse Assets</h2>
+                            <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>Found {products.length} units in store</p>
                         </div>
-                    </form>
-                </section>
-
-                <section className="admin_form_card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
-                        <h2 style={{ marginBottom: 0 }}>Product List</h2>
-                        <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>{loading ? "..." : `${products.length} products`}</span>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>Sort by Category:</span>
+                            <select
+                                style={{
+                                    minWidth: '200px',
+                                    padding: '10px 16px',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--color-border)',
+                                    background: 'var(--color-background)',
+                                    fontSize: '14px',
+                                    fontWeight: '600'
+                                }}
+                                value={selectedCategory}
+                                onChange={(event) => {
+                                    const nextCategory = event.target.value;
+                                    setSelectedCategory(nextCategory);
+                                    loadProducts(nextCategory);
+                                }}
+                            >
+                                <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
+                                {categories.map((category) => (
+                                    <option key={category} value={category}>
+                                        {category}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="admin_form inline" style={{ marginBottom: 'var(--space-4)' }}>
-                        <select
-                            value={selectedCategory}
-                            onChange={(event) => {
-                                const nextCategory = event.target.value;
-                                setSelectedCategory(nextCategory);
-                                loadProducts(nextCategory);
-                            }}
-                        >
-                            <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
-                            {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {category}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {message ? <div style={{ margin: '24px' }} className="admin_notice success">{message}</div> : null}
+                    {error ? <div style={{ margin: '24px' }} className="admin_notice error">{error}</div> : null}
 
-                    {message ? <p className="admin_notice success">{message}</p> : null}
-                    {error ? <p className="admin_notice error">{error}</p> : null}
-
-                    {loading ? (
-                        <p style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading products...</p>
-                    ) : (
-                        <div className="admin_table_container">
-                            <table className="admin_table">
-                                <thead>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table className="admin_table">
+                            <thead>
+                                <tr>
+                                    <th style={{ paddingLeft: '32px' }}>Product Profile</th>
+                                    <th>Inventory Status</th>
+                                    <th>Valuation</th>
+                                    <th style={{ textAlign: 'right', paddingRight: '32px' }}>Management</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Category</th>
-                                        <th>Price</th>
-                                        <th>Actions</th>
+                                        <td colSpan="4" style={{ padding: '100px', textAlign: 'center' }}>
+                                            <div style={{ width: '40px', height: '40px', border: '3px solid var(--color-primary-light)', borderTopColor: 'var(--color-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div>
+                                            <span style={{ color: 'var(--color-text-secondary)', fontWeight: '600' }}>Archiving assets...</span>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {products.map((product) => (
+                                ) : products.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="4" style={{ padding: '100px', textAlign: 'center', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>No assets found in the selected sector.</td>
+                                    </tr>
+                                ) : (
+                                    products.map((product) => (
                                         <tr key={product._id}>
-                                            <td style={{ fontWeight: 500 }}>{product?.title?.shortTitle}</td>
-                                            <td>
-                                                <span className="admin_badge info">{product.category}</span>
+                                            <td style={{ paddingLeft: '32px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                                    <div style={{
+                                                        width: '60px',
+                                                        height: '60px',
+                                                        borderRadius: '14px',
+                                                        background: 'white',
+                                                        border: '1px solid var(--color-border)',
+                                                        overflow: 'hidden',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        boxShadow: 'var(--shadow-sm)'
+                                                    }}>
+                                                        {product.url ? <img src={product.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} /> : <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Empty</span>}
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontWeight: 800, color: 'var(--color-text-primary)', fontSize: '15px' }}>{product?.title?.shortTitle}</div>
+                                                        <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                                                            <span className="admin_badge success" style={{ fontSize: '10px', padding: '4px 10px' }}>{product.category}</span>
+                                                            {product.discount && <span className="admin_badge warning" style={{ fontSize: '10px', padding: '4px 10px' }}>{product.discount}</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td>Rs. {product?.price?.cost}</td>
                                             <td>
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button
-                                                        type="button"
-                                                        className="admin_btn secondary sm"
-                                                        onClick={() => handleEdit(product)}
-                                                        disabled={saving}
-                                                    >
-                                                        Edit
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#10b981' }}>Available</span>
+                                                    <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600' }}>Active Listing</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style={{ fontWeight: '900', color: 'var(--color-text-primary)', fontSize: '16px' }}>${product?.price?.cost}</div>
+                                                {product?.price?.mrp > product?.price?.cost && (
+                                                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', textDecoration: 'line-through', fontWeight: '500' }}>${product?.price?.mrp}</div>
+                                                )}
+                                            </td>
+                                            <td style={{ textAlign: 'right', paddingRight: '32px' }}>
+                                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                                    <button type="button" className="admin_btn secondary" onClick={() => handleEdit(product)} disabled={saving} style={{ padding: '8px 16px', fontSize: '12px' }}>
+                                                        Configure
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="admin_btn danger sm"
+                                                        className="admin_btn"
                                                         onClick={() => handleDelete(product)}
                                                         disabled={saving}
+                                                        style={{ padding: '8px 16px', fontSize: '12px', background: 'rgba(239, 68, 68, 0.08)', color: '#ef4444' }}
                                                     >
-                                                        Delete
+                                                        Terminate
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                {/* Edit/Create Form Card */}
+                <section className="admin_form_card" style={{ position: 'sticky', top: 'calc(var(--admin-header-height) + 32px)' }}>
+                    <div style={{ maxHeight: 'calc(100vh - var(--admin-header-height) - 100px)', overflowY: 'auto' }} className="admin_sidebar_nav">
+                        <div style={{ marginBottom: '32px' }}>
+                            <h2 style={{ fontSize: '22px', fontWeight: '900', color: 'var(--color-text-primary)', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
+                                {isEditing ? "Modify Asset" : "Deploy Asset"}
+                            </h2>
+                            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: 0 }}>
+                                {isEditing ? "Sync configuration with global catalog." : "Bootstrap a new SKU entrance."}
+                            </p>
                         </div>
-                    )}
+
+                        <form className="admin_form" onSubmit={handleSubmit}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
+                                <section>
+                                    <label htmlFor="shortTitle">Marketing Name</label>
+                                    <input id="shortTitle" name="shortTitle" value={form.shortTitle} onChange={updateField} required placeholder="iPhone 15 Pro" />
+                                </section>
+                                <section>
+                                    <label htmlFor="category">Sector</label>
+                                    <select id="category" name="category" value={form.category} onChange={updateField} required>
+                                        {categories.map((category) => (
+                                            <option key={category} value={category}>
+                                                {category}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </section>
+                            </div>
+
+                            <section>
+                                <label htmlFor="longTitle">Legal Designation</label>
+                                <input id="longTitle" name="longTitle" value={form.longTitle} onChange={updateField} required placeholder="Apple iPhone 15 Pro Max (256GB)" />
+                            </section>
+
+                            <section>
+                                <label htmlFor="description">Executive Summary</label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    value={form.description}
+                                    onChange={updateField}
+                                    rows="4"
+                                    style={{ width: '100%', resize: 'none' }}
+                                    placeholder="Enter high-fidelity description..."
+                                ></textarea>
+                            </section>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <section>
+                                    <label htmlFor="cost">Market Valuation ($)</label>
+                                    <input id="cost" name="cost" type="number" value={form.cost} onChange={updateField} required placeholder="99.00" />
+                                </section>
+                                <section>
+                                    <label htmlFor="mrp">Base MSRP ($)</label>
+                                    <input id="mrp" name="mrp" type="number" value={form.mrp} onChange={updateField} required placeholder="120.00" />
+                                </section>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <section>
+                                    <label htmlFor="priceDiscount">Discount Logic</label>
+                                    <input id="priceDiscount" name="priceDiscount" value={form.priceDiscount} onChange={updateField} placeholder="15% OFF" />
+                                </section>
+                                <section>
+                                    <label htmlFor="offerText">Product Badge</label>
+                                    <input id="offerText" name="offerText" value={form.offerText} onChange={updateField} placeholder="Premium" />
+                                </section>
+                            </div>
+
+                            <section>
+                                <label htmlFor="url">Resource Identifier (URL)</label>
+                                <input id="url" name="url" value={form.url} onChange={updateField} required placeholder="https://cdn.assets.com/img.png" />
+                            </section>
+
+                            <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <button type="submit" className="admin_btn primary" disabled={saving} style={{ width: '100%', height: '50px' }}>
+                                    {submitLabel}
+                                </button>
+                                {isEditing ? (
+                                    <button type="button" className="admin_btn secondary" onClick={resetForm} disabled={saving} style={{ width: '100%' }}>
+                                        Abort Operations
+                                    </button>
+                                ) : null}
+                            </div>
+                        </form>
+                    </div>
                 </section>
             </div>
         </div>

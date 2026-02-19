@@ -164,6 +164,7 @@ header nav .right {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 header .right a {

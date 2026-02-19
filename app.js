@@ -28,6 +28,9 @@ app.use((req, res, next) => {
     next();
 });
 
+// Serve static files for uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use(router);
 // app.get("/",(req,res)=>{
 //     res.send("your server is running");

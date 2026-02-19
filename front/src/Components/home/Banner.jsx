@@ -9,9 +9,9 @@ const data = [
     "https://rukminim1.flixcart.com/flap/1680/280/image/685712c6cefb3c02.jpg?q=50"
 ];
 
-const Banner = () => {
+const Banner = React.memo(() => {
     return (
-        <div className="banner_wrapper" style={{marginTop: "var(--header-height)"}}>
+        <div className="banner_wrapper" style={{ marginTop: "var(--header-height)" }}>
             <Carousel
                 className="carasousel"
                 autoPlay={true}
@@ -53,6 +53,6 @@ const Banner = () => {
             </Carousel>
         </div>
     );
-};
+});
 
 export default Banner;

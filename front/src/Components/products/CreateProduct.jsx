@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { apiUrl } from "../../api";
+import ImageUpload from "./ImageUpload";
 import "./create-product.css";
 
 const CATEGORY_ALL = "All Categories";
@@ -27,6 +28,7 @@ const CreateProduct = () => {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [images, setImages] = useState([]);
 
     useEffect(() => {
         const bootstrap = async () => {
@@ -85,11 +87,19 @@ const CreateProduct = () => {
         setSaving(true);
         setError("");
         setMessage("");
+        
         try {
+            // Process images - extract URLs from image objects
+            const processedImages = images.map(image => image.url);
+
             const payload = {
                 ...form,
                 mrp: Number(form.mrp),
-                cost: Number(form.cost)
+                cost: Number(form.cost),
+                images: processedImages,
+                // Set primary URL if no URL provided but images exist
+                url: form.url || (processedImages.length > 0 ? processedImages[0] : ""),
+                detailUrl: form.detailUrl || (processedImages.length > 1 ? processedImages[1] : processedImages[0] || "")
             };
 
             const response = await fetch(apiUrl("/products"), {
@@ -178,11 +188,22 @@ const CreateProduct = () => {
                     <label htmlFor="tagline">Tagline</label>
                     <input id="tagline" name="tagline" value={form.tagline} onChange={updateField} />
 
-                    <label htmlFor="url">Primary Image URL</label>
-                    <input id="url" name="url" value={form.url} onChange={updateField} required />
+                    <ImageUpload 
+                        images={images} 
+                        onChange={setImages}
+                        maxImages={5}
+                    />
 
-                    <label htmlFor="detailUrl">Detail Image URL</label>
-                    <input id="detailUrl" name="detailUrl" value={form.detailUrl} onChange={updateField} />
+                    <div className="split_fields">
+                        <div>
+                            <label htmlFor="url">Primary Image URL (Optional)</label>
+                            <input id="url" name="url" value={form.url} onChange={updateField} placeholder="Auto-filled from first image" />
+                        </div>
+                        <div>
+                            <label htmlFor="detailUrl">Detail Image URL (Optional)</label>
+                            <input id="detailUrl" name="detailUrl" value={form.detailUrl} onChange={updateField} placeholder="Auto-filled from images" />
+                        </div>
+                    </div>
 
                     <button type="submit" disabled={saving}>
                         {saving ? "Publishing..." : "Publish Product"}

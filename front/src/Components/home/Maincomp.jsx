@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Banner from "./Banner";
-import "../home/home.css";
+import SpecialProductSections from "./SpecialProductSections";
 import Slide from "./Slide";
+import "../home/home.css";
 import { Divider } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
@@ -11,7 +13,8 @@ import { apiUrl } from "../../api";
 
 const CATEGORY_ALL = "All Categories";
 
-const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
+const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, setSelectedCategory }) => {
+    const { t } = useTranslation();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -72,8 +75,8 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                         <ShoppingBagIcon className="shopping_icon pulse" />
                     </div>
                     <div className="loader_spinner_main"></div>
-                    <h2>Preparing curated collections</h2>
-                    <p>Loading products and personalized offers</p>
+                    <h2>{t('home.preparingCollections')}</h2>
+                    <p>{t('home.loadingPersonalized')}</p>
                     <div className="loader_progress">
                         <div className="loader_progress_bar"></div>
                     </div>
@@ -92,8 +95,8 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
 
                     <aside className="right_slide">
                         <div className="right_slide_content">
-                            <h4>Premium Week Collection</h4>
-                            <p>Handpicked launches from global brands, refreshed daily.</p>
+                            <h4>{t('home.premiumCollection')}</h4>
+                            <p>{t('home.premiumDescription')}</p>
                             <div className="right_img_wrapper">
                                 <img
                                     src="https://images-eu.ssl-images-amazon.com/images/G/31/img21/Wireless/Jupiter/Launches/T3/DesktopGateway_CategoryCard2x_758X608_T3._SY608_CB639883570_.jpg"
@@ -102,59 +105,62 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                                 />
                             </div>
                             <button type="button" className="explore_link">
-                                Explore Collection
+                                {t('home.exploreCollection')}
                             </button>
                         </div>
                     </aside>
                 </section>
 
                 <section className="category_status">
-                    <h4>{selectedCategory === CATEGORY_ALL ? "Showing all categories" : `Category: ${selectedCategory}`}</h4>
-                    <p>{products.length} product{products.length === 1 ? "" : "s"} available</p>
+                    <h4>{selectedCategory === CATEGORY_ALL ? t('home.showingAll') : `${t('home.category')}: ${selectedCategory}`}</h4>
+                    <p>{products.length} {t('home.productsAvailable')}{products.length === 1 ? "" : "s"}</p>
                 </section>
 
                 <section className="trust_strip">
                     <article>
                         <LocalShippingIcon />
                         <div>
-                            <h5>Fast Delivery</h5>
-                            <p>Next-day dispatch on top categories.</p>
+                            <h5>{t('home.fastDelivery')}</h5>
+                            <p>{t('home.fastDeliveryDesc')}</p>
                         </div>
                     </article>
                     <article>
                         <StarIcon />
                         <div>
-                            <h5>Verified Quality</h5>
-                            <p>Only trusted products with high ratings.</p>
+                            <h5>{t('home.verifiedQuality')}</h5>
+                            <p>{t('home.verifiedQualityDesc')}</p>
                         </div>
                     </article>
                     <article>
                         <TrendingUpIcon />
                         <div>
-                            <h5>Secure Checkout</h5>
-                            <p>Protected payment and buyer support.</p>
+                            <h5>{t('home.secureCheckout')}</h5>
+                            <p>{t('home.secureCheckoutDesc')}</p>
                         </div>
                     </article>
                 </section>
 
-                {products.length ? (
+                {products.length > 0 ? (
                     <>
-                        <Slide title="Deal of the Day" products={products} />
-
-                        <div className="center_img">
-                            <div className="center_img_overlay">
-                                <h3>Exclusive Savings Hub</h3>
-                                <p>Up to 80% off selected categories this week.</p>
-                            </div>
-                            <img
-                                src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"
-                                alt="Special offers"
-                                loading="lazy"
-                            />
-                        </div>
-
-                        <Slide title="Trending Now" products={products} />
-                        <Slide title="Top Rated Picks" products={products} />
+                        {selectedCategory === CATEGORY_ALL && !filters ? (
+                            <SpecialProductSections />
+                        ) : (
+                            <>
+                                <Slide title={`${selectedCategory === CATEGORY_ALL ? "All Products" : selectedCategory}`} products={products} />
+                                
+                                <div className="center_img">
+                                    <div className="center_img_overlay">
+                                        <h3>Exclusive Savings Hub</h3>
+                                        <p>Up to 80% off selected categories this week.</p>
+                                    </div>
+                                    <img
+                                        src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"
+                                        alt="Special offers"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            </>
+                        )}
                     </>
                 ) : (
                     <div className="category_empty_state">
@@ -163,18 +169,18 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                         <span className="floating_icon">📱</span>
                         <span className="floating_icon">💎</span>
 
-                        <h3 className="empty_title">No products found</h3>
+                        <h3 className="empty_title">{t('home.noProductsFound')}</h3>
                         <p className="empty_description">
-                            We couldn't find any products in this category right now. Try browsing other categories or check back later for new arrivals.
+                            {t('home.noProductsDesc')}
                         </p>
                         <div className="empty_actions">
                             <button
                                 type="button"
                                 className="action_btn primary_btn"
-                                onClick={() => setSelectedCategory(CATEGORY_ALL)}
+                                onClick={() => setSelectedCategory && setSelectedCategory(CATEGORY_ALL)}
                             >
                                 <span>🏠</span>
-                                Browse All Products
+                                {t('home.browseAllProducts')}
                             </button>
                             <button
                                 type="button"
@@ -182,7 +188,7 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
                                 onClick={() => window.location.reload()}
                             >
                                 <span>🔄</span>
-                                Refresh Page
+                                {t('home.refreshPage')}
                             </button>
                         </div>
                     </div>
@@ -192,6 +198,6 @@ const Maincomp = ({ selectedCategory = CATEGORY_ALL, filters = null }) => {
             <Divider className="main_divider" />
         </>
     );
-};
+});
 
 export default Maincomp;

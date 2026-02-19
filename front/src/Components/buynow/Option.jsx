@@ -3,6 +3,7 @@ import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { apiUrl } from "../../api";
+import "./option.css";
 
 const Option = ({ deletedata, get }) => {
     const { setAccount } = useContext(Logincontext);

@@ -1,8 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "../home/slide.css";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { ArrowForward, LocalOffer, StarRate, Visibility } from "@mui/icons-material";
 
 const responsive = {
@@ -20,18 +21,26 @@ const responsive = {
     }
 };
 
-const Slide = ({ title, products }) => {
+const Slide = React.memo(({ title, products }) => {
+    const { t } = useTranslation();
+    const history = useHistory();
     const items = Array.isArray(products) ? products : [];
+
+    const handleViewAll = () => {
+        // Extract category from title or use "all" for general products
+        const category = title.toLowerCase().replace(/\s+/g, '-');
+        history.push(`/products/all/${category}`);
+    };
 
     return (
         <div className="products_section">
             <div className="products_deal">
                 <div className="title_wrapper">
-                    <p className="title_tag">Curated</p>
+                    <p className="title_tag">{t('product.curated')}</p>
                     <h3>{title}</h3>
                 </div>
-                <button className="view_btn" type="button">
-                    <span>View all</span>
+                <button className="view_btn" type="button" onClick={handleViewAll}>
+                    <span>{t('product.viewAll')}</span>
                     <ArrowForward className="arrow_icon" />
                 </button>
             </div>
@@ -88,6 +97,6 @@ const Slide = ({ title, products }) => {
             )}
         </div>
     );
-};
+});
 
 export default Slide;

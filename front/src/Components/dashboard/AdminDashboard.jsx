@@ -47,8 +47,13 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
 
             <aside className={sidebarOpen ? "admin_sidebar open" : "admin_sidebar"}>
                 <div className="admin_sidebar_brand">
-                    <p className="admin_brand_kicker">Control Panel</p>
-                    <h2>Admin Dashboard</h2>
+                    <div style={{ width: '40px', height: '40px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
+                        <CategoryIcon style={{ color: 'var(--color-primary)' }} />
+                    </div>
+                    <div>
+                        <p className="admin_brand_kicker">Nexus Console</p>
+                        <h2 style={{ letterSpacing: '0.05em' }}>E-COM v2</h2>
+                    </div>
                 </div>
 
                 <nav className="admin_sidebar_nav">
@@ -70,41 +75,79 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
                         );
                     })}
                 </nav>
+
+                <div className="admin_sidebar_footer">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--admin-sidebar-gradient)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '900', fontSize: '14px', boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>AH</div>
+                        <div style={{ flex: 1 }}>
+                            <p style={{ margin: 0, fontSize: '14px', color: 'white', fontWeight: '800' }}>Admin Hub</p>
+                            <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.5)', fontWeight: '700' }}>SYSTEM ONLINE</p>
+                        </div>
+                    </div>
+                </div>
             </aside>
 
-            <div className="admin_dashboard_content" onClick={closeSidebar}>
-                <Suspense fallback={
-                    <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem', color: '#666' }}>
-                        Loading...
+            <div className="admin_dashboard_content">
+                <header className="admin_top_header">
+                    <div className="admin_search_bar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-text-muted)' }}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" placeholder="Access terminal records, statistics..." />
                     </div>
-                }>
-                    <Switch>
-                        <Route exact path={path}>
-                            <DashboardHome />
-                        </Route>
-                        <Route exact path={`${path}/users`}>
-                            <UsersManagement />
-                        </Route>
-                        <Route exact path={`${path}/products`}>
-                            <ProductsManagement />
-                        </Route>
-                        <Route exact path={`${path}/categories`}>
-                            <CategoriesManagement onCategoriesChanged={onCategoriesChanged} />
-                        </Route>
-                        <Route exact path={`${path}/reviews`}>
-                            <ReviewManagement />
-                        </Route>
-                        <Route exact path={`${path}/statistics`}>
-                            <StatisticsPage />
-                        </Route>
-                        <Route exact path={`${path}/design-system`}>
-                            <DesignSystemShowcase />
-                        </Route>
-                        <Route path={path}>
-                            <DashboardHome />
-                        </Route>
-                    </Switch>
-                </Suspense>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                        <div className="admin_header_icon_group" style={{ display: 'flex', gap: '16px' }}>
+                            <div className="admin_header_icon">
+                                <RateReviewIcon style={{ fontSize: '18px' }} />
+                                <span className="admin_notification_badge">5</span>
+                            </div>
+                            <div className="admin_header_icon">
+                                <Inventory2Icon style={{ fontSize: '18px' }} />
+                            </div>
+                        </div>
+
+                        <div style={{ height: '32px', width: '1px', background: 'var(--color-border)' }}></div>
+
+                        <NavLink to="/" className="admin_btn primary sm" style={{ textDecoration: 'none', padding: '10px 24px', fontSize: '12px', fontWeight: '800', boxShadow: '0 8px 20px rgba(59, 130, 246, 0.25)' }}>
+                            LAUNCH SITE
+                        </NavLink>
+                    </div>
+                </header>
+
+                <main className="admin_page_wrapper" onClick={closeSidebar} style={{ position: 'relative' }}>
+                    <Suspense fallback={
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', gap: '20px' }}>
+                            <div style={{ width: '48px', height: '48px', border: '4px solid var(--color-primary-light)', borderTopColor: 'var(--color-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                            <p style={{ color: 'var(--color-text-secondary)', fontWeight: '700', fontSize: '15px', letterSpacing: '0.05em' }}>SYNCHRONIZING MODULES...</p>
+                        </div>
+                    }>
+                        <Switch>
+                            <Route exact path={path}>
+                                <DashboardHome />
+                            </Route>
+                            <Route exact path={`${path}/users`}>
+                                <UsersManagement />
+                            </Route>
+                            <Route exact path={`${path}/products`}>
+                                <ProductsManagement />
+                            </Route>
+                            <Route exact path={`${path}/categories`}>
+                                <CategoriesManagement onCategoriesChanged={onCategoriesChanged} />
+                            </Route>
+                            <Route exact path={`${path}/reviews`}>
+                                <ReviewManagement />
+                            </Route>
+                            <Route exact path={`${path}/statistics`}>
+                                <StatisticsPage />
+                            </Route>
+                            <Route exact path={`${path}/design-system`}>
+                                <DesignSystemShowcase />
+                            </Route>
+                            <Route path={path}>
+                                <DashboardHome />
+                            </Route>
+                        </Switch>
+                    </Suspense>
+                </main>
             </div>
         </section>
     );

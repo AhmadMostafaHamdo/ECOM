@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { apiUrl } from './api';
 import { Logincontext } from './Components/context/Contextprovider';
 import './App.css';
+import './i18n/i18n';
 
 // Lazy Load Components
 const Navbaar = lazy(() => import('./Components/header/Navbaar'));
@@ -17,6 +18,7 @@ const Buynow = lazy(() => import('./Components/buynow/Buynow'));
 const AdminDashboard = lazy(() => import('./Components/dashboard/AdminDashboard'));
 const ProfilePage = lazy(() => import('./Components/profile/ProfilePage'));
 const CreateProduct = lazy(() => import('./Components/products/CreateProduct'));
+const AllProducts = lazy(() => import('./Components/products/AllProducts'));
 
 const CATEGORY_ALL = "All Categories";
 
@@ -124,7 +126,7 @@ function App() {
               <h2>Loading...</h2>
             </div>
           }>
-            <Navbaar />
+            {!isDashboardRoute && <Navbaar />}
             {!isDashboardRoute && isHomeRoute && (
               <Newnav
                 categories={categories}
@@ -133,29 +135,9 @@ function App() {
                 onApplyFilters={handleFilterApply}
               />
             )}
-            <main className={isDashboardRoute ? "app_main app_main_dashboard" : "app_main"}>
+
+            {isDashboardRoute ? (
               <Switch>
-                <Route exact path="/">
-                  {isAdmin ? <Redirect to="/dashboard" /> : <Maincomp selectedCategory={selectedCategory} filters={appliedFilters} />}
-                </Route>
-                <Route exact path="/signup">
-                  {account ? <Redirect to="/" /> : <Signup />}
-                </Route>
-                <Route exact path="/login">
-                  {account ? <Redirect to="/" /> : <SignIn />}
-                </Route>
-                <Route exact path="/getproductsone/:id">
-                  {isAdmin ? <Redirect to="/dashboard" /> : <Cart />}
-                </Route>
-                <Route exact path="/buynow">
-                  {isAdmin ? <Redirect to="/dashboard" /> : <Buynow />}
-                </Route>
-                <Route exact path="/profile">
-                  {isAdmin ? <Redirect to="/dashboard" /> : <ProfilePage />}
-                </Route>
-                <Route exact path="/products/new">
-                  {isAdmin ? <Redirect to="/dashboard" /> : <CreateProduct />}
-                </Route>
                 <Route path="/dashboard">
                   {!account ? (
                     <Redirect to="/login" />
@@ -165,11 +147,40 @@ function App() {
                     <Redirect to="/" />
                   )}
                 </Route>
-                <Route>
-                  <Redirect to="/" />
-                </Route>
               </Switch>
-            </main>
+            ) : (
+              <main className="app_main">
+                <Switch>
+                  <Route exact path="/">
+                    {isAdmin ? <Redirect to="/dashboard" /> : <Maincomp selectedCategory={selectedCategory} filters={appliedFilters} setSelectedCategory={setSelectedCategory} />}
+                  </Route>
+                  <Route exact path="/signup">
+                    {account ? <Redirect to="/" /> : <Signup />}
+                  </Route>
+                  <Route exact path="/login">
+                    {account ? <Redirect to="/" /> : <SignIn />}
+                  </Route>
+                  <Route exact path="/getproductsone/:id">
+                    {isAdmin ? <Redirect to="/dashboard" /> : <Cart />}
+                  </Route>
+                  <Route exact path="/buynow">
+                    {isAdmin ? <Redirect to="/dashboard" /> : <Buynow />}
+                  </Route>
+                  <Route exact path="/profile">
+                    {isAdmin ? <Redirect to="/dashboard" /> : <ProfilePage />}
+                  </Route>
+                  <Route exact path="/products/new">
+                    {isAdmin ? <Redirect to="/dashboard" /> : <CreateProduct />}
+                  </Route>
+                  <Route exact path="/products/all/:category?">
+                    {isAdmin ? <Redirect to="/dashboard" /> : <AllProducts />}
+                  </Route>
+                  <Route>
+                    <Redirect to="/" />
+                  </Route>
+                </Switch>
+              </main>
+            )}
             {!isDashboardRoute && <Footer />}
           </Suspense>
         ) : (

@@ -1,0 +1,59 @@
+.add_remove_select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.add_remove_select select {
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add_remove_select select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.add_remove_select p {
+    cursor: pointer;
+    transition: color 0.2s ease;
+    margin: 0;
+}
+
+.add_remove_select p:hover {
+    color: #dc2626;
+}
+
+.add_remove_select span {
+    color: #9ca3af;
+    user-select: none;
+}
+
+.forremovemedia {
+    cursor: pointer;
+    transition: color 0.2s ease;
+    margin: 0;
+}
+
+.forremovemedia:hover {
+    color: #3b82f6;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .forremovemedia {
+        display: none;
+    }
+    
+    .add_remove_select span:nth-of-type(2),
+    .add_remove_select span:nth-of-type(3) {
+        display: none;
+    }
+}
