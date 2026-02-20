@@ -76,14 +76,9 @@ const Signup = () => {
     return (
         <section className="auth_page">
             <div className="sign_container">
-                <div className="sign_header">
-                    <img src="./blacklogoamazon.png" alt="signup logo" />
-                    <h1>{t('auth.signup')}</h1>
-                    <p>{t('auth.createAccount')}</p>
-                </div>
                 <div className="sign_form">
                     <form method="POST">
-                        <h1>Create account</h1>
+                        <h1>{t('auth.signup')}</h1>
                         <div className="form_data">
                             <label htmlFor="name">{t('auth.firstName')}</label>
                             <input type="text" name="fname" onChange={adddata} value={udata.fname} id="name" />
@@ -112,11 +107,8 @@ const Signup = () => {
                             <input type="password" name="cpassword" onChange={adddata} value={udata.cpassword} id="passwordg" />
                         </div>
                         <button type="submit" className="signin_btn" onClick={senddata}>
-                            {t('common.continue')}
+                            {t('common.signup')}
                         </button>
-
-                        <Divider />
-
                         <div className="signin_info">
                             <p>{t('auth.alreadyHaveAccount')}</p>
                             <NavLink to="/login">{t('auth.login')}</NavLink>

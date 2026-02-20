@@ -9,7 +9,7 @@ const LanguageSwitcher = () => {
         i18n.changeLanguage(lng);
         // Save language preference to localStorage
         localStorage.setItem('i18nextLng', lng);
-        
+
         // Update document direction for RTL/LTR
         document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.lang = lng;
@@ -17,7 +17,7 @@ const LanguageSwitcher = () => {
 
     return (
         <div className="language_switcher">
-            <button 
+            <button
                 className={`lang_btn ${i18n.language === 'en' ? 'active' : ''}`}
                 onClick={() => changeLanguage('en')}
                 title="English"
@@ -25,7 +25,7 @@ const LanguageSwitcher = () => {
                 <span className="flag">🇺🇸</span>
                 <span className="lang_text">EN</span>
             </button>
-            <button 
+            <button
                 className={`lang_btn ${i18n.language === 'ar' ? 'active' : ''}`}
                 onClick={() => changeLanguage('ar')}
                 title="العربية"

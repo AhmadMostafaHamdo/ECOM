@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB limit
@@ -80,6 +80,7 @@ const resolveProductCategory = (productDoc) => {
 
     return {
         ...product,
+        id: (product.id || product._id).toString(),
         category: categoryValue || shortTitleValue || UNCATEGORIZED
     };
 };
@@ -398,29 +399,58 @@ router.get("/getproducts", async (req, res) => {
     try {
         await ensureCategoryCatalog();
 
-        const { category } = req.query;
-        const normalizedFilter = normalizeCategory(category);
-        const productsData = await products.find();
-        const productsWithCategory = productsData.map(resolveProductCategory);
+        const { category, search, page = 1, limit = 10 } = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
 
-        const filteredProducts = !normalizedFilter || normalizedFilter === normalizeCategory(CATEGORY_ALL)
-            ? productsWithCategory
-            : productsWithCategory.filter(
-                (product) => normalizeCategory(product.category) === normalizedFilter
-            );
+        let query = {};
 
-        res.status(201).json(filteredProducts);
+        if (category && normalizeCategory(category) !== normalizeCategory(CATEGORY_ALL)) {
+            query.category = { $regex: `^${escapeRegex(category)}$`, $options: "i" };
+        }
+
+        if (search) {
+            const searchRegex = new RegExp(escapeRegex(search), "i");
+            query.$or = [
+                { "title.shortTitle": searchRegex },
+                { "title.longTitle": searchRegex },
+                { "description": searchRegex },
+                { "tagline": searchRegex }
+            ];
+        }
+
+        const [productsData, totalItems] = await Promise.all([
+            products.find(query).skip(skip).limit(limitNum).sort({ createdAt: -1 }),
+            products.all ? products.countDocuments(query) : products.countDocuments(query)
+        ]);
+
+        const resolvedProducts = productsData.map(resolveProductCategory);
+
+        res.status(201).json({
+            products: resolvedProducts,
+            pagination: {
+                totalItems,
+                totalPages: Math.ceil(totalItems / limitNum),
+                currentPage: pageNum,
+                limit: limitNum
+            }
+        });
     } catch (error) {
         console.log("error " + error.message);
         res.status(500).json({ error: "Failed to fetch products" });
     }
 });
 
+// Filtered products with pagination
 router.post("/products/filter", async (req, res) => {
     try {
         await ensureCategoryCatalog();
 
-        const { category, selections = {}, price } = req.body || {};
+        const { category, selections = {}, price, search, page = 1, limit = 12 } = req.body || {};
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
         const normalizedSelections = Object.entries(selections).reduce((acc, [filterId, values]) => {
             if (Array.isArray(values) && values.length) {
                 acc[filterId] = values;
@@ -433,6 +463,18 @@ router.post("/products/filter", async (req, res) => {
         if (category && category !== CATEGORY_ALL) {
             clauses.push({
                 category: { $regex: `^${escapeRegex(category)}$`, $options: "i" }
+            });
+        }
+
+        if (search) {
+            const searchRegex = new RegExp(escapeRegex(search), "i");
+            clauses.push({
+                $or: [
+                    { "title.shortTitle": searchRegex },
+                    { "title.longTitle": searchRegex },
+                    { "description": searchRegex },
+                    { "tagline": searchRegex }
+                ]
             });
         }
 
@@ -451,10 +493,23 @@ router.post("/products/filter", async (req, res) => {
         }
 
         const query = clauses.length ? { $and: clauses } : {};
-        const productsData = await products.find(query);
-        const productsWithCategory = productsData.map(resolveProductCategory);
 
-        res.status(200).json(productsWithCategory);
+        const [productsData, totalItems] = await Promise.all([
+            products.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+            products.countDocuments(query)
+        ]);
+
+        const resolvedProducts = productsData.map(resolveProductCategory);
+
+        res.status(200).json({
+            products: resolvedProducts,
+            pagination: {
+                totalItems,
+                totalPages: Math.ceil(totalItems / limitNum),
+                currentPage: pageNum,
+                limit: limitNum
+            }
+        });
     } catch (error) {
         console.log("error " + error.message);
         res.status(500).json({ error: "Failed to fetch filtered products" });
@@ -468,6 +523,7 @@ router.get("/products/filter", async (req, res) => {
 
         const category = req.query.category;
         const price = req.query.price ? Number(req.query.price) : null;
+        const search = req.query.search;
         let selections = {};
         if (req.query.selections) {
             try {
@@ -489,6 +545,18 @@ router.get("/products/filter", async (req, res) => {
         if (category && category !== CATEGORY_ALL) {
             clauses.push({
                 category: { $regex: `^${escapeRegex(category)}$`, $options: "i" }
+            });
+        }
+
+        if (search) {
+            const searchRegex = new RegExp(escapeRegex(search), "i");
+            clauses.push({
+                $or: [
+                    { "title.shortTitle": searchRegex },
+                    { "title.longTitle": searchRegex },
+                    { "description": searchRegex },
+                    { "tagline": searchRegex }
+                ]
             });
         }
 
@@ -611,8 +679,35 @@ router.delete("/admin/categories/:id", authenicate, requireAdmin, async (req, re
 
 router.get("/admin/users", authenicate, requireAdmin, async (req, res) => {
     try {
-        const users = await User.find().sort({ createdAt: -1 });
-        res.status(200).json(users.map(toPublicUser));
+        const { page = 1, limit = 10, search = "" } = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
+        let query = {};
+        if (search) {
+            const searchRegex = new RegExp(escapeRegex(search), "i");
+            query.$or = [
+                { fname: searchRegex },
+                { email: searchRegex },
+                { mobile: searchRegex }
+            ];
+        }
+
+        const [users, totalItems] = await Promise.all([
+            User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+            User.countDocuments(query)
+        ]);
+
+        res.status(200).json({
+            data: users.map(toPublicUser),
+            pagination: {
+                totalItems,
+                totalPages: Math.ceil(totalItems / limitNum),
+                currentPage: pageNum,
+                limit: limitNum
+            }
+        });
     } catch (error) {
         console.log("error " + error.message);
         res.status(500).json({ error: "Failed to fetch users" });
@@ -791,18 +886,44 @@ router.get("/admin/stats", authenicate, requireAdmin, async (req, res) => {
 
 router.get("/admin/products", authenicate, requireAdmin, async (req, res) => {
     try {
+        const { page = 1, limit = 10, category, search = "" } = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
         const query = {};
-        const normalizedCategory = normalizeCategory(req.query?.category);
+        const normalizedCategory = normalizeCategory(category);
         if (normalizedCategory && normalizedCategory !== normalizeCategory(CATEGORY_ALL)) {
-            query.category = { $regex: `^${escapeRegex(req.query.category.trim())}$`, $options: "i" };
+            query.category = { $regex: `^${escapeRegex(category.trim())}$`, $options: "i" };
         }
 
-        const productDocs = await products
-            .find(query)
-            .sort({ createdAt: -1 })
-            .populate("createdBy", "fname email");
+        if (search) {
+            const searchRegex = new RegExp(escapeRegex(search), "i");
+            query.$or = [
+                { "title.shortTitle": searchRegex },
+                { "title.longTitle": searchRegex },
+                { id: searchRegex }
+            ];
+        }
 
-        res.status(200).json(productDocs.map(toPublicProduct));
+        const [productDocs, totalItems] = await Promise.all([
+            products.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limitNum)
+                .populate("createdBy", "fname email"),
+            products.countDocuments(query)
+        ]);
+
+        res.status(200).json({
+            data: productDocs.map(toPublicProduct),
+            pagination: {
+                totalItems,
+                totalPages: Math.ceil(totalItems / limitNum),
+                currentPage: pageNum,
+                limit: limitNum
+            }
+        });
     } catch (error) {
         console.log("error " + error.message);
         res.status(500).json({ error: "Failed to fetch products for admin" });
@@ -962,9 +1083,9 @@ router.post("/upload/images", authenicate, upload.array('images', 5), async (req
             return `/uploads/${file.filename}`;
         });
 
-        res.status(200).json({ 
+        res.status(200).json({
             message: "Files uploaded successfully",
-            images: imageUrls 
+            images: imageUrls
         });
     } catch (error) {
         console.log("Upload error:", error.message);
@@ -1415,14 +1536,31 @@ router.delete("/reviews/:id", authenicate, async (req, res) => {
 // Admin: Get all reviews
 router.get("/admin/reviews", authenicate, requireAdmin, async (req, res) => {
     try {
-        const status = req.query.status;
+        const { status, page = 1, limit = 10 } = req.query;
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
         const query = status ? { status } : {};
 
-        const reviews = await Review.find(query)
-            .populate("reviewerId", "fname email")
-            .sort({ createdAt: -1 });
+        const [reviews, totalItems] = await Promise.all([
+            Review.find(query)
+                .populate("reviewerId", "fname email")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limitNum),
+            Review.countDocuments(query)
+        ]);
 
-        res.status(200).json(reviews);
+        res.status(200).json({
+            data: reviews,
+            pagination: {
+                totalItems,
+                totalPages: Math.ceil(totalItems / limitNum),
+                currentPage: pageNum,
+                limit: limitNum
+            }
+        });
     } catch (error) {
         console.log("Admin fetch reviews error:", error.message);
         res.status(500).json({ error: "Failed to fetch reviews" });
@@ -1500,7 +1638,7 @@ router.get("/products/trending", async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
         const trending = await products.find()
-            .sort({ popularity: -1, views: -1, likeCount: -1 })
+            .sort({ views: -1, createdAt: -1 })
             .limit(limit);
 
         res.status(200).json(trending.map(resolveProductCategory));
@@ -1525,5 +1663,21 @@ router.get("/products/top-rated", async (req, res) => {
     }
 });
 
+// Get discounted products
+router.get("/products/discounted", async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const discounted = await products.find({
+            discount: { $exists: true, $nin: ["0", "0%", ""] }
+        })
+            .sort({ createdAt: -1 })
+            .limit(limit);
+
+        res.status(200).json(discounted.map(resolveProductCategory));
+    } catch (error) {
+        console.log("Discounted products error:", error.message);
+        res.status(500).json({ error: "Failed to fetch discounted products" });
+    }
+});
 
 module.exports = router;

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router";
 
 const Right = ({ iteam }) => {
+    const { t } = useTranslation();
     const [val, setVal] = useState(false);
     const [price, setPrice] = useState(0);
     const history = useHistory("");
@@ -14,7 +16,7 @@ const Right = ({ iteam }) => {
     }, [iteam]);
 
     const proceesby = () => {
-        alert("Your order has been confirmed.");
+        alert(t('cart.orderConfirmed'));
         history.push("/");
     };
 
@@ -26,21 +28,21 @@ const Right = ({ iteam }) => {
             />
             <div className="cost_right">
                 <p>
-                    Your order is eligible for free delivery.
-                    <span> You can choose faster delivery at checkout.</span>
+                    {t('cart.eligibleFree')}
+                    <span> {t('cart.fasterCheckout')}</span>
                 </p>
                 <h3>
-                    Subtotal ({iteam.length} items): <span>Rs. {price}</span>
+                    {t('cart.subtotal')} ({iteam.length} {iteam.length === 1 ? t('cart.item') : t('cart.items')}): <span>Rs. {price}</span>
                 </h3>
                 <button className="rightbuy_btn" onClick={proceesby}>
-                    Proceed to Buy
+                    {t('cart.proceedToBuy')}
                 </button>
                 <div className="emi" onClick={() => setVal(!val)}>
-                    EMI available
+                    {t('cart.emiAvailable')}
                     {!val ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                 </div>
                 <span className={val ? "show" : "hide"}>
-                    Your order may qualify for EMI options with eligible credit cards. Terms apply.
+                    {t('cart.emiTerms')}
                 </span>
             </div>
         </div>

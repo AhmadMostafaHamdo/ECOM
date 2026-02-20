@@ -1,19 +1,22 @@
 
 import { apiUrl } from "../../../api";
 
-export const getProducts = ()=> async(dispatch)=>{
+export const getProducts = (category = "", searchTerm = "") => async (dispatch) => {
     try {
-        const data = await fetch(apiUrl("/getproducts"),{
-                method:"GET",
-                headers:{
-                    "Content-Type":"application/json"
-                }
+        const url = new URL(apiUrl("/getproducts"));
+        if (category) url.searchParams.append("category", category);
+        if (searchTerm) url.searchParams.append("search", searchTerm);
+
+        const data = await fetch(url.toString(), {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
         });
 
         const res = await data.json();
-        // console.log(res);
-        dispatch({type:"SUCCESS_GET_PRODUCTS",payload:res});
+        dispatch({ type: "SUCCESS_GET_PRODUCTS", payload: res });
     } catch (error) {
-        dispatch({type:"FAIL_GET_PRODUCTS",payload:error.response});
+        dispatch({ type: "FAIL_GET_PRODUCTS", payload: error.response });
     }
 }

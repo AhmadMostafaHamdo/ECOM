@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
 import "../../styles/design-system-proposal.css";
 
 const ProfilePage = () => {
+    const { t } = useTranslation();
     const history = useHistory();
     const { account, setAccount } = useContext(Logincontext);
     const [form, setForm] = useState({
@@ -93,7 +95,7 @@ const ProfilePage = () => {
             }
 
             setAccount(payload);
-            setMessage("Profile updated successfully.");
+            setMessage(t('profile.updateSuccess'));
         } catch (saveError) {
             setError(saveError.message);
         } finally {
@@ -105,7 +107,7 @@ const ProfilePage = () => {
         return (
             <section className="ds-container">
                 <div className="ds-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-                    <h2 className="ds-heading-3">Loading profile...</h2>
+                    <h2 className="ds-heading-3">{t('profile.loading')}</h2>
                 </div>
             </section>
         );
@@ -116,29 +118,29 @@ const ProfilePage = () => {
             <div className="ds-grid-2">
                 <article className="ds-card">
                     <header style={{ marginBottom: 'var(--space-6)' }}>
-                        <p className="ds-subtitle">Account</p>
-                        <h1 className="ds-heading-2">{account?.fname || "Your Profile"}</h1>
-                        <p className="ds-body">Manage your personal details and account settings.</p>
+                        <p className="ds-subtitle">{t('navigation.profile')}</p>
+                        <h1 className="ds-heading-2">{account?.fname || t('profile.title')}</h1>
+                        <p className="ds-body">{t('profile.manageAccount')}</p>
                     </header>
 
                     <form onSubmit={saveProfile} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                         <div className="ds-input-group">
-                            <label htmlFor="fname" className="ds-label">Name</label>
+                            <label htmlFor="fname" className="ds-label">{t('auth.firstName')}</label>
                             <input id="fname" name="fname" className="ds-input" value={form.fname} onChange={updateField} required />
                         </div>
 
                         <div className="ds-input-group">
-                            <label htmlFor="email" className="ds-label">Email</label>
+                            <label htmlFor="email" className="ds-label">{t('auth.email')}</label>
                             <input id="email" name="email" type="email" className="ds-input" value={form.email} onChange={updateField} required />
                         </div>
 
                         <div className="ds-input-group">
-                            <label htmlFor="mobile" className="ds-label">Mobile</label>
+                            <label htmlFor="mobile" className="ds-label">{t('auth.mobile')}</label>
                             <input id="mobile" name="mobile" className="ds-input" value={form.mobile} onChange={updateField} required />
                         </div>
 
                         <button type="submit" disabled={saving} className="ds-btn ds-btn-primary" style={{ marginTop: 'var(--space-2)' }}>
-                            {saving ? "Saving..." : "Save Profile"}
+                            {saving ? t('profile.saving') : t('profile.saveProfile')}
                         </button>
                     </form>
 
@@ -148,9 +150,9 @@ const ProfilePage = () => {
 
                 <article className="ds-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
-                        <h2 className="ds-heading-3" style={{ margin: 0 }}>Your Products</h2>
+                        <h2 className="ds-heading-3" style={{ margin: 0 }}>{t('profile.yourProducts')}</h2>
                         <NavLink to="/products/new" className="ds-btn ds-btn-secondary">
-                            Create Product
+                            {t('admin.createProduct')}
                         </NavLink>
                     </div>
 
@@ -181,7 +183,7 @@ const ProfilePage = () => {
                         </ul>
                     ) : (
                         <div style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--text-tertiary)' }}>
-                            <p>You have not created products yet.</p>
+                            <p>{t('profile.noProducts')}</p>
                         </div>
                     )}
                 </article>

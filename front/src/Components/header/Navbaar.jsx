@@ -20,23 +20,60 @@ import { getProducts } from "../redux/actions/action";
 import { useSelector, useDispatch } from "react-redux";
 import { apiUrl } from "../../api";
 import { useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import './Navbaar.css';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 
-const Navbaar = React.memo(() => {
+const Navbaar = React.memo(({ onSearch }) => {
+    const { t } = useTranslation();
     const history = useHistory("");
     const [text, setText] = useState("");
-    const { products } = useSelector((state) => state.getproductsdata);
+    const [suggestions, setSuggestions] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(getProducts());
-    }, [dispatch]);
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [liopen, setLiopen] = useState(true);
     const [dropen, setDropen] = useState(false);
     const { account, setAccount } = useContext(Logincontext);
+
+    const fetchSuggestions = useCallback(async (query) => {
+        if (!query.trim()) {
+            setSuggestions([]);
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            const res = await fetch(apiUrl(`/getproducts?search=${encodeURIComponent(query)}&limit=6`));
+            const resData = await res.json();
+            if (resData.products) {
+                setSuggestions(resData.products);
+            } else if (Array.isArray(resData)) {
+                setSuggestions(resData);
+            }
+        } catch (error) {
+            console.log("Suggestions fetch failed:", error.message);
+        } finally {
+            setIsSearching(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        const delaySearchFn = setTimeout(() => {
+            if (text.trim()) {
+                fetchSuggestions(text);
+            } else {
+                setSuggestions([]);
+            }
+
+            if (onSearch) {
+                onSearch(text);
+            }
+        }, 400);
+
+        return () => clearTimeout(delaySearchFn);
+    }, [text, onSearch, fetchSuggestions]);
 
     const handleClick = useCallback((event) => {
         setAnchorEl(event.currentTarget);
@@ -93,7 +130,7 @@ const Navbaar = React.memo(() => {
         } else {
             setAccount(false);
             setAnchorEl(null);
-            toast.success("Logged out successfully.", {
+            toast.success(t('auth.logoutSuccess') || "Logged out successfully.", {
                 position: "top-center",
                 autoClose: 2400,
                 hideProgressBar: false,
@@ -103,22 +140,12 @@ const Navbaar = React.memo(() => {
             });
             history.push("/");
         }
-    }, [history, setAccount]);
+    }, [history, setAccount, t]);
 
     const getText = useCallback((searchText) => {
         setText(searchText);
         setLiopen(searchText.trim().length === 0);
     }, []);
-
-    const filteredProducts = useMemo(() => {
-        if (!text.trim()) {
-            return [];
-        }
-        return products.filter((product) =>
-            product.title.longTitle.toLowerCase().includes(text.toLowerCase())
-        );
-    }, [products, text]);
-
     return (
         <header>
             <nav className="main_nav">
@@ -126,41 +153,40 @@ const Navbaar = React.memo(() => {
                     <IconButton className="hamburgur" onClick={() => setDropen(true)}>
                         <MenuIcon />
                     </IconButton>
-
                     <Drawer open={dropen} onClose={() => setDropen(false)}>
                         <Rightheader userlog={logoutuser} logclose={() => setDropen(false)} />
                     </Drawer>
-
                     <div className="navlogo">
                         <NavLink to="/">
-                            <img src="./amazon_PNG25.png" alt="logo" />
+                            <img src="/amazon_PNG25.png" alt="logo" />
                             <span>Studio Commerce</span>
                         </NavLink>
                     </div>
-
                     <div className="nav_searchbaar">
                         <SearchIcon className="search_leading_icon" />
                         <input
                             type="text"
                             onChange={(e) => getText(e.target.value)}
                             value={text}
-                            placeholder="Search products, categories, and brands"
+                            placeholder={t('allProducts.searchPlaceholder')}
                         />
                         <button type="button" className="search_icon" aria-label="Search products">
                             <SearchIcon id="search" />
                         </button>
                         {text.trim().length > 0 && (
                             <List className="extrasearch" hidden={liopen}>
-                                {filteredProducts.length > 0 ? (
-                                    filteredProducts.map((product) => (
+                                {isSearching ? (
+                                    <ListItem className="no_search_result">Searching...</ListItem>
+                                ) : suggestions.length > 0 ? (
+                                    suggestions.map((product) => (
                                         <ListItem key={product.id}>
                                             <NavLink to={`/getproductsone/${product.id}`} onClick={() => setLiopen(true)}>
-                                                {/* {product.title.longTitle} */}
+                                                {product.title.longTitle}
                                             </NavLink>
                                         </ListItem>
                                     ))
                                 ) : (
-                                    <ListItem className="no_search_result">No matching products found.</ListItem>
+                                    <ListItem className="no_search_result">{t('allProducts.noProductsFound')}</ListItem>
                                 )}
                             </List>
                         )}
@@ -169,18 +195,18 @@ const Navbaar = React.memo(() => {
 
                 <div className="right">
                     <LanguageSwitcher />
-                    
+
                     {isAdmin && (
                         <div className="nav_btn">
                             <NavLink to="/dashboard">
-                                <span>Dashboard</span>
+                                <span>{t('navigation.dashboard')}</span>
                             </NavLink>
                         </div>
                     )}
 
                     {!account && <div className="nav_btn">
                         <NavLink to="/login">
-                            <span>Sign in</span>
+                            <span>{t('auth.login')}</span>
                         </NavLink>
                     </div>}
 
@@ -189,7 +215,7 @@ const Navbaar = React.memo(() => {
                             <Badge badgeContent={account ? account.carts.length : 0} color="secondary">
                                 <ShoppingCartIcon id="icon" />
                             </Badge>
-                            <p>Cart</p>
+                            <p>{t('navigation.cart')}</p>
                         </div>
                     </NavLink>
 
@@ -205,12 +231,12 @@ const Navbaar = React.memo(() => {
                         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose} className="profile_menu">
                             <MenuItem onClick={handleMyAccountClick} style={{ margin: 10 }}>
                                 <AccountCircleIcon style={{ fontSize: 18, marginRight: 8 }} />
-                                My Account
+                                {t('navigation.profile')}
                             </MenuItem>
                             {account && (
                                 <MenuItem onClick={logoutuser} style={{ margin: 10 }}>
                                     <LogoutIcon style={{ fontSize: 18, marginRight: 8 }} />
-                                    Logout
+                                    {t('navigation.logout')}
                                 </MenuItem>
                             )}
                         </Menu>

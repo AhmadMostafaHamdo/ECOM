@@ -13,22 +13,22 @@ import { apiUrl } from "../../api";
 
 const CATEGORY_ALL = "All Categories";
 
-const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, setSelectedCategory }) => {
+const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, setSelectedCategory, searchTerm = "" }) => {
     const { t } = useTranslation();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         let isMounted = true;
-        let loaderTimer;
 
         const fetchProducts = async () => {
             setLoading(true);
             try {
                 const payload = {
-                    category: selectedCategory !== CATEGORY_ALL ? selectedCategory : null,
+                    category: (selectedCategory && selectedCategory !== CATEGORY_ALL) ? selectedCategory : undefined,
                     selections: filters?.selections || {},
-                    price: filters?.price ?? null
+                    price: filters?.price ?? null,
+                    search: searchTerm
                 };
 
                 const response = await fetch(apiUrl("/products/filter"), {
@@ -39,9 +39,9 @@ const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, 
                     body: JSON.stringify(payload)
                 });
 
-                const data = await response.json();
+                const resData = await response.json();
                 if (isMounted) {
-                    setProducts(Array.isArray(data) ? data : []);
+                    setProducts(resData.products || (Array.isArray(resData) ? resData : []));
                 }
             } catch (error) {
                 if (isMounted) {
@@ -49,11 +49,7 @@ const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, 
                 }
                 console.log("Products fetch failed:", error.message);
             } finally {
-                loaderTimer = setTimeout(() => {
-                    if (isMounted) {
-                        setLoading(false);
-                    }
-                }, 350);
+                setLoading(false);
             }
         };
 
@@ -61,11 +57,8 @@ const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, 
 
         return () => {
             isMounted = false;
-            if (loaderTimer) {
-                clearTimeout(loaderTimer);
-            }
         };
-    }, [selectedCategory, filters]);
+    }, [selectedCategory, filters, searchTerm]);
 
     if (loading) {
         return (
@@ -142,16 +135,20 @@ const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, 
 
                 {products.length > 0 ? (
                     <>
-                        {selectedCategory === CATEGORY_ALL && !filters ? (
+                        {selectedCategory === CATEGORY_ALL && !filters && !searchTerm ? (
                             <SpecialProductSections />
                         ) : (
                             <>
-                                <Slide title={`${selectedCategory === CATEGORY_ALL ? "All Products" : selectedCategory}`} products={products} />
-                                
+                                <Slide
+                                    title={selectedCategory === CATEGORY_ALL ? t("allProducts.title") : selectedCategory}
+                                    products={products}
+                                    category={selectedCategory === CATEGORY_ALL ? "all" : selectedCategory}
+                                />
+
                                 <div className="center_img">
                                     <div className="center_img_overlay">
-                                        <h3>Exclusive Savings Hub</h3>
-                                        <p>Up to 80% off selected categories this week.</p>
+                                        <h3>{t('home.savingsHub')}</h3>
+                                        <p>{t('home.savingsDescription')}</p>
                                     </div>
                                     <img
                                         src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"

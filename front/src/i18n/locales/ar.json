@@ -33,7 +33,13 @@
     "refreshPage": "تحديث الصفحة",
     "loadingProducts": "جاري تحميل المنتجات...",
     "preparingCollections": "تحضير المجموعات المختارة",
-    "loadingPersonalized": "تحميل المنتجات والعروض المخصصة"
+    "loadingPersonalized": "تحميل المنتجات والعروض المخصصة",
+    "dealOfTheDay": "صفقة اليوم",
+    "trendingNow": "الرائج الآن",
+    "topRatedPicks": "الأعلى تقييماً",
+    "savingsHub": "مركز التوفير الحصري",
+    "savingsDescription": "خصومات تصل إلى 80٪ على فئات مختارة هذا الأسبوع.",
+    "loadingCurated": "جاري تحميل المجموعات المختارة..."
   },
   "product": {
     "viewAll": "عرض الكل",
@@ -56,6 +62,23 @@
     "delete": "حذف",
     "quantity": "الكمية",
     "selectQuantity": "اختر الكمية"
+  },
+  "productCreator": {
+    "kicker": "منشئ المنتج",
+    "title": "إضافة منتج جديد",
+    "subtitle": "إنشاء منتج ونشره في المتجر.",
+    "productName": "اسم المنتج",
+    "fullTitle": "العنوان الكامل",
+    "mrp": "سعر التجزئة",
+    "sellingPrice": "سعر البيع",
+    "discountText": "نص خصم السعر",
+    "offerBadge": "شارة العرض",
+    "publishing": "جاري النشر...",
+    "publish": "نشر المنتج",
+    "success": "تم إنشاء المنتج بنجاح. جاري التحويل إلى الملف الشخصي...",
+    "primaryImage": "رابط الصورة الأساسية (اختياري)",
+    "detailImage": "رابط صورة التفاصيل (اختياري)",
+    "loading": "جاري تحميل منشئ المنتج..."
   },
   "cart": {
     "title": "سلة التسوق",
@@ -85,7 +108,17 @@
     "item": "عنصر",
     "items": "عناصر",
     "inYourCart": "في سلتك",
-    "price": "السعر"
+    "price": "السعر",
+    "loadingDetails": "جاري تحميل تفاصيل المنتج",
+    "fetchInfo": "يرجى الانتظار بينما نجلب المعلومات الكاملة.",
+    "freeShipping": "شحن مجاني",
+    "dispatch48": "شحن خلال 48 ساعة",
+    "proceedToBuy": "إتمام الشراء",
+    "emiAvailable": "الأقساط متاحة",
+    "emiTerms": "قد يتأهل طلبك لخيارات الأقساط مع بطاقات الائتمان المؤهلة. تطبق الشروط.",
+    "eligibleFree": "طلبك مؤهل للتوصيل المجاني.",
+    "fasterCheckout": "يمكنك اختيار توصيل أسرع عند الدفع.",
+    "orderConfirmed": "تم تأكيد طلبك."
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -109,7 +142,8 @@
     "passwordMismatch": "كلمات المرور غير متطابقة",
     "passwordPlaceholder": "6 أحرف على الأقل",
     "welcomeBack": "مرحباً بعودتك إلى ستوديو التجارة",
-    "newHere": "جديد هنا؟"
+    "newHere": "جديد هنا؟",
+    "logoutSuccess": "تم تسجيل الخروج بنجاح"
   },
   "profile": {
     "title": "ملفي الشخصي",
@@ -118,23 +152,28 @@
     "settings": "الإعدادات",
     "editProfile": "تعديل الملف الشخصي",
     "saveChanges": "حفظ التغييرات",
-    "updateSuccess": "تم تحديث الملف الشخصي بنجاح"
+    "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
+    "manageAccount": "إدارة تفاصيلك الشخصية وإعدادات الحساب.",
+    "saveProfile": "حفظ الملف الشخصي",
+    "saving": "جاري الحفظ...",
+    "yourProducts": "منتجاتك",
+    "noProducts": "لم تقم بإنشاء أي منتجات بعد.",
+    "loading": "جاري تحميل الملف الشخصي..."
   },
   "allProducts": {
-    "title": "جميع المنتجات",
-    "back": "رجوع",
-    "searchPlaceholder": "ابحث عن المنتجات...",
+    "allCategories": "جميع الفئات",
+    "exploring": "استكشاف",
+    "filters": "المرشحات",
+    "search": "البحث",
     "sortBy": "ترتيب حسب",
-    "featured": "المميزة",
-    "priceLow": "السعر: من الأقل إلى الأعلى",
-    "priceHigh": "السعر: من الأعلى إلى الأقل",
-    "highestRated": "الأعلى تقييماً",
-    "nameAZ": "الاسم: أ-ي",
-    "gridView": "عرض الشبكة",
-    "listView": "عرض القائمة",
-    "priceRange": "نطاق السعر:",
-    "min": "الحد الأدنى",
-    "max": "الحد الأعلى",
+    "newest": "الأحدث",
+    "grid": "شبكة",
+    "list": "قائمة",
+    "fetchingProducts": "جاري جلب المنتجات...",
+    "pleaseWait": "يرجى الانتظار بينما نقوم بتحميل المجموعة.",
+    "noResults": "لم يتم العثور على نتائج",
+    "noResultsDesc": "لم نتمكن من العثور على أي شيء يطابق مرشحاتك الحالية.",
+    "clearFilters": "مسح جميع المرشحات",
     "productsFound": "منتج تم العثور عليه",
     "noProductsFound": "لم يتم العثور على منتجات",
     "tryAdjustingFilters": "جرب تعديل المرشحات أو شروط البحث",
@@ -207,7 +246,13 @@
     "of": "من",
     "results": "النتائج",
     "showing": "عرض",
-    "to": "إلى"
+    "to": "إلى",
+    "status": "الحالة",
+    "pending": "معلق",
+    "approved": "مقبول",
+    "rejected": "مرفوض",
+    "signup": "إنشاء حساب",
+    "signin": "تسجيل الدخول"
   },
   "errors": {
     "pageNotFound": "الصفحة غير موجودة",

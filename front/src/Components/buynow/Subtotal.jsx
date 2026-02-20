@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const Subtotal = ({ iteam }) => {
+    const { t } = useTranslation();
     const [price, setPrice] = useState(0);
 
     useEffect(() => {
@@ -11,7 +13,7 @@ const Subtotal = ({ iteam }) => {
     return (
         <div className="sub_item">
             <h3>
-                Subtotal ({iteam.length} items): <strong>Rs. {price}</strong>
+                {t('cart.subtotal')} ({iteam.length} {iteam.length === 1 ? t('cart.item') : t('cart.items')}): <strong>Rs. {price}</strong>
             </h3>
         </div>
     );

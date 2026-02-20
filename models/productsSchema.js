@@ -17,10 +17,17 @@ const productSchema = new mongoose.Schema({
     url: String,
     detailUrl: String,
     images: [String],
-    title: Object,
-    price: Object,
+    title: {
+        shortTitle: { type: String, required: true, index: true },
+        longTitle: { type: String, required: true, index: true }
+    },
+    price: {
+        mrp: Number,
+        cost: { type: Number, index: true },
+        discount: String
+    },
     description: String,
-    discount: String,
+    discount: { type: String, index: true },
     tagline: String,
     views: {
         type: Number,
@@ -40,11 +47,13 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0,
         min: 0,
-        max: 5
+        max: 5,
+        index: true
     },
     totalReviews: {
         type: Number,
-        default: 0
+        default: 0,
+        index: true
     },
     ratingDistribution: {
         5: { type: Number, default: 0 },
@@ -58,7 +67,8 @@ const productSchema = new mongoose.Schema({
     location: String,
     popularity: {
         type: Number,
-        default: 0
+        default: 0,
+        index: true
     },
     // Like functionality
     likeCount: {

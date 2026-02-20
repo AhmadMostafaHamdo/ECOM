@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import "./category-dashboard.css";
 
 const UNCATEGORIZED = "Uncategorized";
 
-const CategoryDashboard = ({ onCategoriesChanged = () => {} }) => {
+const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
+    const { t } = useTranslation();
     const [categories, setCategories] = useState([]);
     const [categoryName, setCategoryName] = useState("");
     const [loading, setLoading] = useState(true);
@@ -116,18 +118,18 @@ const CategoryDashboard = ({ onCategoriesChanged = () => {} }) => {
         <section className="category_dashboard_page">
             <div className="category_dashboard_header">
                 <div>
-                    <p className="dashboard_kicker">Dashboard</p>
-                    <h1>Category Manager</h1>
-                    <p>Add or remove product categories dynamically.</p>
+                    <p className="dashboard_kicker">{t('navigation.dashboard')}</p>
+                    <h1>{t('admin.manageCategories')}</h1>
+                    <p>{t('admin.welcomeMessage')}</p>
                 </div>
                 <NavLink to="/" className="dashboard_back_btn">
-                    Back to Store
+                    {t('allProducts.back')}
                 </NavLink>
             </div>
 
             <div className="category_dashboard_card">
                 <form className="category_form" onSubmit={handleAddCategory}>
-                    <label htmlFor="category-name">New Category</label>
+                    <label htmlFor="category-name">{t('admin.createCategory')}</label>
                     <div className="category_form_row">
                         <input
                             id="category-name"
@@ -138,7 +140,7 @@ const CategoryDashboard = ({ onCategoriesChanged = () => {} }) => {
                             maxLength={50}
                         />
                         <button type="submit" disabled={submitting}>
-                            {submitting ? "Saving..." : "Add Category"}
+                            {submitting ? t('profile.saving') : t('admin.createCategory')}
                         </button>
                     </div>
                 </form>
@@ -148,12 +150,12 @@ const CategoryDashboard = ({ onCategoriesChanged = () => {} }) => {
 
                 <div className="category_list_wrap">
                     <div className="category_list_head">
-                        <h2>Available Categories</h2>
-                        <span>{categories.length} total</span>
+                        <h2>{t('navigation.categories')}</h2>
+                        <span>{categories.length} {t('common.results')}</span>
                     </div>
 
                     {loading ? (
-                        <p className="category_loading">Loading categories...</p>
+                        <p className="category_loading">{t('profile.loading')}</p>
                     ) : (
                         <ul className="category_list">
                             {categories.map((category) => (
@@ -163,7 +165,7 @@ const CategoryDashboard = ({ onCategoriesChanged = () => {} }) => {
                                         <p>{category.productCount} product(s)</p>
                                     </div>
                                     {category.name === UNCATEGORIZED ? (
-                                        <span className="protected_badge">Protected</span>
+                                        <span className="protected_badge">{t('common.status')}</span>
                                     ) : (
                                         <button
                                             type="button"
@@ -171,7 +173,7 @@ const CategoryDashboard = ({ onCategoriesChanged = () => {} }) => {
                                             onClick={() => handleDeleteCategory(category)}
                                             disabled={submitting}
                                         >
-                                            Delete
+                                            {t('common.delete')}
                                         </button>
                                     )}
                                 </li>

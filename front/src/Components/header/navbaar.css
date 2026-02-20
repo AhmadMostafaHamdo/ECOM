@@ -16,15 +16,32 @@ header {
     box-shadow: 0 12px 30px rgba(8, 28, 66, 0.28);
 }
 
+/* subtle shimmer line across top edge */
+header::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.35) 35%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.35) 65%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
 header .main_nav {
     width: min(100%, var(--shell-max));
     height: 100%;
     margin: 0 auto;
-    padding: 0 18px;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 18px;
+    gap: 20px;
 }
 
 header nav .left {
@@ -32,105 +49,140 @@ header nav .left {
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
 }
 
+/* ── Logo ──────────────────────────────── */
 header .navlogo a {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     text-decoration: none;
+    flex-shrink: 0;
 }
 
 header .navlogo img {
-    width: 112px;
-    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.22));
+    width: 108px;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.22));
+    transition: filter 0.2s ease;
+}
+
+header .navlogo a:hover img {
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.34));
 }
 
 header .navlogo span {
     color: #ffffff;
-    font-size: 0.82rem;
-    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    padding: 5px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    padding: 5px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
+header .navlogo a:hover span {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.42);
+}
+
+/* ── Search Bar ────────────────────────── */
 header .nav_searchbaar {
     position: relative;
     flex: 1;
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.96);
-    border: 1px solid #d7e3fb;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1.5px solid #d0dff7;
     border-radius: 999px;
-    box-shadow: 0 9px 18px rgba(7, 34, 77, 0.14);
-    overflow: visible;
+    box-shadow: 0 4px 20px rgba(7, 34, 77, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+header .nav_searchbaar:focus-within {
+    border-color: #a8c0ef;
+    box-shadow: 0 4px 24px rgba(7, 34, 77, 0.18), 0 0 0 3px rgba(180, 210, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 header .search_leading_icon {
-    margin-left: 14px;
-    color: #6f7f9f;
-    font-size: 1.2rem;
+    margin-left: 15px;
+    color: #8496bb;
+    font-size: 1.15rem !important;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+header .nav_searchbaar:focus-within .search_leading_icon {
+    color: #4a6fa5;
 }
 
 header .left input {
-    width: 100%;
+    flex: 1;
     border: 0;
     background: transparent;
     height: 46px;
     color: var(--text-main);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     padding: 0 12px;
     outline: none;
+    min-width: 0;
 }
 
 header .left input::placeholder {
-    color: #7e8bad;
+    color: #8fa3c4;
 }
 
 header .search_icon {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
+    margin-right: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 0;
     border-radius: 999px;
-    margin-right: 3px;
     background: linear-gradient(135deg, #da8b1f, #ebad4d);
     color: #1e2432;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(207, 136, 35, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 header .search_icon:hover {
-    transform: scale(1.04);
-    box-shadow: 0 7px 16px rgba(207, 136, 35, 0.42);
+    transform: scale(1.06);
+    box-shadow: 0 6px 18px rgba(207, 136, 35, 0.48);
+    filter: brightness(1.07);
 }
 
 header .search_icon #search {
-    font-size: 1.3rem;
+    font-size: 1.2rem !important;
 }
 
+/* ── Search Dropdown ───────────────────── */
 header .extrasearch {
     position: absolute;
-    top: 56px;
+    top: calc(100% + 8px);
     left: 0;
     width: 100%;
     max-height: 360px;
     overflow-y: auto;
-    border-radius: 16px;
-    border: 1px solid #d7e3fb;
+    border-radius: 18px;
+    border: 1px solid #d0dff7;
     background: #ffffff;
-    box-shadow: var(--shadow-strong);
+    box-shadow: 0 20px 50px rgba(7, 34, 77, 0.16), 0 4px 12px rgba(7, 34, 77, 0.08);
     z-index: 1300;
+    scrollbar-width: thin;
+    scrollbar-color: #d0dff7 transparent;
 }
 
 header .extrasearch .MuiListItem-root {
-    border-bottom: 1px solid #eef2fa;
+    border-bottom: 1px solid #eef3fc;
     padding: 0;
 }
 
@@ -140,123 +192,166 @@ header .extrasearch .MuiListItem-root:last-child {
 
 header .extrasearch a {
     width: 100%;
-    display: block;
+    display: flex;
+    align-items: center;
     text-decoration: none;
     color: #1c2a45;
-    padding: 13px 16px;
-    font-weight: 600;
+    padding: 13px 18px;
     font-size: 0.9rem;
-    transition: background 0.2s ease, color 0.2s ease;
+    font-weight: 500;
+    transition: background 0.18s ease, color 0.18s ease, padding-left 0.18s ease;
 }
 
 header .extrasearch a:hover {
     color: #0b3d94;
-    background: #f2f6ff;
+    background: #f0f5ff;
+    padding-left: 24px;
 }
 
 header .no_search_result {
-    padding: 14px 16px;
-    font-size: 0.9rem;
-    color: #6d7891;
+    padding: 16px 18px;
+    font-size: 0.88rem;
+    color: #8496bb;
+    font-style: italic;
 }
 
+/* ── Right Section ─────────────────────── */
 header nav .right {
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 header .right a {
     text-decoration: none;
 }
 
+/* ── Nav Buttons ───────────────────────── */
 header .right .nav_btn a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 116px;
-    height: 42px;
+    height: 40px;
+    padding: 0 20px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.32);
     color: #ffffff;
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: 0.88rem;
+    font-weight: 600;
     letter-spacing: 0.02em;
     background: rgba(255, 255, 255, 0.1);
-    transition: background 0.2s ease, border-color 0.2s ease;
+    backdrop-filter: blur(6px);
+    white-space: nowrap;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 header .right .nav_btn a:hover {
-    border-color: #ffe0b7;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
+/* ── Cart Button ───────────────────────── */
 header .right .cart_btn {
-    height: 42px;
+    height: 40px;
     padding: 0 16px;
     border-radius: 999px;
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #f7fbff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.09);
-    transition: background 0.2s ease, border-color 0.2s ease;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 header .right .cart_btn:hover {
-    border-color: #ffe0b7;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.52);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 header .right .cart_btn #icon {
     color: #ffffff;
-    font-size: 1.08rem;
+    font-size: 1.05rem !important;
 }
 
 header .right .cart_btn p {
-    font-size: 0.87rem;
+    font-size: 0.85rem;
     font-weight: 700;
     margin: 0;
     line-height: 1;
+    letter-spacing: 0.01em;
 }
 
+/* ── Avatar ────────────────────────────── */
 header nav .avtar,
 header nav .avtar2 {
     cursor: pointer;
     width: 38px !important;
     height: 38px !important;
-    border: 2px solid rgba(255, 255, 255, 0.35);
-    background: linear-gradient(135deg, #0b3d94, #0e5ecc);
-    font-weight: 700;
+    border: 2px solid rgba(255, 255, 255, 0.32) !important;
+    background: linear-gradient(135deg, #0b3d94, #0e5ecc) !important;
+    font-weight: 700 !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 header nav .avtar:hover,
 header nav .avtar2:hover {
-    box-shadow: 0 8px 16px rgba(7, 31, 74, 0.42);
+    border-color: rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 4px 16px rgba(7, 31, 74, 0.38);
+    transform: scale(1.06);
 }
 
+/* ── Profile Menu ──────────────────────── */
 header .profile_menu .MuiPaper-root {
-    border-radius: 14px;
-    border: 1px solid #dbe5fa;
-    box-shadow: 0 20px 40px rgba(12, 34, 75, 0.2);
-    margin-top: 8px;
+    border-radius: 16px !important;
+    border: 1px solid #dbe8fa !important;
+    box-shadow: 0 20px 50px rgba(12, 34, 75, 0.18), 0 4px 12px rgba(12, 34, 75, 0.08) !important;
+    margin-top: 8px !important;
+    overflow: hidden !important;
 }
 
+header .profile_menu .MuiMenuItem-root {
+    font-size: 0.9rem !important;
+    padding: 10px 16px !important;
+    margin: 4px 8px !important;
+    border-radius: 10px !important;
+    transition: background 0.18s ease !important;
+}
+
+header .profile_menu .MuiMenuItem-root:hover {
+    background: #f0f5ff !important;
+}
+
+/* ── Hamburger ─────────────────────────── */
 header .hamburgur {
     display: none;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     width: 40px !important;
     height: 40px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(6px) !important;
+    transition: background 0.2s ease, border-color 0.2s ease !important;
 }
 
+header .hamburgur:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* ── Toast ─────────────────────────────── */
 .Toastify__toast {
-    border-radius: 12px !important;
-    font-family: "Manrope", sans-serif !important;
+    border-radius: 14px !important;
+    font-family: inherit !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
 }
 
+/* ── Responsive ────────────────────────── */
 @media (max-width: 1120px) {
     header .navlogo span {
         display: none;
@@ -280,7 +375,7 @@ header .hamburgur {
     }
 
     header .navlogo img {
-        width: 96px;
+        width: 92px;
     }
 
     header .nav_searchbaar {
@@ -288,23 +383,19 @@ header .hamburgur {
     }
 
     header .left input {
-        height: 40px;
+        height: 42px;
         font-size: 0.88rem;
     }
 
     header .search_icon {
-        width: 38px;
-        height: 38px;
-    }
-
-    header .extrasearch {
-        top: 50px;
+        width: 36px;
+        height: 36px;
     }
 }
 
 @media (max-width: 560px) {
     header .navlogo img {
-        width: 84px;
+        width: 80px;
     }
 
     header .left {
@@ -313,7 +404,7 @@ header .hamburgur {
 
     header .search_leading_icon {
         margin-left: 10px;
-        font-size: 1rem;
+        font-size: 1rem !important;
     }
 
     header .left input {

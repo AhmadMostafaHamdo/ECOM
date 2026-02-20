@@ -87,8 +87,8 @@ const Cart = () => {
                             <ShoppingCart className="cart_icon_loading" />
                         </div>
                         <div className="loader_spinner_product"></div>
-                        <h2>Loading product details</h2>
-                        <p>Please wait while we fetch complete information.</p>
+                        <h2>{t('cart.loadingDetails')}</h2>
+                        <p>{t('cart.fetchInfo')}</p>
                     </div>
                 </div>
             </div>

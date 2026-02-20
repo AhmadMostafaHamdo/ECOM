@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
+import Pagination from "../common/Pagination";
 
 const CATEGORY_ALL = "All Categories";
 
@@ -18,6 +20,7 @@ const emptyForm = {
 };
 
 const ProductsManagement = () => {
+    const { t } = useTranslation();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
@@ -25,136 +28,70 @@ const ProductsManagement = () => {
     const [editingId, setEditingId] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
+    const [showForm, setShowForm] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [pagination, setPagination] = useState({
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 1,
+        limit: 10
+    });
 
     const isEditing = Boolean(editingId);
 
     const loadCategories = useCallback(async () => {
-        const response = await fetch(apiUrl("/admin/categories"), {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to load categories");
-        }
-
-        const payload = await response.json();
-        const list = Array.isArray(payload) ? payload.map((item) => item.name) : [];
-        setCategories(list);
-        if (!form.category && list.length) {
-            setForm((prev) => ({
-                ...prev,
-                category: list[0]
-            }));
-        }
-    }, [form.category]);
-
-    const loadProducts = useCallback(async (category = selectedCategory) => {
-        setLoading(true);
-        setError("");
         try {
-            const query = category !== CATEGORY_ALL ? `?category=${encodeURIComponent(category)}` : "";
-            const response = await fetch(apiUrl(`/admin/products${query}`), {
+            const response = await fetch(apiUrl("/admin/categories"), {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 credentials: "include"
             });
-
-            if (!response.ok) {
-                throw new Error("Failed to load products");
+            if (response.ok) {
+                const payload = await response.json();
+                const list = Array.isArray(payload) ? payload.map(item => item.name) : [];
+                setCategories(list);
             }
+        } catch (err) { console.error(err); }
+    }, []);
 
-            const payload = await response.json();
-            setProducts(Array.isArray(payload) ? payload : []);
-        } catch (loadError) {
-            setError(loadError.message);
-        } finally {
-            setLoading(false);
-        }
-    }, [selectedCategory]);
+    const loadProducts = useCallback(async (page = 1) => {
+        setLoading(true);
+        try {
+            const queryParams = new URLSearchParams({
+                page,
+                limit: 10,
+                search: searchTerm
+            });
+            if (selectedCategory !== CATEGORY_ALL) {
+                queryParams.set("category", selectedCategory);
+            }
+            const response = await fetch(apiUrl(`/admin/products?${queryParams.toString()}`), {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include"
+            });
+            if (response.ok) {
+                const resData = await response.json();
+                setProducts(resData.data || []);
+                setPagination(resData.pagination);
+            }
+        } catch (err) { console.error(err); } finally { setLoading(false); }
+    }, [selectedCategory, searchTerm]);
 
     useEffect(() => {
-        const bootstrap = async () => {
-            try {
-                await loadCategories();
-                await loadProducts(selectedCategory);
-            } catch (bootstrapError) {
-                setError(bootstrapError.message);
-                setLoading(false);
-            }
-        };
+        loadCategories();
+    }, [loadCategories]);
 
-        bootstrap();
-    }, [loadCategories, loadProducts, selectedCategory]);
+    useEffect(() => {
+        const delaySearch = setTimeout(() => {
+            loadProducts(1);
+        }, 500);
+        return () => clearTimeout(delaySearch);
+    }, [loadProducts]);
 
-    const resetForm = () => {
-        setForm({
-            ...emptyForm,
-            category: categories[0] || ""
-        });
-        setEditingId("");
-    };
-
-    const updateField = (event) => {
-        const { name, value } = event.target;
-        setForm((prev) => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const submitLabel = useMemo(() => {
-        if (saving) {
-            return isEditing ? "Updating..." : "Creating...";
-        }
-        return isEditing ? "Update Product" : "Create Product";
-    }, [isEditing, saving]);
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        setSaving(true);
-        setError("");
-        setMessage("");
-
-        try {
-            const payload = {
-                ...form,
-                mrp: Number(form.mrp),
-                cost: Number(form.cost)
-            };
-
-            const response = await fetch(
-                isEditing ? apiUrl(`/admin/products/${editingId}`) : apiUrl("/admin/products"),
-                {
-                    method: isEditing ? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    credentials: "include",
-                    body: JSON.stringify(payload)
-                }
-            );
-
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(data.error || "Unable to save product");
-            }
-
-            setMessage(isEditing ? "Product updated successfully" : "Product created successfully");
-            resetForm();
-            await loadProducts(selectedCategory);
-        } catch (submitError) {
-            setError(submitError.message);
-        } finally {
-            setSaving(false);
-        }
+    const handlePageChange = (newPage) => {
+        loadProducts(newPage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleEdit = (product) => {
@@ -170,266 +107,186 @@ const ProductsManagement = () => {
             tagline: product?.tagline || "",
             url: product?.url || "",
             detailUrl: product?.detailUrl || "",
-            category: product?.category || categories[0] || ""
+            category: product?.category || ""
         });
+        setShowForm(true);
     };
 
-    const handleDelete = async (product) => {
-        const confirmed = window.confirm(`Delete "${product?.title?.shortTitle}"?`);
-        if (!confirmed) return;
+    const resetForm = () => {
+        setForm(emptyForm);
+        setEditingId("");
+        setShowForm(false);
+    };
 
+    const updateField = (e) => {
+        const { name, value } = e.target;
+        setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         setSaving(true);
-        setError("");
-        setMessage("");
-
         try {
-            const response = await fetch(apiUrl(`/admin/products/${product._id}`), {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                credentials: "include"
-            });
-
-            const payload = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(payload.error || "Unable to delete product");
-            }
-
-            setMessage("Product deleted successfully");
-            await loadProducts(selectedCategory);
-            if (editingId === product._id) {
+            const payload = { ...form, mrp: Number(form.mrp), cost: Number(form.cost) };
+            const response = await fetch(
+                isEditing ? apiUrl(`/admin/products/${editingId}`) : apiUrl("/admin/products"),
+                {
+                    method: isEditing ? "PUT" : "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify(payload)
+                }
+            );
+            if (response.ok) {
                 resetForm();
+                loadProducts(pagination.currentPage);
             }
-        } catch (deleteError) {
-            setError(deleteError.message);
-        } finally {
-            setSaving(false);
-        }
+        } catch (err) { console.error(err); } finally { setSaving(false); }
     };
 
     return (
-        <div className="admin_page">
-            <header className="admin_page_header" style={{ marginBottom: '40px' }}>
-                <p className="admin_page_kicker">Catalog</p>
-                <h1>Products Inventory</h1>
-                <p>Manage your product listings, pricing, and availability. Use filters to narrow down your search.</p>
+        <div className="admin_page" style={{ background: 'transparent' }}>
+            <header className="admin_page_header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: 0 }}>{t('admin.manageProducts')}</h1>
+                    <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>{t('admin.welcomeMessage')}</p>
+                </div>
+                {!showForm && (
+                    <button className="btn_primary" onClick={() => setShowForm(true)}>{t('admin.createProduct')}</button>
+                )}
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 420px', gap: '32px', alignItems: 'start' }}>
-                {/* Product List Table */}
-                <section className="admin_table_container">
-                    <div style={{ padding: '32px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-surface)', flexWrap: 'wrap', gap: '20px' }}>
-                        <div>
-                            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Warehouse Assets</h2>
-                            <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-muted)' }}>Found {products.length} units in store</p>
-                        </div>
-                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)' }}>Sort by Category:</span>
+            <div style={{ display: 'grid', gridTemplateColumns: showForm ? '1fr 420px' : '1fr', gap: '32px', alignItems: 'start' }}>
+                <section className="admin_table_wrapper">
+                    <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
                             <select
-                                style={{
-                                    minWidth: '200px',
-                                    padding: '10px 16px',
-                                    borderRadius: '12px',
-                                    border: '1px solid var(--color-border)',
-                                    background: 'var(--color-background)',
-                                    fontSize: '14px',
-                                    fontWeight: '600'
-                                }}
                                 value={selectedCategory}
-                                onChange={(event) => {
-                                    const nextCategory = event.target.value;
-                                    setSelectedCategory(nextCategory);
-                                    loadProducts(nextCategory);
-                                }}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="btn_outline"
+                                style={{ padding: '6px 12px', fontSize: '13px' }}
                             >
-                                <option value={CATEGORY_ALL}>{CATEGORY_ALL}</option>
-                                {categories.map((category) => (
-                                    <option key={category} value={category}>
-                                        {category}
-                                    </option>
-                                ))}
+                                <option value={CATEGORY_ALL}>{t('navigation.allCategories')}</option>
+                                {categories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
+                        <div className="admin_search_bar" style={{ width: '280px' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input
+                                type="text"
+                                placeholder="Search products..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                     </div>
 
-                    {message ? <div style={{ margin: '24px' }} className="admin_notice success">{message}</div> : null}
-                    {error ? <div style={{ margin: '24px' }} className="admin_notice error">{error}</div> : null}
-
-                    <div style={{ overflowX: 'auto' }}>
-                        <table className="admin_table">
-                            <thead>
-                                <tr>
-                                    <th style={{ paddingLeft: '32px' }}>Product Profile</th>
-                                    <th>Inventory Status</th>
-                                    <th>Valuation</th>
-                                    <th style={{ textAlign: 'right', paddingRight: '32px' }}>Management</th>
+                    <table className="admin_table">
+                        <thead>
+                            <tr>
+                                <th>{t('productCreator.productName')}</th>
+                                <th>{t('navigation.categories')}</th>
+                                <th>{t('product.price')}</th>
+                                <th>{t('common.status')}</th>
+                                <th style={{ textAlign: 'right' }}>{t('common.results')}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading && products.length === 0 ? (
+                                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '100px' }}>Auditing Inventory...</td></tr>
+                            ) : products.length === 0 ? (
+                                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '100px' }}>No products found.</td></tr>
+                            ) : products.map(product => (
+                                <tr key={product._id}>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'white', border: '1px solid #f1f5f9', overflow: 'hidden', padding: '4px' }}>
+                                                <img src={product.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                            </div>
+                                            <div style={{ fontWeight: 800, color: '#1e293b', fontSize: '14px' }}>{product?.title?.shortTitle}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b' }}>{product.category}</span>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontWeight: 900, color: '#1e293b' }}>${product?.price?.cost}</div>
+                                        <div style={{ fontSize: '11px', color: '#94a3b8', textDecoration: 'line-through' }}>${product?.price?.mrp}</div>
+                                    </td>
+                                    <td>
+                                        <span className="status_pill active">{t('common.approved')}</span>
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                            <button className="btn_outline" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => handleEdit(product)}>{t('common.edit')}</button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {loading ? (
-                                    <tr>
-                                        <td colSpan="4" style={{ padding: '100px', textAlign: 'center' }}>
-                                            <div style={{ width: '40px', height: '40px', border: '3px solid var(--color-primary-light)', borderTopColor: 'var(--color-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div>
-                                            <span style={{ color: 'var(--color-text-secondary)', fontWeight: '600' }}>Archiving assets...</span>
-                                        </td>
-                                    </tr>
-                                ) : products.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="4" style={{ padding: '100px', textAlign: 'center', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>No assets found in the selected sector.</td>
-                                    </tr>
-                                ) : (
-                                    products.map((product) => (
-                                        <tr key={product._id}>
-                                            <td style={{ paddingLeft: '32px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                                    <div style={{
-                                                        width: '60px',
-                                                        height: '60px',
-                                                        borderRadius: '14px',
-                                                        background: 'white',
-                                                        border: '1px solid var(--color-border)',
-                                                        overflow: 'hidden',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        boxShadow: 'var(--shadow-sm)'
-                                                    }}>
-                                                        {product.url ? <img src={product.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} /> : <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>Empty</span>}
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontWeight: 800, color: 'var(--color-text-primary)', fontSize: '15px' }}>{product?.title?.shortTitle}</div>
-                                                        <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                                                            <span className="admin_badge success" style={{ fontSize: '10px', padding: '4px 10px' }}>{product.category}</span>
-                                                            {product.discount && <span className="admin_badge warning" style={{ fontSize: '10px', padding: '4px 10px' }}>{product.discount}</span>}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#10b981' }}>Available</span>
-                                                    <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600' }}>Active Listing</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ fontWeight: '900', color: 'var(--color-text-primary)', fontSize: '16px' }}>${product?.price?.cost}</div>
-                                                {product?.price?.mrp > product?.price?.cost && (
-                                                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', textDecoration: 'line-through', fontWeight: '500' }}>${product?.price?.mrp}</div>
-                                                )}
-                                            </td>
-                                            <td style={{ textAlign: 'right', paddingRight: '32px' }}>
-                                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                                                    <button type="button" className="admin_btn secondary" onClick={() => handleEdit(product)} disabled={saving} style={{ padding: '8px 16px', fontSize: '12px' }}>
-                                                        Configure
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="admin_btn"
-                                                        onClick={() => handleDelete(product)}
-                                                        disabled={saving}
-                                                        style={{ padding: '8px 16px', fontSize: '12px', background: 'rgba(239, 68, 68, 0.08)', color: '#ef4444' }}
-                                                    >
-                                                        Terminate
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <div style={{ padding: '16px' }}>
+                        <Pagination
+                            currentPage={pagination.currentPage}
+                            totalPages={pagination.totalPages}
+                            onPageChange={handlePageChange}
+                        />
                     </div>
                 </section>
 
-                {/* Edit/Create Form Card */}
-                <section className="admin_form_card" style={{ position: 'sticky', top: 'calc(var(--admin-header-height) + 32px)' }}>
-                    <div style={{ maxHeight: 'calc(100vh - var(--admin-header-height) - 100px)', overflowY: 'auto' }} className="admin_sidebar_nav">
-                        <div style={{ marginBottom: '32px' }}>
-                            <h2 style={{ fontSize: '22px', fontWeight: '900', color: 'var(--color-text-primary)', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-                                {isEditing ? "Modify Asset" : "Deploy Asset"}
+                {showForm && (
+                    <section className="admin_card" style={{ position: 'sticky', top: '104px', maxHeight: 'calc(100vh - 140px)', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', margin: 0 }}>
+                                {isEditing ? t('admin.editProduct') : t('admin.createProduct')}
                             </h2>
-                            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: 0 }}>
-                                {isEditing ? "Sync configuration with global catalog." : "Bootstrap a new SKU entrance."}
-                            </p>
+                            <button onClick={resetForm} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
                         </div>
-
                         <form className="admin_form" onSubmit={handleSubmit}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
-                                <section>
-                                    <label htmlFor="shortTitle">Marketing Name</label>
-                                    <input id="shortTitle" name="shortTitle" value={form.shortTitle} onChange={updateField} required placeholder="iPhone 15 Pro" />
-                                </section>
-                                <section>
-                                    <label htmlFor="category">Sector</label>
-                                    <select id="category" name="category" value={form.category} onChange={updateField} required>
-                                        {categories.map((category) => (
-                                            <option key={category} value={category}>
-                                                {category}
-                                            </option>
-                                        ))}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <div>
+                                    <label>Mark Name</label>
+                                    <input type="text" name="shortTitle" value={form.shortTitle} onChange={updateField} required />
+                                </div>
+                                <div>
+                                    <label>Sector</label>
+                                    <select name="category" value={form.category} onChange={updateField} required>
+                                        <option value="">Select Category</option>
+                                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
-                                </section>
+                                </div>
                             </div>
-
-                            <section>
-                                <label htmlFor="longTitle">Legal Designation</label>
-                                <input id="longTitle" name="longTitle" value={form.longTitle} onChange={updateField} required placeholder="Apple iPhone 15 Pro Max (256GB)" />
-                            </section>
-
-                            <section>
-                                <label htmlFor="description">Executive Summary</label>
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    value={form.description}
-                                    onChange={updateField}
-                                    rows="4"
-                                    style={{ width: '100%', resize: 'none' }}
-                                    placeholder="Enter high-fidelity description..."
-                                ></textarea>
-                            </section>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                <section>
-                                    <label htmlFor="cost">Market Valuation ($)</label>
-                                    <input id="cost" name="cost" type="number" value={form.cost} onChange={updateField} required placeholder="99.00" />
-                                </section>
-                                <section>
-                                    <label htmlFor="mrp">Base MSRP ($)</label>
-                                    <input id="mrp" name="mrp" type="number" value={form.mrp} onChange={updateField} required placeholder="120.00" />
-                                </section>
+                            <div>
+                                <label>Legal Designation</label>
+                                <input type="text" name="longTitle" value={form.longTitle} onChange={updateField} required />
                             </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                <section>
-                                    <label htmlFor="priceDiscount">Discount Logic</label>
-                                    <input id="priceDiscount" name="priceDiscount" value={form.priceDiscount} onChange={updateField} placeholder="15% OFF" />
-                                </section>
-                                <section>
-                                    <label htmlFor="offerText">Product Badge</label>
-                                    <input id="offerText" name="offerText" value={form.offerText} onChange={updateField} placeholder="Premium" />
-                                </section>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <div>
+                                    <label>Market Price ($)</label>
+                                    <input type="number" name="cost" value={form.cost} onChange={updateField} required />
+                                </div>
+                                <div>
+                                    <label>Base MSRP ($)</label>
+                                    <input type="number" name="mrp" value={form.mrp} onChange={updateField} required />
+                                </div>
                             </div>
-
-                            <section>
-                                <label htmlFor="url">Resource Identifier (URL)</label>
-                                <input id="url" name="url" value={form.url} onChange={updateField} required placeholder="https://cdn.assets.com/img.png" />
-                            </section>
-
-                            <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <button type="submit" className="admin_btn primary" disabled={saving} style={{ width: '100%', height: '50px' }}>
-                                    {submitLabel}
+                            <div>
+                                <label>Product Resource URL</label>
+                                <input type="text" name="url" value={form.url} onChange={updateField} required />
+                            </div>
+                            <div>
+                                <label>Description</label>
+                                <textarea name="description" value={form.description} onChange={updateField} rows="3" style={{ resize: 'none' }} />
+                            </div>
+                            <div style={{ marginTop: '16px' }}>
+                                <button type="submit" className="btn_primary" style={{ width: '100%' }} disabled={saving}>
+                                    {saving ? t('common.loading') : isEditing ? t('common.save') : t('admin.createProduct')}
                                 </button>
-                                {isEditing ? (
-                                    <button type="button" className="admin_btn secondary" onClick={resetForm} disabled={saving} style={{ width: '100%' }}>
-                                        Abort Operations
-                                    </button>
-                                ) : null}
                             </div>
                         </form>
-                    </div>
-                </section>
+                    </section>
+                )}
             </div>
         </div>
     );

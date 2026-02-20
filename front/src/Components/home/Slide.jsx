@@ -21,15 +21,15 @@ const responsive = {
     }
 };
 
-const Slide = React.memo(({ title, products }) => {
+const Slide = React.memo(({ title, products, category }) => {
     const { t } = useTranslation();
     const history = useHistory();
     const items = Array.isArray(products) ? products : [];
 
     const handleViewAll = () => {
-        // Extract category from title or use "all" for general products
-        const category = title.toLowerCase().replace(/\s+/g, '-');
-        history.push(`/products/all/${category}`);
+        // Use provided category or extract from title
+        const targetCategory = category || (title ? title.toLowerCase().replace(/\s+/g, '-') : "all");
+        history.push(`/products/all/${targetCategory}`);
     };
 
     return (

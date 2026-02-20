@@ -66,29 +66,29 @@ const Buynow = () => {
                                                 <p className="item-subtitle">
                                                     {item.title.shortTitle}
                                                 </p>
-                                                
+
                                                 <div className="item-badges">
                                                     <span className="badge badge-shipping">
                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <path d="M16 3h5v5M4 20L21 3"/>
+                                                            <path d="M16 3h5v5M4 20L21 3" />
                                                         </svg>
-                                                        Free Shipping
+                                                        {t('cart.freeShipping')}
                                                     </span>
                                                     <span className="badge badge-delivery">
                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <rect x="1" y="3" width="15" height="13"/>
-                                                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 16 8"/>
-                                                            <circle cx="5.5" cy="18.5" r="2.5"/>
-                                                            <circle cx="18.5" cy="18.5" r="2.5"/>
+                                                            <rect x="1" y="3" width="15" height="13" />
+                                                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 16 8" />
+                                                            <circle cx="5.5" cy="18.5" r="2.5" />
+                                                            <circle cx="18.5" cy="18.5" r="2.5" />
                                                         </svg>
-                                                        48h Dispatch
+                                                        {t('cart.dispatch48')}
                                                     </span>
                                                 </div>
 
                                                 <div className="item-meta">
-                                                    <img 
-                                                        src="https://m.media-amazon.com/images/G/31/marketing/fba/fba-badge_18px-2x._CB485942108_.png" 
-                                                        alt="Prime badge" 
+                                                    <img
+                                                        src="https://m.media-amazon.com/images/G/31/marketing/fba/fba-badge_18px-2x._CB485942108_.png"
+                                                        alt="Prime badge"
                                                         className="prime-badge"
                                                     />
                                                 </div>

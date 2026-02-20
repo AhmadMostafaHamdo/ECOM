@@ -29,6 +29,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
   const [categories, setCategories] = useState([CATEGORY_ALL]);
   const [appliedFilters, setAppliedFilters] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
   const isDashboardRoute = location.pathname.startsWith("/dashboard");
   const isHomeRoute = location.pathname === "/";
@@ -56,9 +57,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
-      setData(true);
-    }, 1200);
+    setData(true);
   }, []);
 
   useEffect(() => {
@@ -126,7 +125,7 @@ function App() {
               <h2>Loading...</h2>
             </div>
           }>
-            {!isDashboardRoute && <Navbaar />}
+            {!isDashboardRoute && <Navbaar onSearch={setSearchTerm} />}
             {!isDashboardRoute && isHomeRoute && (
               <Newnav
                 categories={categories}
@@ -152,7 +151,7 @@ function App() {
               <main className="app_main">
                 <Switch>
                   <Route exact path="/">
-                    {isAdmin ? <Redirect to="/dashboard" /> : <Maincomp selectedCategory={selectedCategory} filters={appliedFilters} setSelectedCategory={setSelectedCategory} />}
+                    {isAdmin ? <Redirect to="/dashboard" /> : <Maincomp selectedCategory={selectedCategory} filters={appliedFilters} setSelectedCategory={setSelectedCategory} searchTerm={searchTerm} />}
                   </Route>
                   <Route exact path="/signup">
                     {account ? <Redirect to="/" /> : <Signup />}

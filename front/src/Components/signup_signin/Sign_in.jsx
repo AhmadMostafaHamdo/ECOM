@@ -66,14 +66,9 @@ const Sign_in = () => {
   return (
     <section className="auth_page">
       <div className="sign_container">
-        <div className="sign_header">
-          <img src="./blacklogoamazon.png" alt="signin logo" />
-          <h1>{t('auth.login')}</h1>
-          <p>{t('auth.welcomeBack')}</p>
-        </div>
         <div className="sign_form">
           <form method="POST">
-            <h1>Sign In</h1>
+            <h1>{t('auth.login')}</h1>
             <div className="form_data">
               <label htmlFor="email">{t('auth.email')}</label>
               <input
@@ -96,7 +91,7 @@ const Sign_in = () => {
               />
             </div>
             <button type="submit" className="signin_btn" onClick={senddata}>
-              {t('common.continue')}
+              {t('common.signin')}
             </button>
           </form>
           <ToastContainer />

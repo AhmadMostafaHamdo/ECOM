@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import ImageUpload from "./ImageUpload";
 import "./create-product.css";
@@ -21,6 +22,7 @@ const initialForm = {
 };
 
 const CreateProduct = () => {
+    const { t } = useTranslation();
     const history = useHistory();
     const [form, setForm] = useState(initialForm);
     const [categories, setCategories] = useState([]);
@@ -87,7 +89,7 @@ const CreateProduct = () => {
         setSaving(true);
         setError("");
         setMessage("");
-        
+
         try {
             // Process images - extract URLs from image objects
             const processedImages = images.map(image => image.url);
@@ -116,7 +118,7 @@ const CreateProduct = () => {
                 throw new Error(data.error || "Failed to create product");
             }
 
-            setMessage("Product created successfully. Redirecting to profile...");
+            setMessage(t('productCreator.success'));
             setTimeout(() => history.push("/profile"), 900);
         } catch (submitError) {
             setError(submitError.message);
@@ -129,7 +131,7 @@ const CreateProduct = () => {
         return (
             <section className="create_product_page">
                 <div className="create_product_card">
-                    <h2>Loading product builder...</h2>
+                    <h2>{t('productCreator.loading')}</h2>
                 </div>
             </section>
         );
@@ -139,19 +141,19 @@ const CreateProduct = () => {
         <section className="create_product_page">
             <div className="create_product_card">
                 <header className="create_product_header">
-                    <p className="kicker">Product Creator</p>
-                    <h1>Add New Product</h1>
-                    <p>Create a product and publish it to the storefront.</p>
+                    <p className="kicker">{t('productCreator.kicker')}</p>
+                    <h1>{t('productCreator.title')}</h1>
+                    <p>{t('productCreator.subtitle')}</p>
                 </header>
 
                 <form className="create_product_form" onSubmit={submitProduct}>
-                    <label htmlFor="shortTitle">Product Name</label>
+                    <label htmlFor="shortTitle">{t('productCreator.productName')}</label>
                     <input id="shortTitle" name="shortTitle" value={form.shortTitle} onChange={updateField} required />
 
-                    <label htmlFor="longTitle">Full Title</label>
+                    <label htmlFor="longTitle">{t('productCreator.fullTitle')}</label>
                     <input id="longTitle" name="longTitle" value={form.longTitle} onChange={updateField} required />
 
-                    <label htmlFor="category">Category</label>
+                    <label htmlFor="category">{t('navigation.categories')}</label>
                     <select id="category" name="category" value={form.category} onChange={updateField} required>
                         {categories.map((category) => (
                             <option key={category} value={category}>
@@ -160,27 +162,27 @@ const CreateProduct = () => {
                         ))}
                     </select>
 
-                    <label htmlFor="description">Description</label>
+                    <label htmlFor="description">{t('product.description')}</label>
                     <textarea id="description" name="description" value={form.description} onChange={updateField} rows={4} />
 
                     <div className="split_fields">
                         <div>
-                            <label htmlFor="mrp">MRP</label>
+                            <label htmlFor="mrp">{t('productCreator.mrp')}</label>
                             <input id="mrp" name="mrp" type="number" value={form.mrp} onChange={updateField} required />
                         </div>
                         <div>
-                            <label htmlFor="cost">Selling Price</label>
+                            <label htmlFor="cost">{t('productCreator.sellingPrice')}</label>
                             <input id="cost" name="cost" type="number" value={form.cost} onChange={updateField} required />
                         </div>
                     </div>
 
                     <div className="split_fields">
                         <div>
-                            <label htmlFor="priceDiscount">Price Discount Text</label>
+                            <label htmlFor="priceDiscount">{t('productCreator.discountText')}</label>
                             <input id="priceDiscount" name="priceDiscount" value={form.priceDiscount} onChange={updateField} />
                         </div>
                         <div>
-                            <label htmlFor="offerText">Offer Badge</label>
+                            <label htmlFor="offerText">{t('productCreator.offerBadge')}</label>
                             <input id="offerText" name="offerText" value={form.offerText} onChange={updateField} />
                         </div>
                     </div>
@@ -188,25 +190,25 @@ const CreateProduct = () => {
                     <label htmlFor="tagline">Tagline</label>
                     <input id="tagline" name="tagline" value={form.tagline} onChange={updateField} />
 
-                    <ImageUpload 
-                        images={images} 
+                    <ImageUpload
+                        images={images}
                         onChange={setImages}
                         maxImages={5}
                     />
 
                     <div className="split_fields">
                         <div>
-                            <label htmlFor="url">Primary Image URL (Optional)</label>
+                            <label htmlFor="url">{t('productCreator.primaryImage')}</label>
                             <input id="url" name="url" value={form.url} onChange={updateField} placeholder="Auto-filled from first image" />
                         </div>
                         <div>
-                            <label htmlFor="detailUrl">Detail Image URL (Optional)</label>
+                            <label htmlFor="detailUrl">{t('productCreator.detailImage')}</label>
                             <input id="detailUrl" name="detailUrl" value={form.detailUrl} onChange={updateField} placeholder="Auto-filled from images" />
                         </div>
                     </div>
 
                     <button type="submit" disabled={saving}>
-                        {saving ? "Publishing..." : "Publish Product"}
+                        {saving ? t('productCreator.publishing') : t('productCreator.publish')}
                     </button>
                 </form>
 
