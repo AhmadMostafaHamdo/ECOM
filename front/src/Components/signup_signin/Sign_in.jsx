@@ -46,14 +46,14 @@ const Sign_in = () => {
       const data = await res.json();
 
       if (res.status === 400 || !data) {
-        toast.error(t('auth.invalidCredentials'), {
-          position: "top-center"
+        toast.error(t("auth.invalidCredentials"), {
+          position: "top-center",
         });
       } else {
         setAccount(data);
         setData({ email: "", password: "" });
-        toast.success(t('auth.loginSuccess'), {
-          position: "top-center"
+        toast.success(t("auth.loginSuccess"), {
+          position: "top-center",
         });
         const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
         setTimeout(() => history.push(nextRoute), 300);
@@ -68,9 +68,9 @@ const Sign_in = () => {
       <div className="sign_container">
         <div className="sign_form">
           <form method="POST">
-            <h1>{t('auth.login')}</h1>
+            <h1>{t("auth.login")}</h1>
             <div className="form_data">
-              <label htmlFor="email">{t('auth.email')}</label>
+              <label htmlFor="email">{t("auth.email")}</label>
               <input
                 type="email"
                 name="email"
@@ -80,26 +80,26 @@ const Sign_in = () => {
               />
             </div>
             <div className="form_data">
-              <label htmlFor="password">{t('auth.password')}</label>
+              <label htmlFor="password">{t("auth.password")}</label>
               <input
                 type="password"
                 name="password"
                 onChange={adddata}
                 value={logdata.password}
                 id="password"
-                placeholder={t('auth.passwordPlaceholder')}
+                placeholder={t("auth.passwordPlaceholder")}
               />
             </div>
             <button type="submit" className="signin_btn" onClick={senddata}>
-              {t('common.signin')}
+              {t("common.signin")}
             </button>
           </form>
           <ToastContainer />
         </div>
         <div className="create_accountinfo">
-          <p>{t('auth.newHere')}</p>
+          <p>{t("auth.newHere")}</p>
           <button>
-            <NavLink to="/signup">{t('auth.createAccount')}</NavLink>
+            <NavLink to="/signup">{t("auth.createAccount")}</NavLink>
           </button>
         </div>
       </div>

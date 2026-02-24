@@ -1,122 +1,186 @@
-.rightheader {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    min-width: 280px;
+.drawer {
+  width: 280px; /* Slightly wider for better text flow */
+  padding: 24px;
+  background: #0f172a; /* Deep navy/slate */
+  height: 100%;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
 }
 
-.rightheader_profile {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--line);
-}
-
-.profile_avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--brand), var(--brand-strong));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 1.25rem;
-}
-
-.profile_info h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: 4px;
-}
-
-.profile_info p {
-    color: var(--text-muted);
-    font-size: 0.875rem;
-}
-
-.nav_menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.nav_menu li {
-    margin-bottom: 4px;
-}
-
-.nav_menu a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: var(--text-main);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    font-size: 0.875rem;
-}
-
-.nav_menu a:hover {
-    background: var(--brand-soft);
-    color: var(--brand);
-}
-
-.nav_menu svg {
-    color: var(--text-muted);
-    font-size: 1.125rem;
-}
-
-.nav_menu a:hover svg {
-    color: var(--brand);
-}
-
-.logout_btn {
-    width: 100%;
-    background: transparent;
-    border: 1px solid var(--danger);
-    color: var(--danger);
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-}
-
-.logout_btn:hover {
-    background: var(--danger);
-    color: white;
-}
-
+/* Mobile responsiveness for drawer */
 @media (max-width: 768px) {
-    .rightheader {
-        min-width: 260px;
-        padding: 20px;
-    }
-    
-    .rightheader_profile {
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-    }
-    
-    .profile_avatar {
-        width: 50px;
-        height: 50px;
-        font-size: 1.125rem;
-    }
-    
-    .nav_menu a {
-        padding: 10px 12px;
-        font-size: 0.8rem;
-    }
+  .drawer {
+    width: 100%;
+    max-width: 320px;
+    padding: 20px;
+  }
+
+  .drawer_profile {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .drawer_avatar {
+    width: 45px !important;
+    height: 45px !important;
+  }
+
+  .drawer_profile h3 {
+    font-size: 1rem;
+  }
+
+  .drawer_profile p {
+    font-size: 0.75rem;
+  }
+
+  .drawer_nav a {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .drawer_nav a svg {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .drawer {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .drawer_profile {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .drawer_avatar {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .drawer_profile h3 {
+    font-size: 0.95rem;
+  }
+
+  .drawer_profile p {
+    font-size: 0.7rem;
+  }
+
+  .drawer_nav a {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    gap: 10px;
+  }
+
+  .drawer_nav a svg {
+    font-size: 16px;
+  }
+
+  .logout,
+  .signin_btn {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+}
+
+.drawer_profile {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+}
+
+.drawer_avatar {
+  width: 50px !important;
+  height: 50px !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.drawer_profile h3 {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.drawer_profile p {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 2px 0 0 0;
+}
+
+.drawer_nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1; /* Pushes the logout button to the bottom */
+}
+
+.drawer_nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.drawer_nav a svg {
+  color: #6366f1; /* Icon color accent */
+  font-size: 20px;
+}
+
+.drawer_nav a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.drawer_nav a.active {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.divider_custom {
+  margin: 20px 0 !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.logout {
+  margin-top: auto; /* Pins to bottom */
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.05);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout:hover {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+}
+
+.signin_btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white !important;
+  justify-content: center;
+  margin-top: auto;
 }

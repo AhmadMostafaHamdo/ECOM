@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
+import { apiUrl } from "../../api";
 import "./ImageUpload.css";
 
 const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {

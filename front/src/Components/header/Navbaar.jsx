@@ -1,251 +1,207 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import "../header/navbaar.css";
+import React, { useContext, useEffect, useState, useCallback } from "react";
+import "./Navbaar.css";
+import { NavLink, useHistory } from "react-router-dom";
+import { Logincontext } from "../context/Contextprovider";
+import { ToastContainer, toast } from "react-toastify";
+import { apiUrl } from "../../api";
+import { useTranslation } from "react-i18next";
+
+// Material UI Components
 import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { NavLink } from "react-router-dom";
-import { Logincontext } from "../context/Contextprovider";
-import { ToastContainer, toast } from "react-toastify";
+import { Drawer, IconButton, List, ListItem } from "@mui/material";
+
+// Icons
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import "react-toastify/dist/ReactToastify.css";
-import { useHistory } from "react-router";
-import { Drawer, IconButton, List, ListItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+
+// Internal Components
 import Rightheader from "./Rightheader";
-import { getProducts } from "../redux/actions/action";
-import { useSelector, useDispatch } from "react-redux";
-import { apiUrl } from "../../api";
-import { useCallback } from 'react';
-import { useTranslation } from "react-i18next";
-import './Navbaar.css';
-import LanguageSwitcher from '../common/LanguageSwitcher';
+import LanguageSwitcher from "../common/LanguageSwitcher";
 
 const Navbaar = React.memo(({ onSearch }) => {
-    const { t } = useTranslation();
-    const history = useHistory("");
-    const [text, setText] = useState("");
-    const [suggestions, setSuggestions] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const history = useHistory();
+  const { account, setAccount } = useContext(Logincontext);
 
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [liopen, setLiopen] = useState(true);
-    const [dropen, setDropen] = useState(false);
-    const { account, setAccount } = useContext(Logincontext);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [dropen, setDropen] = useState(false);
+  const [text, setText] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
-    const fetchSuggestions = useCallback(async (query) => {
-        if (!query.trim()) {
-            setSuggestions([]);
-            return;
-        }
+  const fetchSuggestions = useCallback(async (query) => {
+    if (!query.trim()) return setSuggestions([]);
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        apiUrl(`/getproducts?search=${encodeURIComponent(query)}&limit=6`),
+      );
+      const data = await res.json();
+      setSuggestions(data.products || data || []);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
-        setIsSearching(true);
-        try {
-            const res = await fetch(apiUrl(`/getproducts?search=${encodeURIComponent(query)}&limit=6`));
-            const resData = await res.json();
-            if (resData.products) {
-                setSuggestions(resData.products);
-            } else if (Array.isArray(resData)) {
-                setSuggestions(resData);
-            }
-        } catch (error) {
-            console.log("Suggestions fetch failed:", error.message);
-        } finally {
-            setIsSearching(false);
-        }
-    }, []);
+  useEffect(() => {
+    const tmr = setTimeout(() => {
+      fetchSuggestions(text);
+      if (onSearch) onSearch(text);
+    }, 350);
+    return () => clearTimeout(tmr);
+  }, [text, fetchSuggestions, onSearch]);
 
-    useEffect(() => {
-        const delaySearchFn = setTimeout(() => {
-            if (text.trim()) {
-                fetchSuggestions(text);
-            } else {
-                setSuggestions([]);
-            }
+  const logoutuser = useCallback(async () => {
+    await fetch(apiUrl("/logout"), { credentials: "include" });
+    setAccount(false);
+    setAnchorEl(null);
+    toast.success(t("auth.logoutSuccess") || "Logged out");
+    history.push("/");
+  }, [history, setAccount, t]);
 
-            if (onSearch) {
-                onSearch(text);
-            }
-        }, 400);
+  const isAdmin = account?.role === "admin";
 
-        return () => clearTimeout(delaySearchFn);
-    }, [text, onSearch, fetchSuggestions]);
+  return (
+    <header className="header">
+      <nav className="main_nav">
+        {/* LEFT SECTION */}
+        <div className="left_section">
+          <IconButton className="hamburgur" onClick={() => setDropen(true)}>
+            <MenuIcon />
+          </IconButton>
 
-    const handleClick = useCallback((event) => {
-        setAnchorEl(event.currentTarget);
-    }, []);
+          <Drawer open={dropen} onClose={() => setDropen(false)}>
+            <Rightheader
+              userlog={logoutuser}
+              logclose={() => setDropen(false)}
+            />
+          </Drawer>
 
-    const handleClose = useCallback(() => {
-        setAnchorEl(null);
-    }, []);
+          <NavLink to="/" className="navlogo">
+            <img src="/amazon_PNG25.png" alt="logo" />
+            <span className="logo_badge">Studio Commerce</span>
+          </NavLink>
+        </div>
 
-    const handleMyAccountClick = useCallback(() => {
-        handleClose();
-        history.push("/profile");
-    }, [handleClose, history]);
+        {/* SEARCH SECTION */}
+        <div
+          className={`search_section ${showMobileSearch ? "mobile_visible" : ""}`}
+        >
+          <div className="nav_searchbaar">
+            <SearchIcon className="search_leading_icon" />
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={t("allProducts.searchPlaceholder")}
+            />
+            <button className="search_icon_btn">
+              <SearchIcon style={{ fontSize: 20 }} />
+            </button>
 
-    useEffect(() => {
-        const getdetailsvaliduser = async () => {
-            const res = await fetch(apiUrl("/validuser"), {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json"
-                },
-                credentials: "include"
-            });
+            {text && (
+              <List className="extrasearch_dropdown">
+                {isSearching ? (
+                  <ListItem className="searching_status">Searching…</ListItem>
+                ) : suggestions.length ? (
+                  suggestions.map((p) => (
+                    <ListItem key={p.id} className="suggestion_item">
+                      <NavLink
+                        to={`/getproductsone/${p.id}`}
+                        onClick={() => setText("")}
+                      >
+                        {p.title.longTitle}
+                      </NavLink>
+                    </ListItem>
+                  ))
+                ) : (
+                  <ListItem className="searching_status">
+                    {t("allProducts.noProductsFound")}
+                  </ListItem>
+                )}
+              </List>
+            )}
+          </div>
+        </div>
 
-            const data = await res.json();
+        {/* RIGHT SECTION */}
+        <div className="right_section">
+          {/* Mobile Search Toggle */}
+          <IconButton
+            className="mobile_search_toggle"
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+          >
+            <SearchIcon />
+          </IconButton>
 
-            if (res.status !== 201) {
-                return;
-            }
-            setAccount(data);
-        };
+          <div className="desktop_items">
+            <LanguageSwitcher />
+            {isAdmin && (
+              <NavLink to="/dashboard" className="nav_pill_btn">
+                {t("navigation.dashboard")}
+              </NavLink>
+            )}
+            {!account && (
+              <NavLink to="/login" className="nav_pill_btn primary">
+                {t("auth.login")}
+              </NavLink>
+            )}
+          </div>
 
-        getdetailsvaliduser();
-    }, [setAccount]);
+          <NavLink to={account ? "/buynow" : "/login"} className="cart_action">
+            <Badge
+              badgeContent={account ? account.carts.length : 0}
+              color="error"
+            >
+              <ShoppingCartIcon />
+            </Badge>
+            <span className="cart_label">{t("navigation.cart")}</span>
+          </NavLink>
 
-    const isAdmin = account?.role === "admin";
+          <Avatar
+            className="user_avatar"
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+          >
+            {account ? account.fname[0].toUpperCase() : ""}
+          </Avatar>
 
-    const logoutuser = useCallback(async () => {
-        const res2 = await fetch(apiUrl("/logout"), {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        });
-
-        const data2 = await res2.json();
-
-        if (res2.status !== 201) {
-            const error = new Error(data2.error);
-            throw error;
-        } else {
-            setAccount(false);
-            setAnchorEl(null);
-            toast.success(t('auth.logoutSuccess') || "Logged out successfully.", {
-                position: "top-center",
-                autoClose: 2400,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true
-            });
-            history.push("/");
-        }
-    }, [history, setAccount, t]);
-
-    const getText = useCallback((searchText) => {
-        setText(searchText);
-        setLiopen(searchText.trim().length === 0);
-    }, []);
-    return (
-        <header>
-            <nav className="main_nav">
-                <div className="left">
-                    <IconButton className="hamburgur" onClick={() => setDropen(true)}>
-                        <MenuIcon />
-                    </IconButton>
-                    <Drawer open={dropen} onClose={() => setDropen(false)}>
-                        <Rightheader userlog={logoutuser} logclose={() => setDropen(false)} />
-                    </Drawer>
-                    <div className="navlogo">
-                        <NavLink to="/">
-                            <img src="/amazon_PNG25.png" alt="logo" />
-                            <span>Studio Commerce</span>
-                        </NavLink>
-                    </div>
-                    <div className="nav_searchbaar">
-                        <SearchIcon className="search_leading_icon" />
-                        <input
-                            type="text"
-                            onChange={(e) => getText(e.target.value)}
-                            value={text}
-                            placeholder={t('allProducts.searchPlaceholder')}
-                        />
-                        <button type="button" className="search_icon" aria-label="Search products">
-                            <SearchIcon id="search" />
-                        </button>
-                        {text.trim().length > 0 && (
-                            <List className="extrasearch" hidden={liopen}>
-                                {isSearching ? (
-                                    <ListItem className="no_search_result">Searching...</ListItem>
-                                ) : suggestions.length > 0 ? (
-                                    suggestions.map((product) => (
-                                        <ListItem key={product.id}>
-                                            <NavLink to={`/getproductsone/${product.id}`} onClick={() => setLiopen(true)}>
-                                                {product.title.longTitle}
-                                            </NavLink>
-                                        </ListItem>
-                                    ))
-                                ) : (
-                                    <ListItem className="no_search_result">{t('allProducts.noProductsFound')}</ListItem>
-                                )}
-                            </List>
-                        )}
-                    </div>
-                </div>
-
-                <div className="right">
-                    <LanguageSwitcher />
-
-                    {isAdmin && (
-                        <div className="nav_btn">
-                            <NavLink to="/dashboard">
-                                <span>{t('navigation.dashboard')}</span>
-                            </NavLink>
-                        </div>
-                    )}
-
-                    {!account && <div className="nav_btn">
-                        <NavLink to="/login">
-                            <span>{t('auth.login')}</span>
-                        </NavLink>
-                    </div>}
-
-                    <NavLink to={account ? "/buynow" : "/login"}>
-                        <div className="cart_btn">
-                            <Badge badgeContent={account ? account.carts.length : 0} color="secondary">
-                                <ShoppingCartIcon id="icon" />
-                            </Badge>
-                            <p>{t('navigation.cart')}</p>
-                        </div>
-                    </NavLink>
-
-                    {account ? (
-                        <Avatar className="avtar2" onClick={handleClick} title={account.fname.toUpperCase()}>
-                            {account.fname[0].toUpperCase()}
-                        </Avatar>
-                    ) : (
-                        <Avatar className="avtar" onClick={handleClick} />
-                    )}
-
-                    <div className="menu_div">
-                        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose} className="profile_menu">
-                            <MenuItem onClick={handleMyAccountClick} style={{ margin: 10 }}>
-                                <AccountCircleIcon style={{ fontSize: 18, marginRight: 8 }} />
-                                {t('navigation.profile')}
-                            </MenuItem>
-                            {account && (
-                                <MenuItem onClick={logoutuser} style={{ margin: 10 }}>
-                                    <LogoutIcon style={{ fontSize: 18, marginRight: 8 }} />
-                                    {t('navigation.logout')}
-                                </MenuItem>
-                            )}
-                        </Menu>
-                    </div>
-                    <ToastContainer />
-                </div>
-            </nav>
-        </header>
-    );
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+            className="profile_popover"
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+            <MenuItem
+              onClick={() => {
+                history.push("/profile");
+                setAnchorEl(null);
+              }}
+            >
+              <AccountCircleIcon fontSize="small" style={{ marginRight: 10 }} />
+              {t("navigation.profile")}
+            </MenuItem>
+            {account && (
+              <MenuItem onClick={logoutuser}>
+                <LogoutIcon fontSize="small" style={{ marginRight: 10 }} />
+                {t("navigation.logout")}
+              </MenuItem>
+            )}
+          </Menu>
+        </div>
+      </nav>
+      <ToastContainer position="bottom-right" />
+    </header>
+  );
 });
 
 export default Navbaar;

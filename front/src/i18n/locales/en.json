@@ -143,7 +143,10 @@
     "passwordPlaceholder": "At least 6 characters",
     "welcomeBack": "Welcome back to Studio Commerce",
     "newHere": "New here?",
-    "logoutSuccess": "Logged out successfully"
+    "logoutSuccess": "Logged out successfully",
+    "signupError": "Registration failed. Please try again.",
+    "mobileExists": "This mobile number already exists",
+    "emailExists": "This email address already exists"
   },
   "profile": {
     "title": "My Profile",

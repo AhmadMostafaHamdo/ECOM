@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiUrl } from '../../api';
 import Pagination from '../common/Pagination';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './table';
+import './ReviewManagement.css';
 
 const ReviewManagement = () => {
     const { t } = useTranslation();
@@ -59,103 +61,118 @@ const ReviewManagement = () => {
     };
 
     return (
-        <div className="admin_page" style={{ background: 'transparent' }}>
-            <header className="admin_page_header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: 0 }}>{t('admin.manageReviews')}</h1>
-                    <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>{t('admin.welcomeMessage')}</p>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="admin_page bg-transparent">
+            {/* <header className="admin_page_header mb-8">
+                <div className="review_filter_tabs">
                     {['all', 'pending', 'approved', 'rejected'].map(t_key => (
                         <button
                             key={t_key}
                             onClick={() => setFilter(t_key)}
-                            style={{
-                                padding: '6px 16px',
-                                borderRadius: '8px',
-                                fontSize: '13px',
-                                fontWeight: '700',
-                                border: 'none',
-                                cursor: 'pointer',
-                                background: filter === t_key ? 'var(--admin-accent-blue-soft)' : 'transparent',
-                                color: filter === t_key ? 'var(--admin-accent-blue)' : '#64748b'
-                            }}
+                            className={`filter_tab ${filter === t_key ? 'active' : ''}`}
                         >
                             {t(`common.${t_key === 'all' ? 'results' : t_key}`)}
                         </button>
                     ))}
                 </div>
-            </header>
+            </header> */}
 
-            <section className="admin_table_wrapper">
-                <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9' }}>
-                    <div style={{ fontWeight: '800', color: '#1e293b', fontSize: '15px' }}>Community Sentiment</div>
+            <section className="dashboard-section">
+                <div className="dashboard-header">
+                    <div className="dashboard-title">Community Sentiment</div>
                 </div>
 
-                <table className="admin_table">
-                    <thead>
-                        <tr>
-                            <th>{t('admin.manageUsers')}</th>
-                            <th>{t('admin.manageReviews')}</th>
-                            <th>{t('admin.manageProducts')}</th>
-                            <th>{t('common.status')}</th>
-                            <th style={{ textAlign: 'right' }}>{t('common.results')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{t('admin.manageUsers')}</TableHead>
+                            <TableHead>{t('admin.manageReviews')}</TableHead>
+                            <TableHead>{t('admin.manageProducts')}</TableHead>
+                            <TableHead>{t('common.status')}</TableHead>
+                            <TableHead className="text-right">{t('common.results')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {loading ? (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: '100px' }}>Analyzing Sentiment...</td></tr>
+                            <TableRow>
+                                <TableCell colSpan="5" className="loading-state">
+                                    <div className="loading-spinner"></div>
+                                    Analyzing Sentiment...
+                                </TableCell>
+                            </TableRow>
                         ) : reviews.length === 0 ? (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: '100px', color: '#94a3b8' }}>No reviews found in this sector.</td></tr>
+                            <TableRow>
+                                <TableCell colSpan="5" className="empty-state">
+                                    <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    No reviews found in this sector.
+                                </TableCell>
+                            </TableRow>
                         ) : reviews.map(review => (
-                            <tr key={review._id}>
-                                <td>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f1f5f9', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
+                            <TableRow key={review._id}>
+                                <TableCell>
+                                    <div className="user-info">
+                                        <div className="reviewer_avatar">
                                             {review.reviewerId?.fname ? review.reviewerId.fname[0].toUpperCase() : '?'}
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: 800, color: '#1e293b' }}>{review.reviewerId?.fname || 'External'}</div>
-                                            <div style={{ fontSize: '11px', color: '#94a3b8' }}>{new Date(review.createdAt).toLocaleDateString()}</div>
+                                            <div className="user-name">{review.reviewerId?.fname || 'External'}</div>
+                                            <div className="user-id">{new Date(review.createdAt).toLocaleDateString()}</div>
                                         </div>
                                     </div>
-                                </td>
-                                <td>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <div style={{ color: '#f59e0b', fontSize: '12px' }}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</div>
-                                        <div style={{ fontSize: '13px', color: '#64748b', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{review.comment}</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#3b82f6' }}>{review.targetType}</span>
-                                </td>
-                                <td>
-                                    <span className={`status_pill ${review.status === 'approved' ? 'active' : review.status === 'pending' ? 'pending' : 'rejected'}`}>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="review-rating">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</div>
+                                    <div className="review_comment_truncate" title={review.comment}>{review.comment}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <span className="review-type">{review.targetType}</span>
+                                </TableCell>
+                                <TableCell>
+                                    <span className={`status-badge ${
+                                        review.status === 'approved' 
+                                            ? 'active'
+                                            : review.status === 'pending'
+                                            ? 'pending'
+                                            : 'inactive'
+                                    }`}>
                                         {t(`common.${review.status}`)}
                                     </span>
-                                </td>
-                                <td style={{ textAlign: 'right' }}>
-                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <div className="action-buttons">
                                         {review.status !== 'approved' && (
-                                            <button className="btn_outline" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => handleModerate(review._id, 'approved')} disabled={moderating === review._id}>Approve</button>
+                                            <button 
+                                                className="action-btn approve" 
+                                                onClick={() => handleModerate(review._id, 'approved')} 
+                                                disabled={moderating === review._id}
+                                            >
+                                                Approve
+                                            </button>
                                         )}
                                         {review.status !== 'rejected' && (
-                                            <button className="btn_outline" style={{ padding: '6px 12px', fontSize: '12px', color: '#ef4444' }} onClick={() => handleModerate(review._id, 'rejected')} disabled={moderating === review._id}>Reject</button>
+                                            <button 
+                                                className="action-btn reject" 
+                                                onClick={() => handleModerate(review._id, 'rejected')} 
+                                                disabled={moderating === review._id}
+                                            >
+                                                Reject
+                                            </button>
                                         )}
                                     </div>
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
                         ))}
-                    </tbody>
-                </table>
-                <div style={{ padding: '16px' }}>
-                    <Pagination
-                        currentPage={pagination.currentPage}
-                        totalPages={pagination.totalPages}
-                        onPageChange={handlePageChange}
-                    />
-                </div>
-            </section>
+                    </TableBody>
+                </Table>
+                    <div className="pagination-container">
+                        <Pagination
+                            currentPage={pagination.currentPage}
+                            totalPages={pagination.totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                </section>
         </div>
     );
 };

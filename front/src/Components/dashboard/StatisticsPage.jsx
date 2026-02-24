@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "../../api";
 import { useTranslation } from "react-i18next";
+import { Users, DollarSign, Package, TrendingUp, RefreshCw, Download } from "lucide-react";
+import "./admin-dashboard.css";
 
 const StatisticsPage = () => {
     const { t } = useTranslation();
@@ -58,114 +60,115 @@ const StatisticsPage = () => {
     }, [stats]);
 
     return (
-        <div className="admin_page" style={{ background: 'transparent' }}>
-            <header className="admin_page_header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: 0 }}>{t("admin.statistics")}</h1>
-                    <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>{t("admin.welcomeMessage")}</p>
-                </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <button className="btn_outline" onClick={fetchStats} disabled={loading}>
-                        {loading ? "Updating..." : "Refresh Data"}
+        <div className="admin_page">
+            <div className="dashboard-header">
+                <div className="dashboard-title">{t("admin.statistics")}</div>
+                <div className="dashboard-controls">
+                    <button 
+                        onClick={fetchStats}
+                        disabled={loading}
+                        className="filter-btn"
+                        title={lastUpdated ? `Last updated: ${lastUpdated}` : "Refresh statistics"}
+                    >
+                        <RefreshCw className={`btn-icon-sm ${loading ? 'animate-spin' : ''}`} />
+                        {t("common.refresh")}
                     </button>
-                    <button className="btn_primary">Export Report</button>
                 </div>
-            </header>
-
-            <section className="admin_stats_grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
+            </div>
+            <section className="admin_stats_grid">
                 {[
-                    { label: t("admin.totalUsers"), value: stats.totalUsers, color: '#3b82f6', trend: '+12%', icon: '👥' },
-                    { label: t("cart.total"), value: `$${(stats.totalProducts * 420).toLocaleString()}`, color: '#10b981', trend: '+8%', icon: '💰' },
-                    { label: t("admin.cartItems"), value: stats.totalCartItems, color: '#f59e0b', trend: '-2%', icon: '📦' },
-                    { label: t("admin.totalProducts"), value: stats.totalProducts, color: '#8b5cf6', trend: '+4%', icon: '🚀' }
+                    { label: t("admin.totalUsers"), value: stats.totalUsers, color: '#3b82f6', trend: '+12%', icon: Users },
+                    { label: t("cart.total"), value: `$${(stats.totalProducts * 420).toLocaleString()}`, color: '#10b981', trend: '+8%', icon: DollarSign },
+                    { label: t("admin.cartItems"), value: stats.totalCartItems, color: '#f59e0b', trend: '-2%', icon: Package },
+                    { label: t("admin.totalProducts"), value: stats.totalProducts, color: '#8b5cf6', trend: '+4%', icon: TrendingUp }
                 ].map((stat, i) => (
-                    <article key={i} className="admin_card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b' }}>{stat.label}</span>
-                            <span style={{ fontSize: '18px' }}>{stat.icon}</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-                            <span style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b' }}>{loading ? "..." : stat.value}</span>
-                            <span style={{ fontSize: '12px', fontWeight: '700', color: stat.trend.startsWith('+') ? '#10b981' : '#ef4444', paddingBottom: '4px' }}>
-                                {stat.trend}
+                    <article key={i} className="admin_stat_card">
+                        <div className="admin_stat_icon_row">
+                            <span className="admin_stat_icon" style={{ background: stat.color + '15', color: stat.color }}>
+                                <stat.icon className="btn-icon-sm" />
                             </span>
                         </div>
-                        <div style={{ height: '4px', width: '100%', background: '#f1f5f9', borderRadius: '2px', marginTop: '4px' }}>
-                            <div style={{ width: '60%', height: '100%', background: stat.color, borderRadius: '2px' }}></div>
-                        </div>
+                        <h3>{stat.label}</h3>
+                        <p>{loading ? "..." : stat.value}</p>
+                        <span className="admin_badge" style={{ background: `${stat.color}20`, color: stat.color }}>{stat.trend}</span>
                     </article>
                 ))}
             </section>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '32px' }}>
-                <section className="admin_card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Global Resource Allocation</h2>
-                        <select className="btn_outline" style={{ padding: '4px 12px', fontSize: '12px' }}>
+            <section className="admin_stats_grid">
+                <h2 className="dashboard-title" style={{ gridColumn: '1 / -1', marginBottom: 'var(--space-6)' }}>Derived Metrics</h2>
+                {[
+                    { label: 'Products per Category', value: derivedMetrics.productsPerCategory, color: '#06b6d4', icon: Package },
+                    { label: 'Cart Items per User', value: derivedMetrics.cartsPerUser, color: '#8b5cf6', icon: Users }
+                ].map((metric, i) => (
+                    <article key={i} className="admin_stat_card">
+                        <div className="admin_stat_icon_row">
+                            <span className="admin_stat_icon" style={{ background: metric.color + '15', color: metric.color }}>
+                                <metric.icon className="btn-icon-sm" />
+                            </span>
+                        </div>
+                        <h3>{metric.label}</h3>
+                        <p>{loading ? "..." : metric.value}</p>
+                        <span className="admin_badge" style={{ background: `${metric.color}20`, color: metric.color }}>Calculated</span>
+                    </article>
+                ))}
+            </section>
+
+            <div className="dashboard-grid-two">
+                <section className="dashboard-section">
+                    <div className="dashboard-controls">
+                        <h2 className="dashboard-title">Global Resource Allocation</h2>
+                        <select className="filter-btn">
                             <option>Last 30 Days</option>
                             <option>Last 6 Months</option>
                         </select>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div className="progress-list">
                         {[
                             { label: 'Cloud Infrastructure', value: stats.totalUsers, total: 1000, color: '#3b82f6' },
                             { label: 'Stock Capacity', value: stats.totalProducts, total: 500, color: '#8b5cf6' },
                             { label: 'Logical Clusters', value: stats.totalCategories, total: 50, color: '#10b981' },
                             { label: 'Transactional Flow', value: stats.totalCartItems, total: 2000, color: '#f59e0b' },
                         ].map((item, idx) => (
-                            <div key={idx}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{item.label}</span>
-                                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b' }}>{item.value} / {item.total}</span>
+                            <div key={idx} className="progress-item">
+                                <div className="progress-header">
+                                    <span className="progress-label">{item.label}</span>
+                                    <span className="progress-value">{item.value} / {item.total}</span>
                                 </div>
-                                <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                                    <div style={{
-                                        width: `${Math.min(100, (item.value / item.total) * 100)}%`,
-                                        height: '100%',
-                                        background: item.color,
-                                        borderRadius: '4px',
-                                        transition: 'width 1s ease'
-                                    }}></div>
+                                <div className="progress-bar">
+                                    <div 
+                                        className="progress-bar-fill"
+                                        style={{
+                                            width: `${Math.min(100, (item.value / item.total) * 100)}%`,
+                                            background: item.color
+                                        }}
+                                    ></div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </section>
 
-                <section className="admin_card" style={{ background: '#1e293b', border: 'none' }}>
-                    <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: '#ffffff' }}>Operational Status</h2>
-                    <p style={{ margin: '8px 0 24px', color: '#94a3b8', fontSize: '13px' }}>Real-time health of core system modules.</p>
+                <section className="dashboard-section status-section">
+                    <h2 className="dashboard-title">Operational Status</h2>
+                    <p className="dashboard-subtitle">Real-time health of core system modules.</p>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div className="status-list">
                         {[
                             { name: 'Core Engine', status: t("common.success"), color: '#10b981' },
                             { name: 'Edge Database', status: t("common.success"), color: '#10b981' },
                             { name: 'Media Hub', status: t("common.success"), color: '#10b981' }
                         ].map((srv, i) => (
-                            <div key={i} style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                padding: '16px',
-                                background: 'rgba(255,255,255,0.05)',
-                                borderRadius: '12px',
-                                border: '1px solid rgba(255,255,255,0.05)'
-                            }}>
-                                <span style={{ fontSize: '14px', fontWeight: '600', color: 'white' }}>{srv.name}</span>
-                                <span className="status_pill active" style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                    {srv.status}
-                                </span>
+                            <div key={i} className="status-item">
+                                <span className="status-name">{srv.name}</span>
+                                <span className="status-badge active">{srv.status}</span>
                             </div>
                         ))}
                     </div>
-
-                    <button className="btn_primary" style={{ width: '100%', marginTop: '32px', background: 'rgba(255,255,255,0.1)', color: 'white' }}>
-                        System Health Audit
-                    </button>
                 </section>
             </div>
-            {error && <div style={{ marginTop: '24px' }} className="admin_notice error">{error}</div>}
+            {error && <div className="admin_notice error">{error}</div>}
         </div>
     );
 };

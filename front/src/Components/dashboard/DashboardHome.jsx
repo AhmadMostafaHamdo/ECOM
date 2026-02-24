@@ -134,17 +134,6 @@ const DashboardHome = () => {
 
   return (
     <div className="admin_page" style={{ background: 'transparent' }}>
-      <header className="admin_page_header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: 0 }}>{t("admin.dashboard")}</h1>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>{t("admin.welcomeMessage")}</p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn_outline">View System Logs</button>
-          <button className="btn_primary">Export Analytics</button>
-        </div>
-      </header>
-
       <section className="admin_stats_grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
         {statCards.slice(0, 4).map((stat, i) => {
           const Icon = stat.icon;

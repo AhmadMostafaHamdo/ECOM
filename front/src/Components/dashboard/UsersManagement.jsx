@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { apiUrl } from "../../api";
 import { useTranslation } from "react-i18next";
 import Pagination from "../common/Pagination";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "./table";
 
 const defaultForm = {
     fname: "",
@@ -164,67 +165,91 @@ const UsersManagement = () => {
             </header>
 
             <div style={{ display: 'grid', gridTemplateColumns: showForm ? '1fr 400px' : '1fr', gap: '32px', alignItems: 'start' }}>
-                <section className="admin_table_wrapper">
-                    <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div className="admin_search_bar" style={{ width: '340px' }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <section className="dashboard-section">
+                    <div className="dashboard-header">
+                        <div className="dashboard-title">User Management</div>
+                        <div className="dashboard-subtitle">Manage user accounts and permissions</div>
+                    </div>
+
+                    <div className="dashboard-controls">
+                        <div className="search-container">
                             <input
                                 type="text"
-                                placeholder="Search by name, email or mobile..."
+                                placeholder="Search users..."
+                                className="search-input"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <div className="action-buttons">
+                            <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+                                Add User
+                            </button>
+                        </div>
                     </div>
 
-                    <table className="admin_table">
-                        <thead>
-                            <tr>
-                                <th>{t("profile.personalInfo")}</th>
-                                <th>{t("auth.email")}</th>
-                                <th>{t("auth.role")}</th>
-                                <th>{t("common.status")}</th>
-                                <th style={{ textAlign: 'right' }}>{t("common.edit")}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t("profile.personalInfo")}</TableHead>
+                                <TableHead>{t("auth.email")}</TableHead>
+                                <TableHead>{t("auth.role")}</TableHead>
+                                <TableHead>{t("common.status")}</TableHead>
+                                <TableHead className="text-right">{t("common.edit")}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {loading ? (
-                                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '100px', color: '#64748b' }}>Synchronizing Citizen Data...</td></tr>
+                                <TableRow>
+                                    <TableCell colSpan="5" className="loading-state">
+                                        <div className="loading-spinner"></div>
+                                        Synchronizing Citizen Data...
+                                    </TableCell>
+                                </TableRow>
                             ) : users.length === 0 ? (
-                                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '100px', color: '#64748b' }}>No citizens found matching your criteria.</td></tr>
+                                <TableRow>
+                                    <TableCell colSpan="5" className="empty-state">
+                                        <svg className="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        No citizens found matching your criteria.
+                                    </TableCell>
+                                </TableRow>
                             ) : users.map(user => (
-                                <tr key={user._id}>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f1f5f9', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '13px' }}>
+                                <TableRow key={user._id}>
+                                    <TableCell>
+                                        <div className="user-info">
+                                            <div className="user-avatar">
                                                 {user.fname ? user.fname[0].toUpperCase() : '?'}
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 800, color: '#1e293b' }}>{user.fname} {user.lname}</div>
-                                                <div style={{ fontSize: '11px', color: '#94a3b8' }}>ID: {user._id.substring(user._id.length - 8)}</div>
+                                                <div className="user-name">{user.fname} {user.lname}</div>
+                                                <div className="user-id">ID: {user._id.substring(user._id.length - 8)}</div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td style={{ fontWeight: '600', color: '#64748b' }}>{user.email}</td>
-                                    <td>
-                                        <span style={{ fontSize: '12px', fontWeight: '800', color: user.role === 'admin' ? '#3b82f6' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                    </TableCell>
+                                    <TableCell className="font-semibold text-gray-600">{user.email}</TableCell>
+                                    <TableCell>
+                                        <span className={`role-badge ${user.role === 'admin' ? 'admin' : 'user'}`}>
                                             {user.role}
                                         </span>
-                                    </td>
-                                    <td>
-                                        <span className="status_pill active">Active</span>
-                                    </td>
-                                    <td style={{ textAlign: 'right' }}>
-                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                            <button className="btn_outline" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => handleEdit(user)}>Edit</button>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="status-badge active">
+                                            Active
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="action-buttons">
+                                            <button className="btn-secondary" onClick={() => handleEdit(user)}>Edit</button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </TableCell>
+                                </TableRow>
                             ))}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
 
-                    <div style={{ padding: '16px' }}>
+                    <div className="pagination-container">
                         <Pagination
                             currentPage={pagination.currentPage}
                             totalPages={pagination.totalPages}

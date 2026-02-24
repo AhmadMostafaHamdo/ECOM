@@ -1,23 +1,21 @@
-/* CSS Variables */
 :root {
-    --primary-color: #ff9900;
-    --primary-dark: #e68900;
-    --primary-light: #fff3e0;
-    --text-dark: #212121;
-    --text-light: #757575;
-    --border-color: #e0e0e0;
-    --background-light: #f5f5f5;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --nav-blue: #3b82f6;
+    --nav-indigo: #6366f1;
+    --nav-glass: rgba(255, 255, 255, 0.8);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
 }
 
-/* Main Navigation Container */
 .new_nav {
-    background: white;
-    border-bottom: 1px solid var(--border-color);
-    padding: 0;
-    box-shadow: var(--shadow-sm);
-    margin-top: 60px;
+    background: var(--nav-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    /* Align perfectly under your fixed 70px header */
+    margin-top: 70px; 
+    position: sticky;
+    top: 70px;
+    z-index: 1000;
 }
 
 .nav_data {
@@ -29,205 +27,55 @@
 .left_data {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     overflow-x: auto;
-    padding: 20px 0;
-    scroll-behavior: smooth;
+    padding: 12px 0;
+    /* Hide scrollbar for a cleaner look while keeping functionality */
+    scrollbar-width: none; 
 }
 
-/* Custom Scrollbar */
 .left_data::-webkit-scrollbar {
-    height: 6px;
-}
-
-.left_data::-webkit-scrollbar-track {
-    background: var(--background-light);
-    border-radius: 3px;
-}
-
-.left_data::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 3px;
-    transition: background 0.3s ease;
-}
-
-.left_data::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-dark);
+    display: none;
 }
 
 /* Category Chips */
 .category_chip {
-    background: white;
-    border: 2px solid var(--border-color);
-    padding: 10px 20px;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-dark);
+    background: #f1f5f9;
+    border: 1px solid transparent;
+    padding: 8px 18px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
-    text-decoration: none;
-    position: relative;
-    overflow: hidden;
-    min-width: fit-content;
-}
-
-.category_chip::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 153, 0, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.category_chip:hover::before {
-    left: 100%;
 }
 
 .category_chip:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: var(--primary-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    background: #e2e8f0;
+    color: var(--text-main);
+    transform: translateY(-1px);
 }
 
 .category_chip.active {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--nav-blue), var(--nav-indigo));
     color: white;
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-md);
-    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
-.category_chip.active:hover {
-    background: var(--primary-dark);
-    border-color: var(--primary-dark);
-    transform: scale(1.05) translateY(-2px);
-}
-
-/* Right Data Section (if needed in future) */
-.right_data {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.filter_btn {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    color: var(--text-light);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.filter_btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: var(--primary-light);
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .nav_data {
-        padding: 0 15px;
-    }
-    
-    .left_data {
-        gap: 10px;
-        padding: 18px 0;
-    }
-    
-    .category_chip {
-        padding: 8px 16px;
-        font-size: 0.85rem;
-    }
-}
-
+/* Mobile-specific adjustments */
 @media (max-width: 768px) {
-    .nav_data {
-        padding: 0 12px;
+    .new_nav {
+        margin-top: 60px; /* Match smaller header height on mobile if changed */
+        top: 60px;
     }
-    
     .left_data {
         gap: 8px;
-        padding: 16px 0;
+        padding: 10px 5px;
     }
-    
     .category_chip {
-        padding: 8px 14px;
-        font-size: 0.8rem;
-        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
     }
-    
-    .category_chip:hover {
-        transform: translateY(-1px);
-    }
-    
-    .category_chip.active {
-        transform: scale(1.02);
-    }
-}
-
-@media (max-width: 480px) {
-    .nav_data {
-        padding: 0 8px;
-    }
-    
-    .left_data {
-        gap: 6px;
-        padding: 14px 0;
-    }
-    
-    .category_chip {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-        border-radius: 18px;
-        border-width: 1.5px;
-    }
-    
-    .category_chip:hover {
-        transform: translateY(-1px);
-    }
-    
-    .category_chip.active {
-        transform: scale(1.02);
-    }
-}
-
-/* Animation for category selection */
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 153, 0, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(255, 153, 0, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 153, 0, 0);
-    }
-}
-
-.category_chip.active {
-    animation: pulse 0.3s ease-out;
-}
-
-/* Focus states for accessibility */
-.category_chip:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-
-.category_chip:focus:not(:focus-visible) {
-    outline: none;
 }

@@ -1,24 +1,33 @@
-import React, { useCallback, useContext, useEffect, useState, Suspense, lazy } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  Suspense,
+  lazy,
+} from "react";
 import { Switch, Route, useLocation, Redirect } from "react-router-dom";
-import CircularProgress from '@mui/material/CircularProgress';
-import { apiUrl } from './api';
-import { Logincontext } from './Components/context/Contextprovider';
-import './App.css';
-import './i18n/i18n';
+import CircularProgress from "@mui/material/CircularProgress";
+import { apiUrl } from "./api";
+import { Logincontext } from "./Components/context/Contextprovider";
+import "./App.css";
+import "./i18n/i18n";
 
 // Lazy Load Components
-const Navbaar = lazy(() => import('./Components/header/Navbaar'));
-const Newnav = lazy(() => import('./Components/newnav/Newnav'));
-const Maincomp = lazy(() => import('./Components/home/Maincomp'));
-const Footer = lazy(() => import('./Components/footer/Footer'));
-const Signup = lazy(() => import('./Components/signup_signin/SignUp'));
-const SignIn = lazy(() => import('./Components/signup_signin/Sign_in'));
-const Cart = lazy(() => import('./Components/cart/Cart'));
-const Buynow = lazy(() => import('./Components/buynow/Buynow'));
-const AdminDashboard = lazy(() => import('./Components/dashboard/AdminDashboard'));
-const ProfilePage = lazy(() => import('./Components/profile/ProfilePage'));
-const CreateProduct = lazy(() => import('./Components/products/CreateProduct'));
-const AllProducts = lazy(() => import('./Components/products/AllProducts'));
+const Navbaar = lazy(() => import("./Components/header/Navbaar"));
+const Newnav = lazy(() => import("./Components/newnav/Newnav"));
+const Maincomp = lazy(() => import("./Components/home/Maincomp"));
+const Footer = lazy(() => import("./Components/footer/Footer"));
+const Signup = lazy(() => import("./Components/signup_signin/SignUp"));
+const SignIn = lazy(() => import("./Components/signup_signin/Sign_in"));
+const Cart = lazy(() => import("./Components/cart/Cart"));
+const Buynow = lazy(() => import("./Components/buynow/Buynow"));
+const AdminDashboard = lazy(
+  () => import("./Components/dashboard/AdminDashboard"),
+);
+const ProfilePage = lazy(() => import("./Components/profile/ProfilePage"));
+const CreateProduct = lazy(() => import("./Components/products/CreateProduct"));
+const AllProducts = lazy(() => import("./Components/products/AllProducts"));
 
 const CATEGORY_ALL = "All Categories";
 
@@ -33,14 +42,16 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const isDashboardRoute = location.pathname.startsWith("/dashboard");
   const isHomeRoute = location.pathname === "/";
+  const isAuthRoute =
+    location.pathname === "/signup" || location.pathname === "/login";
 
   const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch(apiUrl("/getcategories"), {
         method: "GET",
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
@@ -67,9 +78,9 @@ function App() {
           method: "GET",
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          credentials: "include"
+          credentials: "include",
         });
 
         if (res.status === 201) {
@@ -114,82 +125,107 @@ function App() {
     }
   }, [location.pathname]);
 
-
   return (
     <div className="app_shell">
-      {
-        data && authChecked ? (
-          <Suspense fallback={
+      {data && authChecked ? (
+        <Suspense
+          fallback={
             <div className="circle">
               <CircularProgress />
               <h2>Loading...</h2>
             </div>
-          }>
-            {!isDashboardRoute && <Navbaar onSearch={setSearchTerm} />}
-            {!isDashboardRoute && isHomeRoute && (
-              <Newnav
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-                onApplyFilters={handleFilterApply}
-              />
-            )}
+          }
+        >
+          {isAuthRoute ? (
+            <Switch>
+              <Route exact path="/signup">
+                {account ? <Redirect to="/" /> : <Signup />}
+              </Route>
+              <Route exact path="/login">
+                {account ? <Redirect to="/" /> : <SignIn />}
+              </Route>
+            </Switch>
+          ) : (
+            <>
+              {!isDashboardRoute && <Navbaar onSearch={setSearchTerm} />}
+              {!isDashboardRoute && isHomeRoute && (
+                <Newnav
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                  onApplyFilters={handleFilterApply}
+                />
+              )}
 
-            {isDashboardRoute ? (
-              <Switch>
-                <Route path="/dashboard">
-                  {!account ? (
-                    <Redirect to="/login" />
-                  ) : isAdmin ? (
-                    <AdminDashboard onCategoriesChanged={fetchCategories} />
-                  ) : (
-                    <Redirect to="/" />
-                  )}
-                </Route>
-              </Switch>
-            ) : (
-              <main className="app_main">
+              {isDashboardRoute ? (
                 <Switch>
-                  <Route exact path="/">
-                    {isAdmin ? <Redirect to="/dashboard" /> : <Maincomp selectedCategory={selectedCategory} filters={appliedFilters} setSelectedCategory={setSelectedCategory} searchTerm={searchTerm} />}
-                  </Route>
-                  <Route exact path="/signup">
-                    {account ? <Redirect to="/" /> : <Signup />}
-                  </Route>
-                  <Route exact path="/login">
-                    {account ? <Redirect to="/" /> : <SignIn />}
-                  </Route>
-                  <Route exact path="/getproductsone/:id">
-                    {isAdmin ? <Redirect to="/dashboard" /> : <Cart />}
-                  </Route>
-                  <Route exact path="/buynow">
-                    {isAdmin ? <Redirect to="/dashboard" /> : <Buynow />}
-                  </Route>
-                  <Route exact path="/profile">
-                    {isAdmin ? <Redirect to="/dashboard" /> : <ProfilePage />}
-                  </Route>
-                  <Route exact path="/products/new">
-                    {isAdmin ? <Redirect to="/dashboard" /> : <CreateProduct />}
-                  </Route>
-                  <Route exact path="/products/all/:category?">
-                    {isAdmin ? <Redirect to="/dashboard" /> : <AllProducts />}
-                  </Route>
-                  <Route>
-                    <Redirect to="/" />
+                  <Route path="/dashboard">
+                    {!account ? (
+                      <Redirect to="/login" />
+                    ) : isAdmin ? (
+                      <AdminDashboard onCategoriesChanged={fetchCategories} />
+                    ) : (
+                      <Redirect to="/" />
+                    )}
                   </Route>
                 </Switch>
-              </main>
-            )}
-            {!isDashboardRoute && <Footer />}
-          </Suspense>
-        ) : (
-          <div className="circle">
-            <CircularProgress />
-            <h2>Crafting your experience...</h2>
-          </div>
-        )
-      }
-
+              ) : (
+                <main className="app_main">
+                  <Switch>
+                    <Route exact path="/">
+                      {isAdmin ? (
+                        <Redirect to="/dashboard" />
+                      ) : (
+                        <Maincomp
+                          selectedCategory={selectedCategory}
+                          filters={appliedFilters}
+                          setSelectedCategory={setSelectedCategory}
+                          searchTerm={searchTerm}
+                        />
+                      )}
+                    </Route>
+                    <Route exact path="/getproductsone/:id">
+                      {isAdmin ? <Redirect to="/dashboard" /> : <Cart />}
+                    </Route>
+                    <Route exact path="/buynow">
+                      {isAdmin ? <Redirect to="/dashboard" /> : <Buynow />}
+                    </Route>
+                    <Route exact path="/profile">
+                      {isAdmin ? <Redirect to="/dashboard" /> : <ProfilePage />}
+                    </Route>
+                    <Route exact path="/products/edit/:id">
+                      {isAdmin ? (
+                        <Redirect to="/dashboard" />
+                      ) : (
+                        <CreateProduct mode="edit" />
+                      )}
+                    </Route>
+                    <Route exact path="/products/new">
+                      {isAdmin ? (
+                        <Redirect to="/dashboard" />
+                      ) : (
+                        <CreateProduct />
+                      )}
+                    </Route>
+                    <Route exact path="/products/all/:category?">
+                      {isAdmin ? <Redirect to="/dashboard" /> : <AllProducts />}
+                    </Route>
+                    <Route>
+                      <Redirect to="/" />
+                    </Route>
+                  </Switch>
+                </main>
+              )}
+              {!isDashboardRoute && <Footer />}
+            </>
+          )}
+        </Suspense>
+      ) : (
+        <div className="circle">
+          <CircularProgress />
+          <h2>Crafting your experience...</h2>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import ImageUpload from "./ImageUpload";
@@ -21,9 +21,11 @@ const initialForm = {
     category: ""
 };
 
-const CreateProduct = () => {
+const CreateProduct = ({ mode = "create" }) => {
     const { t } = useTranslation();
     const history = useHistory();
+    const { id: editId } = useParams();
+    const isEdit = mode === "edit" && Boolean(editId);
     const [form, setForm] = useState(initialForm);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -48,6 +50,7 @@ const CreateProduct = () => {
                     return;
                 }
 
+                let categoryList = [];
                 const categoryRes = await fetch(apiUrl("/getcategories"), {
                     method: "GET",
                     headers: {
@@ -60,21 +63,69 @@ const CreateProduct = () => {
                     const list = Array.isArray(payload)
                         ? payload.filter((item) => item !== CATEGORY_ALL)
                         : [];
+                    categoryList = list;
                     setCategories(list);
-                    setForm((prev) => ({
-                        ...prev,
-                        category: list[0] || ""
-                    }));
+                    if (!isEdit) {
+                        setForm((prev) => ({
+                            ...prev,
+                            category: list[0] || ""
+                        }));
+                    }
+                }
+
+                if (isEdit && editId) {
+                    const productRes = await fetch(apiUrl(`/products/${editId}`), {
+                        method: "GET",
+                        credentials: "include"
+                    });
+
+                    const productPayload = await productRes.json().catch(() => ({}));
+
+                    if (!productRes.ok) {
+                        throw new Error(productPayload.error || "Failed to load product");
+                    }
+
+                    if (productPayload?.category && !categoryList.includes(productPayload.category)) {
+                        setCategories((prev) => [...prev, productPayload.category]);
+                    }
+
+                    setForm({
+                        shortTitle: productPayload?.title?.shortTitle || "",
+                        longTitle: productPayload?.title?.longTitle || "",
+                        description: productPayload?.description || "",
+                        mrp: productPayload?.price?.mrp ?? "",
+                        cost: productPayload?.price?.cost ?? "",
+                        priceDiscount: productPayload?.price?.discount || "",
+                        offerText: productPayload?.discount || "",
+                        tagline: productPayload?.tagline || "",
+                        url: productPayload?.url || "",
+                        detailUrl: productPayload?.detailUrl || "",
+                        category: productPayload?.category || categoryList[0] || ""
+                    });
+
+                    const normalizedImages = Array.isArray(productPayload?.images)
+                        ? productPayload.images
+                            .filter(Boolean)
+                            .map((url, index) => ({
+                                url,
+                                name: `Image ${index + 1}`,
+                                isUrl: true
+                            }))
+                        : [];
+                    setImages(normalizedImages);
                 }
             } catch (loadError) {
                 setError(loadError.message);
+                if (isEdit) {
+                    setTimeout(() => history.push("/profile"), 800);
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         bootstrap();
-    }, [history]);
+    }, [history, isEdit, editId]);
 
     const updateField = (event) => {
         const { name, value } = event.target;
@@ -104,8 +155,8 @@ const CreateProduct = () => {
                 detailUrl: form.detailUrl || (processedImages.length > 1 ? processedImages[1] : processedImages[0] || "")
             };
 
-            const response = await fetch(apiUrl("/products"), {
-                method: "POST",
+            const response = await fetch(apiUrl(isEdit ? `/products/${editId}` : "/products"), {
+                method: isEdit ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -115,10 +166,10 @@ const CreateProduct = () => {
 
             const data = await response.json().catch(() => ({}));
             if (!response.ok) {
-                throw new Error(data.error || "Failed to create product");
+                throw new Error(data.error || (isEdit ? "Failed to update product" : "Failed to create product"));
             }
 
-            setMessage(t('productCreator.success'));
+            setMessage(isEdit ? "Product updated successfully" : t('productCreator.success'));
             setTimeout(() => history.push("/profile"), 900);
         } catch (submitError) {
             setError(submitError.message);
@@ -141,9 +192,9 @@ const CreateProduct = () => {
         <section className="create_product_page">
             <div className="create_product_card">
                 <header className="create_product_header">
-                    <p className="kicker">{t('productCreator.kicker')}</p>
-                    <h1>{t('productCreator.title')}</h1>
-                    <p>{t('productCreator.subtitle')}</p>
+                    <p className="kicker">{isEdit ? "Edit your product" : t('productCreator.kicker')}</p>
+                    <h1>{isEdit ? "Update product" : t('productCreator.title')}</h1>
+                    <p>{isEdit ? "Make changes and save to keep your listing fresh." : t('productCreator.subtitle')}</p>
                 </header>
 
                 <form className="create_product_form" onSubmit={submitProduct}>
@@ -208,7 +259,9 @@ const CreateProduct = () => {
                     </div>
 
                     <button type="submit" disabled={saving}>
-                        {saving ? t('productCreator.publishing') : t('productCreator.publish')}
+                        {saving
+                            ? (isEdit ? "Saving..." : t('productCreator.publishing'))
+                            : (isEdit ? "Save changes" : t('productCreator.publish'))}
                     </button>
                 </form>
 

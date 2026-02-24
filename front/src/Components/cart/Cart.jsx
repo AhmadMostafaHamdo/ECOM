@@ -29,10 +29,11 @@ const Cart = () => {
                     credentials: "include"
                 });
 
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
 
-                if (res.status !== 201) {
-                    alert(t('errors.somethingWentWrong'));
+                if (!res.ok) {
+                    const message = data?.error || t('errors.somethingWentWrong');
+                    alert(message);
                 } else {
                     setIndedata(data);
                 }

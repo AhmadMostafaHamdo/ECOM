@@ -116,16 +116,6 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
 
     return (
         <section className="category_dashboard_page">
-            <div className="category_dashboard_header">
-                <div>
-                    <p className="dashboard_kicker">{t('navigation.dashboard')}</p>
-                    <h1>{t('admin.manageCategories')}</h1>
-                    <p>{t('admin.welcomeMessage')}</p>
-                </div>
-                <NavLink to="/" className="dashboard_back_btn">
-                    {t('allProducts.back')}
-                </NavLink>
-            </div>
 
             <div className="category_dashboard_card">
                 <form className="category_form" onSubmit={handleAddCategory}>

@@ -32,6 +32,9 @@ export default {
         danger: '#ef4444',
         // Line colors
         line: '#e5e7eb',
+        // Admin accent colors
+        'admin-accent-blue': '#3b82f6',
+        'admin-accent-blue-soft': '#eff6ff',
       },
       fontFamily: {
         'sans': ['Manrope', 'Inter', 'system-ui', 'sans-serif'],

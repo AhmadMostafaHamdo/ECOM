@@ -3,15 +3,25 @@ const router = new express.Router();
 const products = require("../models/productsSchema");
 const Category = require("../models/categorySchema");
 const User = require("../models/userSchema");
+const ProductView = require("../models/productViewSchema");
 const bcrypt = require("bcryptjs");
 const authenicate = require("../middleware/authenticate");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+
+const keysecret = process.env.KEY;
+const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        if (!fs.existsSync(UPLOADS_DIR)) {
+            fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+        }
+        cb(null, UPLOADS_DIR);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -39,6 +49,42 @@ const USER_ROLES = new Set(["user", "admin"]);
 const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
 
 const normalizeCategory = (value = "") => value.toString().trim().toLowerCase();
+const generateSessionId = () => crypto.randomBytes(16).toString("hex");
+const getClientIp = (req = {}) => {
+    const forwarded = (req.headers?.["x-forwarded-for"] || "").split(",")[0].trim();
+    return forwarded || req.connection?.remoteAddress || req.ip || "unknown";
+};
+const getViewerIdentity = (req, res) => {
+    const viewer = {
+        userId: null,
+        sessionId: req.cookies?.viewSessionId || null,
+        userAgent: req.get ? req.get("user-agent") || "" : "",
+        ipHash: null
+    };
+
+    if (!viewer.sessionId) {
+        viewer.sessionId = generateSessionId();
+        res.cookie("viewSessionId", viewer.sessionId, {
+            maxAge: ONE_YEAR_MS,
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false
+        });
+    }
+
+    if (req.cookies?.eccomerce) {
+        try {
+            const verified = jwt.verify(req.cookies.eccomerce, keysecret);
+            viewer.userId = verified?._id || null;
+        } catch (error) {
+            // ignore invalid token for view tracking
+        }
+    }
+
+    const ipAddress = getClientIp(req);
+    viewer.ipHash = crypto.createHash("sha256").update(`${ipAddress}-${viewer.userAgent}`).digest("hex");
+    return viewer;
+};
 
 const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -259,6 +305,19 @@ const toPublicProduct = (productDoc) => {
             }
             : product.createdBy || null
     };
+};
+
+const canModifyProduct = (productDoc, userDoc) => {
+    if (!productDoc || !userDoc) {
+        return false;
+    }
+
+    if (userDoc.role === "admin") {
+        return true;
+    }
+
+    const ownerId = productDoc.createdBy?.toString?.() || productDoc.createdBy;
+    return ownerId && ownerId.toString() === userDoc._id.toString();
 };
 
 const getCategoryDashboardPayload = async () => {
@@ -1203,18 +1262,48 @@ router.get("/getproductsone/:id", async (req, res) => {
 
     try {
         const { id } = req.params;
-        console.log(id);
+        const product = await products.findOne({ id: id });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
 
-        const individual = await products.findOneAndUpdate(
-            { id: id },
-            { $inc: { views: 1 } },
-            { new: true }
-        );
-        console.log(individual + "ind mila hai");
+        const viewer = getViewerIdentity(req, res);
+        const viewRecordQuery = { productId: id };
 
-        res.status(201).json(individual);
+        if (viewer.userId) {
+            viewRecordQuery.userId = viewer.userId;
+        } else if (viewer.sessionId) {
+            viewRecordQuery.sessionId = viewer.sessionId;
+        } else {
+            viewRecordQuery.ipHash = viewer.ipHash;
+        }
+
+        const alreadyViewed = await ProductView.findOne(viewRecordQuery);
+        if (!alreadyViewed) {
+            try {
+                await ProductView.create({
+                    productId: id,
+                    userId: viewer.userId || undefined,
+                    sessionId: viewer.sessionId || undefined,
+                    ipHash: viewer.ipHash || undefined,
+                    userAgent: viewer.userAgent
+                });
+            } catch (viewError) {
+                if (viewError?.code !== 11000) {
+                    console.log("view tracking error:", viewError.message);
+                }
+            }
+        }
+
+        const uniqueViews = await ProductView.countDocuments({ productId: id });
+        if (product.views !== uniqueViews) {
+            product.views = uniqueViews;
+            await product.save();
+        }
+
+        res.status(200).json(product);
     } catch (error) {
-        res.status(400).json(error);
+        res.status(400).json({ error: error.message });
     }
 });
 
@@ -1677,6 +1766,69 @@ router.get("/products/discounted", async (req, res) => {
     } catch (error) {
         console.log("Discounted products error:", error.message);
         res.status(500).json({ error: "Failed to fetch discounted products" });
+    }
+});
+
+// Owner-level product management
+router.get("/products/:id", authenicate, async (req, res) => {
+    try {
+        const product = await products.findOne({ id: req.params.id });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        if (!canModifyProduct(product, req.rootUser)) {
+            return res.status(403).json({ error: "Not allowed to access this product" });
+        }
+
+        res.status(200).json(toPublicProduct(product));
+    } catch (error) {
+        console.log("Fetch product error:", error.message);
+        res.status(500).json({ error: "Failed to fetch product" });
+    }
+});
+
+router.put("/products/:id", authenicate, async (req, res) => {
+    try {
+        const product = await products.findOne({ id: req.params.id });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        if (!canModifyProduct(product, req.rootUser)) {
+            return res.status(403).json({ error: "Not allowed to update this product" });
+        }
+
+        const payload = buildProductPayload(req.body, product);
+        Object.assign(product, payload);
+
+        await product.save();
+        const populated = await products.findById(product._id).populate("createdBy", "fname email");
+        res.status(200).json(toPublicProduct(populated));
+    } catch (error) {
+        console.log("Update product error:", error.message);
+        res.status(500).json({ error: "Failed to update product" });
+    }
+});
+
+router.delete("/products/:id", authenicate, async (req, res) => {
+    try {
+        const product = await products.findOne({ id: req.params.id });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        if (!canModifyProduct(product, req.rootUser)) {
+            return res.status(403).json({ error: "Not allowed to delete this product" });
+        }
+
+        await products.deleteOne({ _id: product._id });
+        await ProductView.deleteMany({ productId: product.id });
+
+        res.status(200).json({ success: true, deletedProductId: product.id });
+    } catch (error) {
+        console.log("Delete product error:", error.message);
+        res.status(500).json({ error: "Failed to delete product" });
     }
 });
 

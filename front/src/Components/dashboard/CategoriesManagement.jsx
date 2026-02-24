@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "./table";
 
 const UNCATEGORIZED = "Uncategorized";
 
@@ -69,71 +70,91 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
 
     return (
         <div className="admin_page" style={{ background: 'transparent' }}>
-            <header className="admin_page_header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', margin: 0 }}>{t('admin.manageCategories')}</h1>
-                    <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>{t('admin.welcomeMessage')}</p>
-                </div>
-                {!showForm && (
-                    <button className="btn_primary" onClick={() => setShowForm(true)}>{t('admin.createCategory')}</button>
-                )}
-            </header>
+           
 
             <div style={{ display: 'grid', gridTemplateColumns: showForm ? '1fr 400px' : '1fr', gap: '32px', alignItems: 'start' }}>
-                <section className="admin_table_wrapper">
-                    <div style={{ padding: '24px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ fontWeight: '800', color: '#1e293b', fontSize: '15px' }}>
-                            Segments <span style={{ color: '#94a3b8', fontSize: '13px', marginLeft: '8px', fontWeight: '500' }}>{categories.length} Total</span>
+                <section className="dashboard-section">
+                    <div className="dashboard-header">
+                        <div className="dashboard-title">
+                            Segments <span className="user-id">{categories.length} Total</span>
                         </div>
-                        <div className="admin_search_bar" style={{ width: '280px' }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            <input type="text" placeholder="Filter segments..." />
+                        <div className="search-container">
+                            <div className="search-icon-wrapper">
+                                <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                placeholder="Filter segments..." 
+                                className="search-input"
+                            />
                         </div>
                     </div>
 
-                    <table className="admin_table">
-                        <thead>
-                            <tr>
-                                <th>{t('auth.firstName')}</th>
-                                <th>{t('admin.totalProducts')}</th>
-                                <th>{t('common.status')}</th>
-                                <th style={{ textAlign: 'right' }}>{t('common.results')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t('auth.firstName')}</TableHead>
+                                <TableHead>{t('admin.totalProducts')}</TableHead>
+                                <TableHead>{t('common.status')}</TableHead>
+                                <TableHead className="text-right">{t('common.results')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {loading ? (
-                                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '80px' }}>Mapping Sectors...</td></tr>
+                                <TableRow>
+                                    <TableCell colSpan="4" className="loading-state">
+                                        <div className="loading-spinner"></div>
+                                        Mapping Sectors...
+                                    </TableCell>
+                                </TableRow>
                             ) : categories.map(cat => (
-                                <tr key={cat._id}>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                            <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#3b82f6' }}></div>
-                                            <div style={{ fontWeight: 800, color: '#1e293b' }}>{cat.name}</div>
+                                <TableRow key={cat._id}>
+                                    <TableCell>
+                                        <div className="product-info">
+                                            <div className="category-badge"></div>
+                                            <div className="product-name">{cat.name}</div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <div style={{ flex: '1', maxWidth: '80px', height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
-                                                <div style={{ width: `${Math.min(100, (cat.productCount || 0) * 10)}%`, height: '100%', background: '#3b82f6' }}></div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="product-info">
+                                            <div className="flex-1 max-w-20 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="progress-bar-fill"
+                                                    style={{ width: `${Math.min(100, (cat.productCount || 0) * 10)}%` }}
+                                                ></div>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '13px' }}>{cat.productCount || 0}</span>
+                                            <span className="product-category">{cat.productCount || 0}</span>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <span className="status_pill active">Operational</span>
-                                    </td>
-                                    <td style={{ textAlign: 'right' }}>
-                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                            <button className="btn_outline" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => { setEditingId(cat._id); setEditName(cat.name); setShowForm(true); }}>Edit</button>
+                                    </TableCell>
+                                    <TableCell>
+                                        <span className="status-badge active">
+                                            Operational
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="action-buttons">
+                                            <button 
+                                                className="btn-secondary" 
+                                                onClick={() => { setEditingId(cat._id); setEditName(cat.name); setShowForm(true); }}
+                                            >
+                                                Edit
+                                            </button>
                                             {cat.name !== UNCATEGORIZED && (
-                                                <button className="btn_outline" style={{ padding: '6px 12px', fontSize: '12px', color: '#ef4444' }} onClick={() => deleteCategory(cat)}>Delete</button>
+                                                <button 
+                                                    className="btn-secondary" 
+                                                    onClick={() => deleteCategory(cat)}
+                                                >
+                                                    Delete
+                                                </button>
                                             )}
                                         </div>
-                                    </td>
-                                </tr>
+                                    </TableCell>
+                                </TableRow>
                             ))}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
                 </section>
 
                 {showForm && (

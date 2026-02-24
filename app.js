@@ -8,6 +8,7 @@ const compression = require("compression");
 const DefaultData = require("./defaultdata");
 const connectDB = require("./db/conn");
 const router = require("./routes/router");
+const allowedOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173,http://127.0.0.1:5173").split(",").map((o) => o.trim()).filter(Boolean);
 
 
 // middleware
@@ -15,8 +16,12 @@ app.use(compression());
 app.use(express.json());
 app.use(cookieParser(""));
 app.use((req, res, next) => {
-    const allowedOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-    res.header("Access-Control-Allow-Origin", allowedOrigin);
+    const requestOrigin = req.headers.origin;
+    const originToUse = allowedOrigins.includes(requestOrigin)
+        ? requestOrigin
+        : (process.env.CLIENT_ORIGIN || allowedOrigins[0] || "http://localhost:5173");
+
+    res.header("Access-Control-Allow-Origin", originToUse);
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
