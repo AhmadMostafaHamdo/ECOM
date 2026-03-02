@@ -49,9 +49,9 @@ const Footer = () => {
     <footer>
       <div className="footer_content">
         <div className="footer_intro">
-          <img src="./amazon_PNG25.png" alt="logo" className="footer_logo" />
-          <h3>{t('footer.studioCommerce')}</h3>
-          <p>{t('footer.tagline')}</p>
+          <img src="./kik-2.png" alt="logo" className="footer_logo" />
+          <h3>{t("footer.studioCommerce")}</h3>
+          <p>{t("footer.tagline")}</p>
           <div className="social_links">
             <a href="#" className="social_link" aria-label="Facebook">
               <svg
@@ -103,8 +103,14 @@ const Footer = () => {
       </div>
 
       <div className="footer_bottom">
-        <p>{t('footer.conditions')} | {t('footer.privacyPolicy')} | {t('footer.accessibility')} | {t('footer.trustCenter')}</p>
-        <small>Copyright {year} {t('footer.studioCommerce')}. {t('footer.allRightsReserved')}</small>
+        <p>
+          {t("footer.conditions")} | {t("footer.privacyPolicy")} |{" "}
+          {t("footer.accessibility")} | {t("footer.trustCenter")}
+        </p>
+        <small>
+          Copyright {year} {t("footer.studioCommerce")}.{" "}
+          {t("footer.allRightsReserved")}
+        </small>
       </div>
     </footer>
   );

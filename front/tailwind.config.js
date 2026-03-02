@@ -1,88 +1,93 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
         // Brand colors from existing design system
         brand: {
-          DEFAULT: '#2563eb',
-          strong: '#1d4ed8',
-          soft: '#eff6ff',
+          DEFAULT: "#2563eb",
+          strong: "#1d4ed8",
+          soft: "#eff6ff",
         },
         // Background colors
         bg: {
-          main: '#fafbfc',
-          accent: '#f3f4f6',
+          main: "#fafbfc",
+          accent: "#f3f4f6",
         },
         // Surface colors
-        surface: '#ffffff',
-        'surface-alt': '#f9fafb',
+        surface: "#ffffff",
+        "surface-alt": "#f9fafb",
         // Text colors
         text: {
-          main: '#111827',
-          muted: '#6b7280',
+          main: "#111827",
+          muted: "#6b7280",
         },
         // Accent colors
-        highlight: '#f59e0b',
-        success: '#10b981',
-        danger: '#ef4444',
+        highlight: "#f59e0b",
+        success: "#10b981",
+        danger: "#ef4444",
         // Line colors
-        line: '#e5e7eb',
+        line: "#e5e7eb",
+        // Primary brand colors (orange theme)
+        primary: "#EF9806",
+        "primary-hover": "#D97F00",
+        "primary-light": "#FFF4E6",
+        // Text colors
+        "text-primary": "#878785",
+        "text-secondary": "#555555",
+        "text-muted": "#999999",
         // Admin accent colors
-        'admin-accent-blue': '#3b82f6',
-        'admin-accent-blue-soft': '#eff6ff',
+        "admin-accent-blue": "#3b82f6",
+        "admin-accent-blue-soft": "#eff6ff",
       },
       fontFamily: {
-        'sans': ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
-        'heading': ['Outfit', 'Manrope', 'sans-serif'],
+        sans: ["Manrope", "Inter", "system-ui", "sans-serif"],
+        heading: ["Outfit", "Manrope", "sans-serif"],
       },
       boxShadow: {
-        'soft': '0 1px 3px rgba(0, 0, 0, 0.1)',
-        'strong': '0 10px 40px rgba(0, 0, 0, 0.1)',
+        soft: "0 1px 3px rgba(0, 0, 0, 0.1)",
+        strong: "0 10px 40px rgba(0, 0, 0, 0.1)",
       },
       borderRadius: {
-        'lg': '12px',
-        'md': '8px',
-        'sm': '6px',
+        lg: "12px",
+        md: "8px",
+        sm: "6px",
       },
       maxWidth: {
-        'shell': '1440px',
+        shell: "1440px",
       },
       spacing: {
-        'header': '64px',
-        'subnav': '52px',
+        header: "64px",
+        subnav: "52px",
       },
       animation: {
-        'page-fade': 'pageFade 0.55s ease-out',
-        'fade-in': 'fadeIn 0.5s ease forwards',
+        "page-fade": "pageFade 0.55s ease-out",
+        "fade-in": "fadeIn 0.5s ease forwards",
       },
       keyframes: {
         pageFade: {
           from: {
-            opacity: '0',
-            transform: 'translateY(12px)',
+            opacity: "0",
+            transform: "translateY(12px)",
           },
           to: {
-            opacity: '1',
-            transform: 'translateY(0)',
+            opacity: "1",
+            transform: "translateY(0)",
           },
         },
         fadeIn: {
           from: {
-            opacity: '0',
-            transform: 'translateY(20px)',
+            opacity: "0",
+            transform: "translateY(20px)",
           },
           to: {
-            opacity: '1',
-            transform: 'translateY(0)',
+            opacity: "1",
+            transform: "translateY(0)",
           },
         },
       },
     },
   },
   plugins: [],
-}
+};

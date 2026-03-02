@@ -28,6 +28,7 @@ const AdminDashboard = lazy(
 const ProfilePage = lazy(() => import("./Components/profile/ProfilePage"));
 const CreateProduct = lazy(() => import("./Components/products/CreateProduct"));
 const AllProducts = lazy(() => import("./Components/products/AllProducts"));
+const ContactUs = lazy(() => import("./Components/ContactUs"));
 
 const CATEGORY_ALL = "All Categories";
 
@@ -209,6 +210,9 @@ function App() {
                     </Route>
                     <Route exact path="/products/all/:category?">
                       {isAdmin ? <Redirect to="/dashboard" /> : <AllProducts />}
+                    </Route>
+                    <Route exact path="/contact">
+                      {isAdmin ? <Redirect to="/dashboard" /> : <ContactUs />}
                     </Route>
                     <Route>
                       <Redirect to="/" />

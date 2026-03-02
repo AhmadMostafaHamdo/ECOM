@@ -13,188 +13,215 @@ import { apiUrl } from "../../api";
 
 const CATEGORY_ALL = "All Categories";
 
-const Maincomp = React.memo(({ selectedCategory = CATEGORY_ALL, filters = null, setSelectedCategory, searchTerm = "" }) => {
+const Maincomp = React.memo(
+  ({
+    selectedCategory = CATEGORY_ALL,
+    filters = null,
+    setSelectedCategory,
+    searchTerm = "",
+  }) => {
     const { t } = useTranslation();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        let isMounted = true;
+      let isMounted = true;
 
-        const fetchProducts = async () => {
-            setLoading(true);
-            try {
-                const payload = {
-                    category: (selectedCategory && selectedCategory !== CATEGORY_ALL) ? selectedCategory : undefined,
-                    selections: filters?.selections || {},
-                    price: filters?.price ?? null,
-                    search: searchTerm
-                };
+      const fetchProducts = async () => {
+        setLoading(true);
+        try {
+          const payload = {
+            category:
+              selectedCategory && selectedCategory !== CATEGORY_ALL
+                ? selectedCategory
+                : undefined,
+            selections: filters?.selections || {},
+            price: filters?.price ?? null,
+            search: searchTerm,
+          };
 
-                const response = await fetch(apiUrl("/products/filter"), {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
+          const response = await fetch(apiUrl("/products/filter"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
 
-                const resData = await response.json();
-                if (isMounted) {
-                    setProducts(resData.products || (Array.isArray(resData) ? resData : []));
-                }
-            } catch (error) {
-                if (isMounted) {
-                    setProducts([]);
-                }
-                console.log("Products fetch failed:", error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+          const resData = await response.json();
+          if (isMounted) {
+            setProducts(
+              resData.products || (Array.isArray(resData) ? resData : []),
+            );
+          }
+        } catch (error) {
+          if (isMounted) {
+            setProducts([]);
+          }
+          console.log("Products fetch failed:", error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-        fetchProducts();
+      fetchProducts();
 
-        return () => {
-            isMounted = false;
-        };
+      return () => {
+        isMounted = false;
+      };
     }, [selectedCategory, filters, searchTerm]);
 
     if (loading) {
-        return (
-            <div className="main_loader">
-                <div className="loader_content">
-                    <div className="loader_icon">
-                        <ShoppingBagIcon className="shopping_icon pulse" />
-                    </div>
-                    <div className="loader_spinner_main"></div>
-                    <h2>{t('home.preparingCollections')}</h2>
-                    <p>{t('home.loadingPersonalized')}</p>
-                    <div className="loader_progress">
-                        <div className="loader_progress_bar"></div>
-                    </div>
-                </div>
+      return (
+        <div className="main_loader">
+          <div className="loader_content">
+            <div className="loader_icon">
+              <ShoppingBagIcon className="shopping_icon pulse" />
             </div>
-        );
+            <div className="loader_spinner_main"></div>
+            <h2>{t("home.preparingCollections")}</h2>
+            <p>{t("home.loadingPersonalized")}</p>
+            <div className="loader_progress">
+              <div className="loader_progress_bar"></div>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     return (
-        <>
-            <div className="home_section">
-                <section className="hero_grid">
-                    <div className="banner_part">
-                        <Banner />
-                    </div>
-
-                    <aside className="right_slide">
-                        <div className="right_slide_content">
-                            <h4>{t('home.premiumCollection')}</h4>
-                            <p>{t('home.premiumDescription')}</p>
-                            <div className="right_img_wrapper">
-                                <img
-                                    src="https://images-eu.ssl-images-amazon.com/images/G/31/img21/Wireless/Jupiter/Launches/T3/DesktopGateway_CategoryCard2x_758X608_T3._SY608_CB639883570_.jpg"
-                                    alt="Latest launch"
-                                    loading="lazy"
-                                />
-                            </div>
-                            <button type="button" className="explore_link">
-                                {t('home.exploreCollection')}
-                            </button>
-                        </div>
-                    </aside>
-                </section>
-
-                <section className="category_status">
-                    <h4>{selectedCategory === CATEGORY_ALL ? t('home.showingAll') : `${t('home.category')}: ${selectedCategory}`}</h4>
-                    <p>{products.length} {t('home.productsAvailable')}{products.length === 1 ? "" : "s"}</p>
-                </section>
-
-                <section className="trust_strip">
-                    <article>
-                        <LocalShippingIcon />
-                        <div>
-                            <h5>{t('home.fastDelivery')}</h5>
-                            <p>{t('home.fastDeliveryDesc')}</p>
-                        </div>
-                    </article>
-                    <article>
-                        <StarIcon />
-                        <div>
-                            <h5>{t('home.verifiedQuality')}</h5>
-                            <p>{t('home.verifiedQualityDesc')}</p>
-                        </div>
-                    </article>
-                    <article>
-                        <TrendingUpIcon />
-                        <div>
-                            <h5>{t('home.secureCheckout')}</h5>
-                            <p>{t('home.secureCheckoutDesc')}</p>
-                        </div>
-                    </article>
-                </section>
-
-                {products.length > 0 ? (
-                    <>
-                        {selectedCategory === CATEGORY_ALL && !filters && !searchTerm ? (
-                            <SpecialProductSections />
-                        ) : (
-                            <>
-                                <Slide
-                                    title={selectedCategory === CATEGORY_ALL ? t("allProducts.title") : selectedCategory}
-                                    products={products}
-                                    category={selectedCategory === CATEGORY_ALL ? "all" : selectedCategory}
-                                />
-
-                                <div className="center_img">
-                                    <div className="center_img_overlay">
-                                        <h3>{t('home.savingsHub')}</h3>
-                                        <p>{t('home.savingsDescription')}</p>
-                                    </div>
-                                    <img
-                                        src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"
-                                        alt="Special offers"
-                                        loading="lazy"
-                                    />
-                                </div>
-                            </>
-                        )}
-                    </>
-                ) : (
-                    <div className="category_empty_state">
-                        <span className="floating_icon">🛍️</span>
-                        <span className="floating_icon">🔍</span>
-                        <span className="floating_icon">📱</span>
-                        <span className="floating_icon">💎</span>
-
-                        <h3 className="empty_title">{t('home.noProductsFound')}</h3>
-                        <p className="empty_description">
-                            {t('home.noProductsDesc')}
-                        </p>
-                        <div className="empty_actions">
-                            <button
-                                type="button"
-                                className="action_btn primary_btn"
-                                onClick={() => setSelectedCategory && setSelectedCategory(CATEGORY_ALL)}
-                            >
-                                <span>🏠</span>
-                                {t('home.browseAllProducts')}
-                            </button>
-                            <button
-                                type="button"
-                                className="action_btn secondary_btn"
-                                onClick={() => window.location.reload()}
-                            >
-                                <span>🔄</span>
-                                {t('home.refreshPage')}
-                            </button>
-                        </div>
-                    </div>
-                )}
+      <>
+        <div className="home_section">
+          <section className="hero_grid">
+            <div className="banner_part">
+              <Banner />
             </div>
 
-            <Divider className="main_divider" />
-        </>
+            <aside className="right_slide">
+              <div className="right_slide_content">
+                <h4>{t("home.premiumCollection")}</h4>
+                <p>{t("home.premiumDescription")}</p>
+                <div className="right_img_wrapper">
+                  <img
+                    src="https://images-eu.ssl-images-amazon.com/images/G/31/img21/Wireless/Jupiter/Launches/T3/DesktopGateway_CategoryCard2x_758X608_T3._SY608_CB639883570_.jpg"
+                    alt="Latest launch"
+                    loading="lazy"
+                  />
+                </div>
+                <button type="button" className="explore_link">
+                  {t("home.exploreCollection")}
+                </button>
+              </div>
+            </aside>
+          </section>
+
+          <section className="category_status">
+            <h4>
+              {selectedCategory === CATEGORY_ALL
+                ? t("home.showingAll")
+                : `${t("home.category")}: ${selectedCategory}`}
+            </h4>
+            <p>
+              {products.length} {t("home.productsAvailable")}
+              {products.length === 1 ? "" : "s"}
+            </p>
+          </section>
+
+          <section className="trust_strip">
+            <article>
+              <LocalShippingIcon />
+              <div>
+                <h5>{t("home.fastDelivery")}</h5>
+                <p>{t("home.fastDeliveryDesc")}</p>
+              </div>
+            </article>
+            <article>
+              <StarIcon />
+              <div>
+                <h5>{t("home.verifiedQuality")}</h5>
+                <p>{t("home.verifiedQualityDesc")}</p>
+              </div>
+            </article>
+            <article>
+              <TrendingUpIcon />
+              <div>
+                <h5>{t("home.secureCheckout")}</h5>
+                <p>{t("home.secureCheckoutDesc")}</p>
+              </div>
+            </article>
+          </section>
+
+          {products.length > 0 ? (
+            <>
+              {selectedCategory === CATEGORY_ALL && !filters && !searchTerm ? (
+                <SpecialProductSections />
+              ) : (
+                <>
+                  <Slide
+                    title={
+                      selectedCategory === CATEGORY_ALL
+                        ? t("allProducts.title")
+                        : selectedCategory
+                    }
+                    products={products}
+                    category={
+                      selectedCategory === CATEGORY_ALL
+                        ? "all"
+                        : selectedCategory
+                    }
+                  />
+
+                  <div className="center_img">
+                    <div className="center_img_overlay">
+                      <h3>{t("home.savingsHub")}</h3>
+                      <p>{t("home.savingsDescription")}</p>
+                    </div>
+                    <img
+                      src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"
+                      alt="Special offers"
+                      loading="lazy"
+                    />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="category_empty_state">
+              <span className="floating_icon">🛍️</span>
+              <span className="floating_icon">🔍</span>
+              <span className="floating_icon">📱</span>
+              <span className="floating_icon">💎</span>
+
+              <h3 className="empty_title">{t("home.noProductsFound")}</h3>
+              <p className="empty_description">{t("home.noProductsDesc")}</p>
+              <div className="empty_actions">
+                <button
+                  type="button"
+                  className="action_btn primary_btn"
+                  onClick={() =>
+                    setSelectedCategory && setSelectedCategory(CATEGORY_ALL)
+                  }
+                >
+                  <span>🏠</span>
+                  {t("home.browseAllProducts")}
+                </button>
+                <button
+                  type="button"
+                  className="action_btn secondary_btn"
+                  onClick={() => window.location.reload()}
+                >
+                  <span>🔄</span>
+                  {t("home.refreshPage")}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Divider className="main_divider" />
+      </>
     );
-});
+  },
+);
 
 export default Maincomp;

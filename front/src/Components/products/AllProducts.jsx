@@ -203,6 +203,7 @@ const AllProducts = () => {
                                         onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
                                     />
                                 </div>
+                                <br/>
                                 <div className="price_box">
                                     <span>{t('allProducts.max')}</span>
                                     <input

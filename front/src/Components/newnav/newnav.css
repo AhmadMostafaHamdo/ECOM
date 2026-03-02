@@ -1,6 +1,6 @@
 :root {
-    --nav-blue: #3b82f6;
-    --nav-indigo: #6366f1;
+    --nav-orange: #f5a623;
+    --nav-gray: #6b6b6b;
     --nav-glass: rgba(255, 255, 255, 0.8);
     --text-main: #1e293b;
     --text-muted: #64748b;
@@ -11,8 +11,7 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    /* Align perfectly under your fixed 70px header */
-    margin-top: 70px; 
+    margin-top: 70px;
     position: sticky;
     top: 70px;
     z-index: 1000;
@@ -30,8 +29,7 @@
     gap: 10px;
     overflow-x: auto;
     padding: 12px 0;
-    /* Hide scrollbar for a cleaner look while keeping functionality */
-    scrollbar-width: none; 
+    scrollbar-width: none;
 }
 
 .left_data::-webkit-scrollbar {
@@ -53,21 +51,22 @@
 }
 
 .category_chip:hover {
-    background: #e2e8f0;
+    background: #fef3d0;
     color: var(--text-main);
     transform: translateY(-1px);
+    border-color: rgba(245, 166, 35, 0.2);
 }
 
 .category_chip.active {
-    background: linear-gradient(135deg, var(--nav-blue), var(--nav-indigo));
+    background: linear-gradient(135deg, var(--nav-orange), var(--nav-gray));
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    box-shadow: 0 4px 12px rgba(245, 166, 35, 0.3);
 }
 
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
     .new_nav {
-        margin-top: 60px; /* Match smaller header height on mobile if changed */
+        margin-top: 60px;
         top: 60px;
     }
     .left_data {

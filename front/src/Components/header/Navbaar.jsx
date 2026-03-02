@@ -87,7 +87,7 @@ const Navbaar = React.memo(({ onSearch }) => {
           </Drawer>
 
           <NavLink to="/" className="navlogo">
-            <img src="/amazon_PNG25.png" alt="logo" />
+            <img src="/kik-2.png" alt="logo" />
             <span className="logo_badge">Studio Commerce</span>
           </NavLink>
         </div>
@@ -144,6 +144,9 @@ const Navbaar = React.memo(({ onSearch }) => {
 
           <div className="desktop_items">
             <LanguageSwitcher />
+            <NavLink to="/contact" className="nav_pill_btn">
+              {t("navigation.contact")}
+            </NavLink>
             {isAdmin && (
               <NavLink to="/dashboard" className="nav_pill_btn">
                 {t("navigation.dashboard")}
@@ -180,20 +183,35 @@ const Navbaar = React.memo(({ onSearch }) => {
             className="profile_popover"
             transformOrigin={{ horizontal: "right", vertical: "top" }}
             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            PaperProps={{
+              elevation: 8,
+              className: "profile_menu_paper",
+            }}
+            MenuListProps={{
+              className: "profile_menu_list",
+            }}
           >
             <MenuItem
+              className="profile_menu_item"
               onClick={() => {
                 history.push("/profile");
                 setAnchorEl(null);
               }}
             >
-              <AccountCircleIcon fontSize="small" style={{ marginRight: 10 }} />
-              {t("navigation.profile")}
+              <div className="menu_item_icon">
+                <AccountCircleIcon fontSize="small" />
+              </div>
+              <span className="menu_item_text">{t("navigation.profile")}</span>
             </MenuItem>
             {account && (
-              <MenuItem onClick={logoutuser}>
-                <LogoutIcon fontSize="small" style={{ marginRight: 10 }} />
-                {t("navigation.logout")}
+              <MenuItem
+                className="profile_menu_item logout_item"
+                onClick={logoutuser}
+              >
+                <div className="menu_item_icon">
+                  <LogoutIcon fontSize="small" />
+                </div>
+                <span className="menu_item_text">{t("navigation.logout")}</span>
               </MenuItem>
             )}
           </Menu>

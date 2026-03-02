@@ -14,7 +14,7 @@ footer::before {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+    background: linear-gradient(90deg, transparent, rgba(245, 166, 35, 0.5), transparent);
 }
 
 .footer_content {
@@ -32,10 +32,8 @@ footer::before {
 }
 
 .footer_logo {
-    width: 120px;
+    width: 15rem;
     height: auto;
-    margin-bottom: 20px;
-    filter: brightness(0) invert(1);
     transition: transform 0.3s ease;
 }
 
@@ -47,7 +45,7 @@ footer::before {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 15px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #f5a623, #6b6b6b);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -82,7 +80,7 @@ footer::before {
     left: 0;
     width: 40px;
     height: 2px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(90deg, #f5a623, #6b6b6b);
     border-radius: 1px;
 }
 
@@ -112,7 +110,7 @@ footer::before {
     left: 0;
     width: 0;
     height: 1px;
-    background: #3b82f6;
+    background: #f5a623;
     transition: width 0.3s ease;
 }
 
@@ -168,10 +166,10 @@ footer::before {
 }
 
 .social_link:hover {
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #f5a623, #6b6b6b);
     color: white;
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 25px rgba(245, 166, 35, 0.3);
 }
 
 @media (max-width: 1024px) {

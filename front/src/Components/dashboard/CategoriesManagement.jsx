@@ -1,192 +1,361 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "./table";
+import DynamicTable from "./DynamicTable";
+import { Button } from "./Button";
+import { Pencil, Trash2 } from "lucide-react";
 
-const UNCATEGORIZED = "Uncategorized";
+const UNCATEGORIZED = "uncategorized";
 
-const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
-    const { t } = useTranslation();
-    const [categories, setCategories] = useState([]);
-    const [categoryName, setCategoryName] = useState("");
-    const [editingId, setEditingId] = useState("");
-    const [editName, setEditName] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [showForm, setShowForm] = useState(false);
-    const [error, setError] = useState("");
+const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
+  const { t } = useTranslation();
+  const [categories, setCategories] = useState([]);
+  const [categoryName, setCategoryName] = useState("");
+  const [editingId, setEditingId] = useState("");
+  const [editName, setEditName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 0,
+    currentPage: 1,
+    limit: 10,
+  });
+  const [saving, setSaving] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-    const loadCategories = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await fetch(apiUrl("/admin/categories"), {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include"
-            });
-            if (response.ok) {
-                const payload = await response.json();
-                setCategories(Array.isArray(payload) ? payload : []);
-            }
-        } catch (err) { console.error(err); } finally { setLoading(false); }
-    }, []);
+  const loadCategories = useCallback(
+    async (search = "", page = 1, limit = 10) => {
+      setLoading(true);
+      try {
+        const queryParams = new URLSearchParams({
+          page,
+          limit,
+          ...(search && { search }),
+        });
+        const response = await fetch(
+          apiUrl(`/admin/categories?${queryParams.toString()}`),
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          },
+        );
+        if (response.ok) {
+          const payload = await response.json();
+          setCategories(payload.data || []);
+          setPagination(
+            payload.pagination || {
+              totalItems: 0,
+              totalPages: 0,
+              currentPage: 1,
+              limit: 10,
+            },
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
-    useEffect(() => { loadCategories(); }, [loadCategories]);
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
-    const addCategory = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            const response = await fetch(apiUrl("/admin/categories"), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ name: categoryName.trim() })
-            });
-            if (response.ok) {
-                setCategoryName("");
-                setShowForm(false);
-                loadCategories();
-                onCategoriesChanged();
-            }
-        } catch (err) { console.error(err); } finally { setSaving(false); }
-    };
+  // Server-side search handler passed to DynamicTable
+  const handleSearch = useCallback(
+    (term) => loadCategories(term, 1, pagination.limit),
+    [loadCategories, pagination.limit],
+  );
 
-    const deleteCategory = async (category) => {
-        if (!window.confirm(`Delete ${category.name}?`)) return;
-        setSaving(true);
-        try {
-            const response = await fetch(apiUrl(`/admin/categories/${category._id}`), {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include"
-            });
-            if (response.ok) {
-                loadCategories();
-                onCategoriesChanged();
-            }
-        } catch (err) { console.error(err); } finally { setSaving(false); }
-    };
+  const handlePageChange = useCallback(
+    (newPage) => loadCategories("", newPage, pagination.limit),
+    [loadCategories, pagination.limit],
+  );
 
-    return (
-        <div className="admin_page" style={{ background: 'transparent' }}>
-           
+  const handlePageSizeChange = useCallback(
+    (newSize) => loadCategories("", 1, newSize),
+    [loadCategories],
+  );
 
-            <div style={{ display: 'grid', gridTemplateColumns: showForm ? '1fr 400px' : '1fr', gap: '32px', alignItems: 'start' }}>
-                <section className="dashboard-section">
-                    <div className="dashboard-header">
-                        <div className="dashboard-title">
-                            Segments <span className="user-id">{categories.length} Total</span>
-                        </div>
-                        <div className="search-container">
-                            <div className="search-icon-wrapper">
-                                <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input 
-                                type="text" 
-                                placeholder="Filter segments..." 
-                                className="search-input"
-                            />
-                        </div>
-                    </div>
+  const addCategory = async (e) => {
+    e.preventDefault();
+    if (!categoryName.trim()) return;
+    setSaving(true);
+    try {
+      const response = await fetch(apiUrl("/admin/categories"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: categoryName.trim() }),
+      });
+      if (response.ok) {
+        setCategoryName("");
+        setShowForm(false);
+        loadCategories();
+        onCategoriesChanged();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('auth.firstName')}</TableHead>
-                                <TableHead>{t('admin.totalProducts')}</TableHead>
-                                <TableHead>{t('common.status')}</TableHead>
-                                <TableHead className="text-right">{t('common.results')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan="4" className="loading-state">
-                                        <div className="loading-spinner"></div>
-                                        Mapping Sectors...
-                                    </TableCell>
-                                </TableRow>
-                            ) : categories.map(cat => (
-                                <TableRow key={cat._id}>
-                                    <TableCell>
-                                        <div className="product-info">
-                                            <div className="category-badge"></div>
-                                            <div className="product-name">{cat.name}</div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="product-info">
-                                            <div className="flex-1 max-w-20 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                <div 
-                                                    className="progress-bar-fill"
-                                                    style={{ width: `${Math.min(100, (cat.productCount || 0) * 10)}%` }}
-                                                ></div>
-                                            </div>
-                                            <span className="product-category">{cat.productCount || 0}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="status-badge active">
-                                            Operational
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="action-buttons">
-                                            <button 
-                                                className="btn-secondary" 
-                                                onClick={() => { setEditingId(cat._id); setEditName(cat.name); setShowForm(true); }}
-                                            >
-                                                Edit
-                                            </button>
-                                            {cat.name !== UNCATEGORIZED && (
-                                                <button 
-                                                    className="btn-secondary" 
-                                                    onClick={() => deleteCategory(cat)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </section>
+  const updateCategory = async (e) => {
+    e.preventDefault();
+    if (!editName.trim()) return;
+    setSaving(true);
+    try {
+      const response = await fetch(apiUrl(`/admin/categories/${editingId}`), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: editName.trim() }),
+      });
+      if (response.ok) {
+        setShowForm(false);
+        setEditingId("");
+        setEditName("");
+        loadCategories();
+        onCategoriesChanged();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
-                {showForm && (
-                    <section className="admin_card" style={{ position: 'sticky', top: '104px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', margin: 0 }}>
-                                {editingId ? t('admin.editCategory') : t('admin.createCategory')}
-                            </h2>
-                            <button onClick={() => { setShowForm(false); setEditingId(""); setCategoryName(""); }} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
-                        </div>
-                        <form className="admin_form" onSubmit={editingId ? (e) => { e.preventDefault(); /* implement update logic if needed or use same as add */ } : addCategory}>
-                            <div>
-                                <label>Segment Identifier</label>
-                                <input
-                                    type="text"
-                                    value={editingId ? editName : categoryName}
-                                    onChange={(e) => editingId ? setEditName(e.target.value) : setCategoryName(e.target.value)}
-                                    required
-                                    placeholder="e.g. Next-Gen Tech"
-                                />
-                            </div>
-                            <div style={{ marginTop: '20px' }}>
-                                <button type="submit" className="btn_primary" style={{ width: '100%' }} disabled={saving}>
-                                    {saving ? t('common.loading') : editingId ? t('admin.editCategory') : t('admin.createCategory')}
-                                </button>
-                            </div>
-                        </form>
-                    </section>
-                )}
+  const deleteCategory = async (category) => {
+    if (
+      !window.confirm(`${t("admin.deleteCategoryConfirm")} "${category.name}"?`)
+    )
+      return;
+    setSaving(true);
+    try {
+      const response = await fetch(
+        apiUrl(`/admin/categories/${category._id}`),
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        },
+      );
+      if (response.ok) {
+        loadCategories();
+        onCategoriesChanged();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="admin_page" style={{ background: "transparent" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: showForm ? "1fr 400px" : "1fr",
+          gap: "32px",
+          alignItems: "start",
+        }}
+      >
+        <section className="dashboard-section">
+          <div className="dashboard-header">
+            <div className="dashboard-title">
+              {t("admin.segments")}{" "}
+              <span className="user-id">
+                {categories.length} {t("admin.total")}
+              </span>
             </div>
-        </div>
-    );
+            <button
+              className="btn_primary"
+              style={{ fontSize: 13 }}
+              onClick={() => {
+                setShowForm(true);
+                setEditingId("");
+                setCategoryName("");
+              }}
+            >
+              + {t("admin.createCategory")}
+            </button>
+          </div>
+
+          <DynamicTable
+            data={categories}
+            loading={loading}
+            emptyMessage={t("admin.noSegmentsFound")}
+            loadingMessage={t("admin.mappingSectors")}
+            cacheKey="categories-management"
+            cacheTTL={30000}
+            title={t("admin.segments")}
+            subtitle={`${categories.length} ${t("admin.totalSegments")}`}
+            searchable={true}
+            searchPlaceholder={t("admin.searchSegments")}
+            searchMode="server"
+            onSearch={handleSearch}
+            searchDebounceMs={400}
+            searchKeys={["name"]}
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            onRefresh={() =>
+              loadCategories("", pagination.currentPage, pagination.limit)
+            }
+            columns={[
+              {
+                // FIX: key="name" so sorting works AND avatar callbacks get the item
+                key: "name",
+                title: t("admin.segmentName"),
+                type: "avatar",
+                getAvatarText: (cat) => cat.name?.[0]?.toUpperCase() || "?",
+                getName: (cat) => cat.name || "—",
+                getSubtitle: (cat) =>
+                  cat._id ? `ID: ${cat._id.slice(-8)}` : "",
+                sortable: true,
+              },
+              {
+                key: "productCount",
+                title: t("admin.products"),
+                type: "progress",
+                sortable: true,
+              },
+              {
+                // FIX: key="name" reused — getStatusClass/Text ignore the value
+                // and always return "active"/"Active", so any key is fine here.
+                // Using a dedicated key avoids collision with sorting.
+                key: "_id",
+                title: t("common.status"),
+                type: "status",
+                getStatusClass: () => "active",
+                getStatusText: () => t("common.active"),
+                align: "center",
+              },
+              {
+                key: "actions",
+                title: t("common.actions"),
+                type: "actions",
+                align: "center",
+              },
+            ]}
+            actions={[
+              {
+                icon: Pencil,
+                label: t("common.edit"),
+                tooltipKey: "common.edit",
+                variant: "edit",
+                onClick: (cat) => {
+                  setEditingId(cat._id);
+                  setEditName(cat.name);
+                  setShowForm(true);
+                },
+              },
+              {
+                icon: Trash2,
+                label: t("common.delete"),
+                tooltipKey: "common.delete",
+                variant: "delete",
+                onClick: (cat) => deleteCategory(cat),
+                // FIX: "Uncategorized" row should NOT show delete button
+                isVisible: (cat) => cat.name !== t("admin.uncategorized"),
+              },
+            ]}
+          />
+        </section>
+
+        {showForm && (
+          <section
+            className="admin_card"
+            style={{ position: "sticky", top: "88px" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "24px",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "800",
+                  color: "#0f1729",
+                  margin: 0,
+                }}
+              >
+                {editingId
+                  ? t("admin.editCategory")
+                  : t("admin.createCategory")}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingId("");
+                  setCategoryName("");
+                }}
+                style={{
+                  border: "1.5px solid #e2e8f0",
+                  background: "#f8fafc",
+                  cursor: "pointer",
+                  color: "#94a3b8",
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 14,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              className="admin_form"
+              onSubmit={editingId ? updateCategory : addCategory}
+            >
+              <div>
+                <label>Segment Identifier</label>
+                <input
+                  type="text"
+                  value={editingId ? editName : categoryName}
+                  onChange={(e) =>
+                    editingId
+                      ? setEditName(e.target.value)
+                      : setCategoryName(e.target.value)
+                  }
+                  required
+                  placeholder="e.g. Next-Gen Tech"
+                />
+              </div>
+              <div style={{ marginTop: "20px" }}>
+                <button
+                  type="submit"
+                  className="btn_primary"
+                  style={{ width: "100%" }}
+                  disabled={saving}
+                >
+                  {saving
+                    ? t("common.loading")
+                    : editingId
+                      ? t("admin.editCategory")
+                      : t("admin.createCategory")}
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default CategoriesManagement;
