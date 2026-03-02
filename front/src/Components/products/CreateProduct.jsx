@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import ImageUpload from "./ImageUpload";
@@ -21,7 +21,7 @@ const initialForm = {
 
 const CreateProduct = ({ mode = "create" }) => {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id: editId } = useParams();
   const isEdit = mode === "edit" && Boolean(editId);
 
@@ -47,7 +47,7 @@ const CreateProduct = ({ mode = "create" }) => {
         });
 
         if (!profileRes.ok) {
-          history.push("/login");
+          navigate("/login");
           return;
         }
 
@@ -119,7 +119,7 @@ const CreateProduct = ({ mode = "create" }) => {
       } catch (loadError) {
         setError(loadError.message);
         if (isEdit) {
-          setTimeout(() => history.push("/profile"), 800);
+          setTimeout(() => navigate("/profile"), 800);
         }
       } finally {
         setLoading(false);
@@ -184,7 +184,7 @@ const CreateProduct = ({ mode = "create" }) => {
       setMessage(
         isEdit ? "Product updated successfully" : t("productCreator.success"),
       );
-      setTimeout(() => history.push("/profile"), 900);
+      setTimeout(() => navigate("/profile"), 900);
     } catch (submitError) {
       setError(submitError.message);
     } finally {

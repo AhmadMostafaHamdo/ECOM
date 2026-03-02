@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import "../home/slide.css";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { ArrowForward, LocalOffer, StarRate, Visibility } from "@mui/icons-material";
 
 const responsive = {
@@ -23,13 +23,13 @@ const responsive = {
 
 const Slide = React.memo(({ title, products, category }) => {
     const { t } = useTranslation();
-    const history = useHistory();
+    const navigate = useNavigate();
     const items = Array.isArray(products) ? products : [];
 
     const handleViewAll = () => {
         // Use provided category or extract from title
         const targetCategory = category || (title ? title.toLowerCase().replace(/\s+/g, '-') : "all");
-        history.push(`/products/all/${targetCategory}`);
+        navigate(`/products/all/${targetCategory}`);
     };
 
     return (

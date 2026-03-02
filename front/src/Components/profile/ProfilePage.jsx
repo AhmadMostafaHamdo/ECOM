@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
@@ -14,7 +14,7 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline";
 
 const ProfilePage = () => {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { account, setAccount } = useContext(Logincontext);
   const [form, setForm] = useState({ fname: "", email: "", mobile: "" });
   const [myProducts, setMyProducts] = useState([]);
@@ -30,7 +30,7 @@ const ProfilePage = () => {
         const profileResponse = await fetch(apiUrl("/profile"), {
           credentials: "include",
         });
-        if (!profileResponse.ok) return history.push("/login");
+        if (!profileResponse.ok) return navigate("/login");
 
         const profileData = await profileResponse.json();
         setAccount(profileData);

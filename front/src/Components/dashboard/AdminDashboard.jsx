@@ -6,7 +6,7 @@ import React, {
   useContext,
 } from "react";
 
-import { NavLink, Route, Switch, useRouteMatch } from "react-router-dom";
+import { NavLink, Route, Routes } from "react-router-dom";
 
 import "./admin-dashboard.css";
 
@@ -30,7 +30,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import LogoutIcon from "@mui/icons-material/Logout";
 
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { Logincontext } from "../context/Contextprovider";
 
@@ -91,10 +91,9 @@ const getNavItems = (t) => [
   },
 ];
 
-const AdminDashboard = ({ onCategoriesChanged = () => {} }) => {
-  const { path, url } = useRouteMatch();
-
-  const history = useHistory();
+const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
+  const url = "/dashboard";
+  const navigate = useNavigate();
 
   const { setAccount } = useContext(Logincontext);
 
@@ -125,12 +124,12 @@ const AdminDashboard = ({ onCategoriesChanged = () => {} }) => {
       if (res.ok) {
         setAccount(false);
 
-        history.push("/login");
+        navigate("/login");
       }
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  }, [history, setAccount]);
+  }, [navigate, setAccount]);
 
   const handleLogoutConfirm = useCallback(async () => {
     await logoutuser();
@@ -167,10 +166,9 @@ const AdminDashboard = ({ onCategoriesChanged = () => {} }) => {
             return (
               <NavLink
                 key={item.key}
-                exact={item.path === ""}
                 to={route}
-                className="admin_nav_link"
-                activeClassName="active"
+                end={item.path === ""}
+                className={({ isActive }) => `admin_nav_link ${isActive ? "active" : ""}`}
                 onClick={closeSidebar}
               >
                 <Icon />
@@ -405,37 +403,23 @@ const AdminDashboard = ({ onCategoriesChanged = () => {} }) => {
               </div>
             }
           >
-            <Switch>
-              <Route exact path={path}>
-                <DashboardHome />
-              </Route>
+            <Routes>
+              <Route path="" element={<DashboardHome />} />
 
-              <Route exact path={`${path}/users`}>
-                <UsersManagement />
-              </Route>
+              <Route path="users" element={<UsersManagement />} />
 
-              <Route exact path={`${path}/products`}>
-                <ProductsManagement />
-              </Route>
+              <Route path="products" element={<ProductsManagement />} />
 
-              <Route exact path={`${path}/categories`}>
-                <CategoriesManagement
-                  onCategoriesChanged={onCategoriesChanged}
-                />
-              </Route>
+              <Route path="categories" element={
+                <CategoriesManagement onCategoriesChanged={onCategoriesChanged} />
+              } />
 
-              <Route exact path={`${path}/messages`}>
-                <Messages />
-              </Route>
+              <Route path="messages" element={<Messages />} />
 
-              <Route exact path={`${path}/statistics`}>
-                <StatisticsPage />
-              </Route>
+              <Route path="statistics" element={<StatisticsPage />} />
 
-              <Route path={path}>
-                <DashboardHome />
-              </Route>
-            </Switch>
+              <Route path="*" element={<DashboardHome />} />
+            </Routes>
           </Suspense>
         </main>
       </div>

@@ -5,13 +5,13 @@ import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { apiUrl } from "../../api";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./signin.css";
 
 const Sign_in = () => {
   const { t } = useTranslation();
   const { setAccount } = useContext(Logincontext);
-  const history = useHistory();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [logdata, setData] = useState({ email: "", password: "" });
 
@@ -39,7 +39,7 @@ const Sign_in = () => {
         setData({ email: "", password: "" });
         toast.success(t("auth.loginSuccess"), { position: "top-center" });
         const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
-        setTimeout(() => history.push(nextRoute), 300);
+        setTimeout(() => navigate(nextRoute), 300);
       }
     } catch (error) {
       console.log("Login error:", error.message);

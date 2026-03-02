@@ -1,3 +1,5 @@
+@import "../index.css";
+
 /* Contact Us Component Styles */
 .contact-us-container {
   @apply min-h-screen bg-bg-main py-12 px-4 sm:px-6 lg:px-8;
@@ -114,7 +116,7 @@
 }
 
 .info-icon {
-  @apply w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mb-4;
+  @apply w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4;
 }
 
 .info-icon svg {
@@ -138,11 +140,11 @@
   .contact-us-content {
     @apply grid-cols-1;
   }
-  
+
   .contact-form-wrapper {
     @apply col-span-1;
   }
-  
+
   .contact-info {
     @apply col-span-1 grid grid-cols-1 sm:grid-cols-3 gap-6;
   }
@@ -152,19 +154,19 @@
   .contact-us-container {
     @apply py-8 px-3;
   }
-  
+
   .contact-us-title {
     @apply text-3xl;
   }
-  
+
   .contact-us-subtitle {
     @apply text-base;
   }
-  
+
   .contact-form {
     @apply p-6;
   }
-  
+
   .contact-info {
     @apply grid-cols-1;
   }
@@ -180,9 +182,11 @@
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.01);
   }
+
   100% {
     transform: scale(1);
   }
@@ -198,6 +202,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

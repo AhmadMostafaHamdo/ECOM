@@ -6,7 +6,7 @@ import React, {
   Suspense,
   lazy,
 } from "react";
-import { Switch, Route, useLocation, Redirect } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { apiUrl } from "./api";
 import { Logincontext } from "./Components/context/Contextprovider";
@@ -138,14 +138,10 @@ function App() {
           }
         >
           {isAuthRoute ? (
-            <Switch>
-              <Route exact path="/signup">
-                {account ? <Redirect to="/" /> : <Signup />}
-              </Route>
-              <Route exact path="/login">
-                {account ? <Redirect to="/" /> : <SignIn />}
-              </Route>
-            </Switch>
+            <Routes>
+              <Route path="/signup" element={account ? <Navigate to="/" replace /> : <Signup />} />
+              <Route path="/login" element={account ? <Navigate to="/" replace /> : <SignIn />} />
+            </Routes>
           ) : (
             <>
               {!isDashboardRoute && <Navbaar onSearch={setSearchTerm} />}
@@ -159,23 +155,23 @@ function App() {
               )}
 
               {isDashboardRoute ? (
-                <Switch>
-                  <Route path="/dashboard">
-                    {!account ? (
-                      <Redirect to="/login" />
+                <Routes>
+                  <Route path="/dashboard/*" element={
+                    !account ? (
+                      <Navigate to="/login" replace />
                     ) : isAdmin ? (
                       <AdminDashboard onCategoriesChanged={fetchCategories} />
                     ) : (
-                      <Redirect to="/" />
-                    )}
-                  </Route>
-                </Switch>
+                      <Navigate to="/" replace />
+                    )
+                  } />
+                </Routes>
               ) : (
                 <main className="app_main">
-                  <Switch>
-                    <Route exact path="/">
-                      {isAdmin ? (
-                        <Redirect to="/dashboard" />
+                  <Routes>
+                    <Route path="/" element={
+                      isAdmin ? (
+                        <Navigate to="/dashboard" replace />
                       ) : (
                         <Maincomp
                           selectedCategory={selectedCategory}
@@ -183,41 +179,41 @@ function App() {
                           setSelectedCategory={setSelectedCategory}
                           searchTerm={searchTerm}
                         />
-                      )}
-                    </Route>
-                    <Route exact path="/getproductsone/:id">
-                      {isAdmin ? <Redirect to="/dashboard" /> : <Cart />}
-                    </Route>
-                    <Route exact path="/buynow">
-                      {isAdmin ? <Redirect to="/dashboard" /> : <Buynow />}
-                    </Route>
-                    <Route exact path="/profile">
-                      {isAdmin ? <Redirect to="/dashboard" /> : <ProfilePage />}
-                    </Route>
-                    <Route exact path="/products/edit/:id">
-                      {isAdmin ? (
-                        <Redirect to="/dashboard" />
+                      )
+                    } />
+                    <Route path="/getproductsone/:id" element={
+                      isAdmin ? <Navigate to="/dashboard" replace /> : <Cart />
+                    } />
+                    <Route path="/buynow" element={
+                      isAdmin ? <Navigate to="/dashboard" replace /> : <Buynow />
+                    } />
+                    <Route path="/profile" element={
+                      isAdmin ? <Navigate to="/dashboard" replace /> : <ProfilePage />
+                    } />
+                    <Route path="/products/edit/:id" element={
+                      isAdmin ? (
+                        <Navigate to="/dashboard" replace />
                       ) : (
                         <CreateProduct mode="edit" />
-                      )}
-                    </Route>
-                    <Route exact path="/products/new">
-                      {isAdmin ? (
-                        <Redirect to="/dashboard" />
+                      )
+                    } />
+                    <Route path="/products/new" element={
+                      isAdmin ? (
+                        <Navigate to="/dashboard" replace />
                       ) : (
                         <CreateProduct />
-                      )}
-                    </Route>
-                    <Route exact path="/products/all/:category?">
-                      {isAdmin ? <Redirect to="/dashboard" /> : <AllProducts />}
-                    </Route>
-                    <Route exact path="/contact">
-                      {isAdmin ? <Redirect to="/dashboard" /> : <ContactUs />}
-                    </Route>
-                    <Route>
-                      <Redirect to="/" />
-                    </Route>
-                  </Switch>
+                      )
+                    } />
+                    <Route path="/products/all/:category?" element={
+                      isAdmin ? <Navigate to="/dashboard" replace /> : <AllProducts />
+                    } />
+                    <Route path="/contact" element={
+                      isAdmin ? <Navigate to="/dashboard" replace /> : <ContactUs />
+                    } />
+                    <Route path="*" element={
+                      <Navigate to="/" replace />
+                    } />
+                  </Routes>
                 </main>
               )}
               {!isDashboardRoute && <Footer />}

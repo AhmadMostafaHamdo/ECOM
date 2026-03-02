@@ -5,12 +5,12 @@ import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { apiUrl } from "../../api";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./signup.css";
 
 const Signup = () => {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { setAccount } = useContext(Logincontext);
   const abortRef = useRef(null);
   const unmountedRef = useRef(false);
@@ -74,7 +74,7 @@ const Signup = () => {
           cpassword: "",
         });
         toast.success(t("auth.signupSuccess"), { position: "top-center" });
-        setTimeout(() => history.push("/"), 300);
+        setTimeout(() => navigate("/"), 300);
       }
     } catch (error) {
       console.log("Signup error:", error.message);

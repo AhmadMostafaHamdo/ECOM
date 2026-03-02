@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import "./Navbaar.css";
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
 import { apiUrl } from "../../api";
@@ -26,7 +26,7 @@ import LanguageSwitcher from "../common/LanguageSwitcher";
 
 const Navbaar = React.memo(({ onSearch }) => {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { account, setAccount } = useContext(Logincontext);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -65,7 +65,7 @@ const Navbaar = React.memo(({ onSearch }) => {
     setAccount(false);
     setAnchorEl(null);
     toast.success(t("auth.logoutSuccess") || "Logged out");
-    history.push("/");
+    navigate("/");
   }, [history, setAccount, t]);
 
   const isAdmin = account?.role === "admin";
@@ -194,7 +194,7 @@ const Navbaar = React.memo(({ onSearch }) => {
             <MenuItem
               className="profile_menu_item"
               onClick={() => {
-                history.push("/profile");
+                navigate("/profile");
                 setAnchorEl(null);
               }}
             >

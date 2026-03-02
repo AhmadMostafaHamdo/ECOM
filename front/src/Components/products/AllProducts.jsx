@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
     ArrowBack,
     Search,
@@ -21,7 +21,7 @@ import Pagination from "../common/Pagination";
 const AllProducts = () => {
     const { t } = useTranslation();
     const { category: categorySlug } = useParams();
-    const history = useHistory();
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -131,7 +131,7 @@ const AllProducts = () => {
     };
 
     const handleProductClick = (productId) => {
-        history.push(`/getproductsone/${productId}`);
+        navigate(`/getproductsone/${productId}`);
     };
 
     return (

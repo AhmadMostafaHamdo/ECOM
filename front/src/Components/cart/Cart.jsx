@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./cart.css";
 import { Divider } from "@mui/material";
-import { useHistory, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Logincontext } from "../context/Contextprovider";
 import {
   ShoppingCart,
@@ -18,7 +18,7 @@ const Cart = () => {
   const { t } = useTranslation();
   const { setAccount } = useContext(Logincontext);
   const { id } = useParams("");
-  const history = useHistory();
+  const navigate = useNavigate();
   const [inddata, setIndedata] = useState("");
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -77,7 +77,7 @@ const Cart = () => {
         setAccount(data1);
         setTimeout(() => {
           setAddingToCart(false);
-          history.push("/buynow");
+          navigate("/buynow");
         }, 700);
       }
     } catch (error) {

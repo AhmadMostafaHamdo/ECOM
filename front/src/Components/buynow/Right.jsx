@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 
 const Right = ({ iteam }) => {
     const { t } = useTranslation();
     const [val, setVal] = useState(false);
     const [price, setPrice] = useState(0);
-    const history = useHistory("");
+    const history = useNavigate("");
 
     useEffect(() => {
         const total = iteam.reduce((sum, item) => sum + item.price.cost, 0);
@@ -17,7 +17,7 @@ const Right = ({ iteam }) => {
 
     const proceesby = () => {
         alert(t('cart.orderConfirmed'));
-        history.push("/");
+        navigate("/");
     };
 
     return (
