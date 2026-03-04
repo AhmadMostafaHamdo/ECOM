@@ -1,13 +1,12 @@
 .star-rating {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 4px;
 }
 
 .star-rating-stars {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: var(--space-1);
 }
 
 .star-button {
@@ -15,63 +14,55 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    transition: transform var(--transition-fast);
+    transition: transform 0.15s ease;
 }
 
-.star-button:hover:not(:disabled) {
-    transform: scale(1.1);
-}
-
-.star-button:active:not(:disabled) {
-    transform: scale(0.95);
+.star-button:hover {
+    transform: scale(1.15);
 }
 
 .star-button-static {
     cursor: default;
-    pointer-events: none;
+}
+
+.star-button-static:hover {
+    transform: none;
 }
 
 .star-icon {
-    display: block;
-    transition: color var(--transition-fast);
+    transition: all 0.2s ease;
 }
 
 .star-filled {
-    color: var(--color-star-filled);
+    color: #f59e0b;
 }
 
 .star-half {
-    color: var(--color-star-filled);
+    color: #f59e0b;
 }
 
 .star-empty {
-    color: var(--color-star-empty);
+    color: #d1d5db;
 }
 
 /* Sizes */
 .star-rating-sm .star-icon {
-    font-size: 16px;
+    font-size: 1rem !important;
 }
 
 .star-rating-md .star-icon {
-    font-size: 20px;
+    font-size: 1.3rem !important;
 }
 
 .star-rating-lg .star-icon {
-    font-size: 28px;
+    font-size: 1.8rem !important;
 }
 
 .star-rating-value {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    margin-left: var(--space-1);
-}
-
-/* Hover effect for interactive ratings */
-.star-button:not(.star-button-static):hover .star-empty {
-    color: hsl(45, 100%, 70%);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-left: 6px;
 }

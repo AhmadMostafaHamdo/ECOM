@@ -49,7 +49,7 @@ const Footer = () => {
     <footer>
       <div className="footer_content">
         <div className="footer_intro">
-          <img src="./kik-2.png" alt="logo" className="footer_logo" />
+          <img src="/kik-2.png" alt="logo" className="footer_logo"/>
           <h3>{t("footer.studioCommerce")}</h3>
           <p>{t("footer.tagline")}</p>
           <div className="social_links">

@@ -83,12 +83,11 @@ const userSchema = new mongoose.Schema({
 
 
 // password hasing 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
     if (this.isModified("password")) {
         this.password = await bcrypt.hash(this.password, 12);
         this.cpassword = await bcrypt.hash(this.cpassword, 12);
     }
-    next();
 });
 
 // generting token

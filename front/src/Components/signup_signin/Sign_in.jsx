@@ -78,7 +78,7 @@ const Sign_in = () => {
             </p>
           </div>
 
-        <img src="./kik.png" alt="" width="300" style={{borderRadius:"3rem"}}/>
+          <img src="./kik.png" alt="" width="300" style={{ borderRadius: "3rem" }} />
 
           {/* Floating decorative circles */}
           <div className="dec_ring dec_r1" />

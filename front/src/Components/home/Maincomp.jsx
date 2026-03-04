@@ -128,13 +128,7 @@ const Maincomp = React.memo(
           </section>
 
           <section className="trust_strip">
-            <article>
-              <LocalShippingIcon />
-              <div>
-                <h5>{t("home.fastDelivery")}</h5>
-                <p>{t("home.fastDeliveryDesc")}</p>
-              </div>
-            </article>
+
             <article>
               <StarIcon />
               <div>
@@ -142,13 +136,7 @@ const Maincomp = React.memo(
                 <p>{t("home.verifiedQualityDesc")}</p>
               </div>
             </article>
-            <article>
-              <TrendingUpIcon />
-              <div>
-                <h5>{t("home.secureCheckout")}</h5>
-                <p>{t("home.secureCheckoutDesc")}</p>
-              </div>
-            </article>
+
           </section>
 
           {products.length > 0 ? (

@@ -23,11 +23,15 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 // Internal Components
 import Rightheader from "./Rightheader";
 import LanguageSwitcher from "../common/LanguageSwitcher";
+import { useTheme } from "../context/ThemeContext";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 const Navbaar = React.memo(({ onSearch }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { account, setAccount } = useContext(Logincontext);
+  const { isDark, toggleTheme } = useTheme();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [dropen, setDropen] = useState(false);
@@ -159,15 +163,12 @@ const Navbaar = React.memo(({ onSearch }) => {
             )}
           </div>
 
-          <NavLink to={account ? "/buynow" : "/login"} className="cart_action">
-            <Badge
-              badgeContent={account ? account.carts.length : 0}
-              color="error"
-            >
-              <ShoppingCartIcon />
-            </Badge>
-            <span className="cart_label">{t("navigation.cart")}</span>
-          </NavLink>
+          {/* Dark / Light toggle */}
+          <button className="theme_toggle" onClick={toggleTheme} aria-label="toggle theme">
+            {isDark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+          </button>
+
+
 
           <Avatar
             className="user_avatar"

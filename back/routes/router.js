@@ -15,7 +15,6 @@ const jwt = require("jsonwebtoken");
 
 const keysecret = process.env.KEY;
 const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
-
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -356,10 +355,10 @@ const toPublicProduct = (productDoc) => {
     createdBy:
       product?.createdBy && typeof product.createdBy === "object"
         ? {
-            _id: product.createdBy._id,
-            fname: product.createdBy.fname,
-            email: product.createdBy.email,
-          }
+          _id: product.createdBy._id,
+          fname: product.createdBy.fname,
+          email: product.createdBy.email,
+        }
         : product.createdBy || null,
   };
 };
@@ -1363,8 +1362,22 @@ router.post(
   },
 );
 
+// Get admin user (fallback for chat - when product has no seller)
+router.get("/getadmin", async (req, res) => {
+  try {
+    const admin = await User.findOne({ role: "admin" }).select("_id fname email");
+    if (!admin) {
+      return res.status(404).json({ error: "No admin found" });
+    }
+    res.status(200).json({ _id: admin._id, fname: admin.fname, email: admin.email });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch admin" });
+  }
+});
+
 // register the data
 router.post("/register", async (req, res) => {
+
   // console.log(req.body);
   const { fname, email, mobile, password, cpassword } = req.body;
 
@@ -1414,7 +1427,7 @@ router.post("/register", async (req, res) => {
     if (error?.code === 11000) {
       return res.status(409).json({ error: "Email or mobile already exists" });
     }
-    res.status(422).json({ error: "Registration failed" });
+    res.status(422).json({ error: "Registration failed: " + error.message });
   }
 });
 
@@ -1463,7 +1476,7 @@ router.post("/login", async (req, res) => {
 router.get("/getproductsone/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await products.findOne({ id: id });
+    const product = await products.findOne({ id: id }).populate("createdBy", "fname email _id");
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
@@ -1502,11 +1515,12 @@ router.get("/getproductsone/:id", async (req, res) => {
       await product.save();
     }
 
-    res.status(200).json(product);
+    res.status(200).json(toPublicProduct(product));
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 // adding the data into cart
 router.post("/addcart/:id", authenicate, async (req, res) => {
@@ -2238,5 +2252,330 @@ router.delete(
     }
   },
 );
+
+// ============================================
+// COMMENT SYSTEM API ENDPOINTS
+// ============================================
+
+const Comment = require("../models/commentSchema");
+
+// Get comments for a product
+router.get("/comments/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const [comments, total] = await Promise.all([
+      Comment.find({ productId, parentId: null })
+        .populate("userId", "fname email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Comment.countDocuments({ productId, parentId: null }),
+    ]);
+
+    // Get replies for each comment
+    const commentIds = comments.map((c) => c._id);
+    const replies = await Comment.find({ parentId: { $in: commentIds } })
+      .populate("userId", "fname email")
+      .sort({ createdAt: 1 });
+
+    const replyMap = {};
+    replies.forEach((r) => {
+      const parentKey = r.parentId.toString();
+      if (!replyMap[parentKey]) replyMap[parentKey] = [];
+      replyMap[parentKey].push(r);
+    });
+
+    const commentsWithReplies = comments.map((c) => {
+      const obj = c.toObject();
+      obj.replies = replyMap[c._id.toString()] || [];
+      return obj;
+    });
+
+    res.status(200).json({
+      comments: commentsWithReplies,
+      pagination: { page, limit, total, hasMore: skip + comments.length < total },
+    });
+  } catch (error) {
+    console.log("Fetch comments error:", error.message);
+    res.status(500).json({ error: "Failed to fetch comments" });
+  }
+});
+
+// Create a comment
+router.post("/comments", authenicate, async (req, res) => {
+  try {
+    const { productId, text, parentId } = req.body;
+
+    if (!productId || !text?.trim()) {
+      return res.status(422).json({ error: "Product ID and text are required" });
+    }
+
+    const comment = await Comment.create({
+      productId,
+      userId: req.userID,
+      text: text.trim(),
+      parentId: parentId || null,
+    });
+
+    const populated = await Comment.findById(comment._id).populate(
+      "userId",
+      "fname email"
+    );
+
+    res.status(201).json(populated);
+  } catch (error) {
+    console.log("Create comment error:", error.message);
+    res.status(500).json({ error: "Failed to create comment" });
+  }
+});
+
+// Like/unlike a comment
+router.post("/comments/:id/like", authenicate, async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    const userId = req.userID;
+    const likedIndex = comment.likedBy.findIndex(
+      (id) => id.toString() === userId.toString()
+    );
+
+    if (likedIndex > -1) {
+      comment.likedBy.splice(likedIndex, 1);
+      comment.likeCount = Math.max(0, comment.likeCount - 1);
+    } else {
+      comment.likedBy.push(userId);
+      comment.likeCount = (comment.likeCount || 0) + 1;
+    }
+
+    await comment.save();
+    res.status(200).json({
+      liked: likedIndex === -1,
+      likeCount: comment.likeCount,
+    });
+  } catch (error) {
+    console.log("Like comment error:", error.message);
+    res.status(500).json({ error: "Failed to like comment" });
+  }
+});
+
+// Delete own comment
+router.delete("/comments/:id", authenicate, async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    if (comment.userId.toString() !== req.userID.toString()) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Delete replies too
+    await Comment.deleteMany({ parentId: comment._id });
+    await Comment.findByIdAndDelete(comment._id);
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log("Delete comment error:", error.message);
+    res.status(500).json({ error: "Failed to delete comment" });
+  }
+});
+
+// ============================================
+// CHAT SYSTEM API ENDPOINTS
+// ============================================
+
+const Conversation = require("../models/conversationSchema");
+const ChatMessage = require("../models/messageSchema");
+
+// Get or create a conversation
+router.post("/conversations", authenicate, async (req, res) => {
+  try {
+    const { recipientId, productId } = req.body;
+    const senderId = req.userID;
+
+    if (!recipientId) {
+      return res.status(422).json({ error: "Recipient ID is required" });
+    }
+
+    if (senderId.toString() === recipientId.toString()) {
+      return res.status(400).json({ error: "Cannot chat with yourself" });
+    }
+
+    // Check if conversation already exists
+    let conversation = await Conversation.findOne({
+      participants: { $all: [senderId, recipientId] },
+      ...(productId ? { productId } : {}),
+    }).populate("participants", "fname email");
+
+    if (!conversation) {
+      conversation = await Conversation.create({
+        participants: [senderId, recipientId],
+        productId: productId || null,
+      });
+      conversation = await Conversation.findById(conversation._id).populate(
+        "participants",
+        "fname email"
+      );
+    }
+
+    res.status(200).json(conversation);
+  } catch (error) {
+    console.log("Create conversation error:", error.message);
+    res.status(500).json({ error: "Failed to create conversation" });
+  }
+});
+
+// Get user's conversations
+router.get("/conversations", authenicate, async (req, res) => {
+  try {
+    const conversations = await Conversation.find({
+      participants: req.userID,
+    })
+      .populate("participants", "fname email")
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json(conversations);
+  } catch (error) {
+    console.log("Fetch conversations error:", error.message);
+    res.status(500).json({ error: "Failed to fetch conversations" });
+  }
+});
+
+// Get messages for a conversation
+router.get("/conversations/:id/messages", authenicate, async (req, res) => {
+  try {
+    const conversation = await Conversation.findById(req.params.id);
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation not found" });
+    }
+
+    const isParticipant = conversation.participants.some(
+      (p) => p.toString() === req.userID.toString()
+    );
+    if (!isParticipant) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    const [messages, total] = await Promise.all([
+      ChatMessage.find({ conversationId: req.params.id })
+        .populate("senderId", "fname email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      ChatMessage.countDocuments({ conversationId: req.params.id }),
+    ]);
+
+    // Mark messages as read
+    await ChatMessage.updateMany(
+      {
+        conversationId: req.params.id,
+        senderId: { $ne: req.userID },
+        read: false,
+      },
+      { $set: { read: true } }
+    );
+
+    // Update unread count
+    if (conversation.unreadCount) {
+      conversation.unreadCount.set(req.userID.toString(), 0);
+      await conversation.save();
+    }
+
+    res.status(200).json({
+      messages: messages.reverse(),
+      pagination: { page, limit, total, hasMore: skip + messages.length < total },
+    });
+  } catch (error) {
+    console.log("Fetch messages error:", error.message);
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+// Send a message
+router.post("/conversations/:id/messages", authenicate, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text?.trim()) {
+      return res.status(422).json({ error: "Message text is required" });
+    }
+
+    const conversation = await Conversation.findById(req.params.id);
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation not found" });
+    }
+
+    const isParticipant = conversation.participants.some(
+      (p) => p.toString() === req.userID.toString()
+    );
+    if (!isParticipant) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    const message = await ChatMessage.create({
+      conversationId: req.params.id,
+      senderId: req.userID,
+      text: text.trim(),
+    });
+
+    // Update conversation
+    conversation.lastMessage = {
+      text: text.trim(),
+      senderId: req.userID,
+      createdAt: new Date(),
+    };
+
+    // Increment unread count for other participants
+    conversation.participants.forEach((p) => {
+      if (p.toString() !== req.userID.toString()) {
+        const current = conversation.unreadCount?.get(p.toString()) || 0;
+        if (!conversation.unreadCount) conversation.unreadCount = new Map();
+        conversation.unreadCount.set(p.toString(), current + 1);
+      }
+    });
+
+    await conversation.save();
+
+    const populated = await ChatMessage.findById(message._id).populate(
+      "senderId",
+      "fname email"
+    );
+
+    res.status(201).json(populated);
+  } catch (error) {
+    console.log("Send message error:", error.message);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+// Get unread message count
+router.get("/conversations/unread/count", authenicate, async (req, res) => {
+  try {
+    const conversations = await Conversation.find({
+      participants: req.userID,
+    });
+
+    let totalUnread = 0;
+    conversations.forEach((c) => {
+      totalUnread += c.unreadCount?.get(req.userID.toString()) || 0;
+    });
+
+    res.status(200).json({ unreadCount: totalUnread });
+  } catch (error) {
+    console.log("Unread count error:", error.message);
+    res.status(500).json({ error: "Failed to get unread count" });
+  }
+});
 
 module.exports = router;

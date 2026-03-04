@@ -29,6 +29,7 @@ const ProfilePage = lazy(() => import("./Components/profile/ProfilePage"));
 const CreateProduct = lazy(() => import("./Components/products/CreateProduct"));
 const AllProducts = lazy(() => import("./Components/products/AllProducts"));
 const ContactUs = lazy(() => import("./Components/ContactUs"));
+const ChatWidget = lazy(() => import("./Components/chat/ChatWidget"));
 
 const CATEGORY_ALL = "All Categories";
 
@@ -217,6 +218,7 @@ function App() {
                 </main>
               )}
               {!isDashboardRoute && <Footer />}
+              {!isDashboardRoute && !isAuthRoute && <ChatWidget />}
             </>
           )}
         </Suspense>

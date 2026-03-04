@@ -31,13 +31,7 @@ const Rightheader = ({ userlog, logclose }) => {
           <HomeIcon /> Home
         </NavLink>
 
-        <NavLink
-          to={account ? "/buynow" : "/login"}
-          onClick={logclose}
-          activeClassName="active"
-        >
-          <ShoppingBagIcon /> Your Orders
-        </NavLink>
+
 
         {/* Add more links here as needed */}
       </nav>

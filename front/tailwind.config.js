@@ -1,91 +1,91 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        // Brand colors from existing design system
         brand: {
-          DEFAULT: "#2563eb",
-          strong: "#1d4ed8",
-          soft: "#eff6ff",
+          DEFAULT: "#f0a500",
+          deep: "#c8880a",
+          light: "#ffd166",
+          soft: "#fff8e7",
         },
-        // Background colors
+        surface: {
+          DEFAULT: "#ffffff",
+          dark: "#1a1a2a",
+        },
+        "surface-2": {
+          DEFAULT: "#f8fafc",
+          dark: "#22223a",
+        },
+        ink: {
+          DEFAULT: "#111827",
+          dark: "#f0f0fa",
+        },
+        muted: {
+          DEFAULT: "#6b7280",
+          dark: "#a0a0c0",
+        },
+        border: {
+          DEFAULT: "#e5e7eb",
+          dark: "rgba(255,255,255,0.07)",
+        },
         bg: {
-          main: "#fafbfc",
-          accent: "#f3f4f6",
+          light: "#f4f6f9",
+          dark: "#0d0d14",
         },
-        // Surface colors
-        surface: "#ffffff",
-        "surface-alt": "#f9fafb",
-        // Text colors
-        text: {
-          main: "#111827",
-          muted: "#6b7280",
-        },
-        // Accent colors
-        highlight: "#f59e0b",
-        success: "#10b981",
-        danger: "#ef4444",
-        // Line colors
-        line: "#e5e7eb",
-        // Primary brand colors (orange theme)
-        primary: "#EF9806",
-        "primary-hover": "#D97F00",
-        "primary-light": "#FFF4E6",
-        // Text colors
-        "text-primary": "#878785",
-        "text-secondary": "#555555",
-        "text-muted": "#999999",
-        // Admin accent colors
-        "admin-accent-blue": "#3b82f6",
-        "admin-accent-blue-soft": "#eff6ff",
       },
       fontFamily: {
-        sans: ["Manrope", "Inter", "system-ui", "sans-serif"],
-        heading: ["Outfit", "Manrope", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "Manrope", "Inter", "system-ui", "sans-serif"],
+        heading: ["Plus Jakarta Sans", "Outfit", "Manrope", "sans-serif"],
       },
       boxShadow: {
-        soft: "0 1px 3px rgba(0, 0, 0, 0.1)",
-        strong: "0 10px 40px rgba(0, 0, 0, 0.1)",
+        soft: "0 1px 3px rgba(0, 0, 0, 0.08)",
+        card: "0 4px 20px rgba(0, 0, 0, 0.08)",
+        gold: "0 6px 24px rgba(240,165,0,0.30)",
+        "gold-lg": "0 10px 36px rgba(240,165,0,0.40)",
       },
       borderRadius: {
-        lg: "12px",
-        md: "8px",
-        sm: "6px",
+        xl: "16px",
+        "2xl": "20px",
+        "3xl": "28px",
       },
       maxWidth: {
         shell: "1440px",
+        content: "1200px",
       },
       spacing: {
-        header: "64px",
-        subnav: "52px",
+        header: "70px",
       },
       animation: {
-        "page-fade": "pageFade 0.55s ease-out",
-        "fade-in": "fadeIn 0.5s ease forwards",
+        "page-fade": "pageFade 0.5s ease-out",
+        "fade-up": "fadeUp 0.5s ease forwards",
+        "slide-in": "slideIn 0.4s ease",
+        "pulse-dot": "pulseDot 2s ease-in-out infinite",
+        "spin-slow": "spin 20s linear infinite",
       },
       keyframes: {
         pageFade: {
-          from: {
-            opacity: "0",
-            transform: "translateY(12px)",
-          },
-          to: {
-            opacity: "1",
-            transform: "translateY(0)",
-          },
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
-        fadeIn: {
-          from: {
-            opacity: "0",
-            transform: "translateY(20px)",
-          },
-          to: {
-            opacity: "1",
-            transform: "translateY(0)",
-          },
+        fadeUp: {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
+        slideIn: {
+          from: { opacity: "0", transform: "translateX(-10px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        pulseDot: {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.5", transform: "scale(0.8)" },
+        },
+      },
+      backgroundImage: {
+        "gold-gradient": "linear-gradient(135deg, #f0a500, #c8880a)",
+        "dark-gradient": "linear-gradient(145deg, #0e0e1b 0%, #171726 50%, #1a1030 100%)",
       },
     },
   },

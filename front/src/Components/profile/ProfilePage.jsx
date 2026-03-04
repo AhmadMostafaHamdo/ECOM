@@ -168,7 +168,7 @@ const ProfilePage = () => {
               </div>
               <div className="input_box">
                 <label>{t("auth.email")}</label>
-              <input
+                <input
                   name="email"
                   type="email"
                   value={form.email}

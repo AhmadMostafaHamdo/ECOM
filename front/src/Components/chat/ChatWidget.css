@@ -1,0 +1,487 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ─── Chat Widget Container ─────────────────────────────── */
+.chat-widget {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* ─── Floating Action Button ────────────────────────────── */
+.chat-fab {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.45);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.chat-fab:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.55);
+}
+
+.chat-fab.active {
+    background: linear-gradient(135deg, #475569, #334155);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.chat-fab svg {
+    font-size: 1.5rem !important;
+}
+
+.chat-fab-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    border: 2px solid white;
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+/* ─── Chat Panel ────────────────────────────────────────── */
+.chat-panel {
+    position: absolute;
+    bottom: 76px;
+    right: 0;
+    width: 360px;
+    height: 520px;
+    /* ← ارتفاع ثابت */
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* ← منع الـ overflow على مستوى الـ panel */
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ─── Chat Header (ثابت في الأعلى) ─────────────────────── */
+.chat-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    flex-shrink: 0;
+    /* ← لا يتقلص أبداً */
+}
+
+.chat-back-btn {
+    background: rgba(255, 255, 255, 0.18);
+    border: none;
+    border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.chat-back-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-header-info h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-header-status {
+    font-size: 0.72rem;
+    opacity: 0.8;
+    color: #a5f3fc;
+}
+
+.chat-header-info svg {
+    font-size: 1.3rem !important;
+    flex-shrink: 0;
+}
+
+.chat-header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* ─── Chat Body (منطقة المحتوى - تحتل المساحة المتبقية) ─── */
+.chat-panel-body {
+    flex: 1;
+    /* ← يأخذ كل المساحة المتبقية */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* ← لا overflow هنا، الـ children تتحكم */
+    min-height: 0;
+    /* ← مهم جداً لـ flex */
+}
+
+/* ─── Conversations List ────────────────────────────────── */
+.chat-conversations-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    /* ← التمرير هنا فقط */
+}
+
+.chat-conv-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+    width: 100%;
+}
+
+.chat-conv-item:hover {
+    background: #f8fafc;
+}
+
+.chat-conv-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.chat-conv-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-conv-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.chat-conv-name span:first-child {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #0f172a;
+}
+
+.chat-conv-time {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.chat-conv-last {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-conv-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    flex-shrink: 0;
+}
+
+/* ─── Messages View ─────────────────────────────────────── */
+/* هذا wrapper يحتوي على messages + input معاً */
+.chat-messages-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.chat-messages {
+    flex: 1;
+    /* ← يأخذ كل المساحة */
+    overflow-y: auto;
+    /* ← التمرير داخل الرسائل فقط */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 14px 8px;
+    min-height: 0;
+    /* ← مهم جداً */
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+}
+
+.chat-empty-messages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 10px;
+    color: #94a3b8;
+    font-size: 0.88rem;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.chat-message {
+    display: flex;
+    margin-bottom: 2px;
+}
+
+.chat-message.sent {
+    justify-content: flex-end;
+}
+
+.chat-message.received {
+    justify-content: flex-start;
+}
+
+.chat-bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    position: relative;
+}
+
+.chat-message.sent .chat-bubble {
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-message.received .chat-bubble {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-bubble p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.chat-time {
+    display: block;
+    font-size: 0.65rem;
+    margin-top: 4px;
+    opacity: 0.65;
+    text-align: right;
+}
+
+/* ─── Input Area (ثابتة في الأسفل) ─────────────────────── */
+.chat-input-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-top: 1px solid #f1f5f9;
+    background: white;
+    flex-shrink: 0;
+    /* ← لا تتقلص أبداً */
+}
+
+.chat-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 24px;
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #f8fafc;
+    color: #1e293b;
+    direction: rtl;
+    min-width: 0;
+    /* ← مهم لـ flex */
+}
+
+.chat-input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+    background: white;
+}
+
+.chat-input::placeholder {
+    color: #94a3b8;
+}
+
+.chat-send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.chat-send-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ─── Empty State (قائمة المحادثات فارغة) ──────────────── */
+.chat-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px 24px;
+    text-align: center;
+    gap: 8px;
+}
+
+.chat-empty-icon {
+    font-size: 3rem !important;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+}
+
+.chat-empty p {
+    margin: 0 0 4px;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.92rem;
+}
+
+.chat-empty span {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+/* ─── Responsive ────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .chat-widget {
+        bottom: 12px;
+        right: 12px;
+    }
+
+    .chat-panel {
+        width: calc(100vw - 24px);
+        height: 75vh;
+        bottom: 72px;
+        right: 0;
+    }
+
+    .chat-fab {
+        width: 52px;
+        height: 52px;
+    }
+}

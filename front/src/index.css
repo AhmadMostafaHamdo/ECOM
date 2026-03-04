@@ -1,72 +1,58 @@
 @import "tailwindcss";
-@import "./styles/design-tokens.css";
-@import "./styles/animations.css";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
-@theme {
-  --color-brand: #2563eb;
-  --color-brand-strong: #1d4ed8;
-  --color-brand-soft: #eff6ff;
-  --color-bg-main: #fafbfc;
-  --color-bg-accent: #f3f4f6;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f9fafb;
-  --color-text-main: #111827;
-  --color-text-muted: #6b7280;
-  --color-highlight: #f59e0b;
-  --color-success: #10b981;
-  --color-danger: #ef4444;
-  --color-line: #e5e7eb;
-  --color-primary: #EF9806;
-  --color-primary-hover: #D97F00;
-  --color-primary-light: #FFF4E6;
-  --color-text-primary: #878785;
-  --color-text-secondary: #555555;
-  --color-admin-accent-blue: #3b82f6;
-  --color-admin-accent-blue-soft: #eff6ff;
+/* ─── CSS Custom Properties ──────────────────────────────── */
+:root {
+  /* Light Mode Tokens */
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --border: #e5e7eb;
+  --text-1: #111827;
+  --text-2: #4b5563;
+  --text-3: #9ca3af;
 
-  --font-sans: Manrope, Inter, system-ui, sans-serif;
-  --font-heading: Outfit, Manrope, sans-serif;
+  /* Brand – stays same in both modes */
+  --gold: #f0a500;
+  --gold-deep: #c8880a;
+  --gold-light: #ffd166;
+  --gold-glow: rgba(240, 165, 0, 0.18);
+  --gold-soft: #fff8e7;
 
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-strong: 0 10px 40px rgba(0, 0, 0, 0.1);
+  /* Shadows */
+  --shadow-gold: 0 8px 24px rgba(240, 165, 0, 0.32);
 
-  --radius-lg: 12px;
-  --radius-md: 8px;
-  --radius-sm: 6px;
+  /* Surface alt */
+  --surface-2: #f1f5f9;
 
-  --width-shell: 1440px;
-  --spacing-header: 64px;
-  --spacing-subnav: 52px;
+  /* Header */
+  --header-bg: rgba(255, 255, 255, 0.9);
+  --header-h: 70px;
 
-  --animate-page-fade: pageFade 0.55s ease-out;
-  --animate-fade-in: fadeIn 0.5s ease forwards;
+  /* Misc */
+  --red: #ef4444;
+  --green: #22c55e;
+  --radius: 12px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
 
-  @keyframes pageFade {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
-/* Modern CSS Reset */
+/* ─── Dark Mode Tokens ───────────────────────────────────── */
+.dark {
+  --bg: #0d0d14;
+  --surface: #1a1a2a;
+  --surface-2: #22223a;
+  --border: rgba(255, 255, 255, 0.08);
+  --text-1: #f0f0fa;
+  --text-2: #a0a0c0;
+  --text-3: #62628a;
+  --header-bg: rgba(13, 13, 20, 0.92);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --gold-soft: rgba(240, 165, 0, 0.08);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -78,135 +64,133 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-primary);
-  background-color: var(--color-background);
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+#root {
   min-height: 100vh;
 }
 
-/* Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-family-heading);
-  line-height: var(--line-height-tight);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-h1 {
-  font-size: var(--font-size-4xl);
-}
-
-h2 {
-  font-size: var(--font-size-3xl);
-}
-
-h3 {
-  font-size: var(--font-size-2xl);
-}
-
-h4 {
-  font-size: var(--font-size-xl);
-}
-
-h5 {
-  font-size: var(--font-size-lg);
-}
-
-h6 {
-  font-size: var(--font-size-base);
-}
-
-p {
-  margin-bottom: var(--space-4);
-}
-
 a {
-  color: var(--color-primary);
+  color: inherit;
   text-decoration: none;
-  transition: color var(--transition-base);
 }
 
-a:hover {
-  color: var(--color-primary-dark);
-}
-
-/* Utility Classes */
-.container {
-  width: 100%;
-  max-width: var(--container-xl);
-  margin: 0 auto;
-  padding: 0 var(--space-4);
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-primary {
-  color: var(--color-text-primary);
-}
-
-.text-secondary {
-  color: var(--color-text-secondary);
-}
-
-.text-muted {
-  color: var(--color-text-muted);
-}
-
-.font-bold {
-  font-weight: var(--font-weight-bold);
-}
-
-.font-semibold {
-  font-weight: var(--font-weight-semibold);
-}
-
-.font-medium {
-  font-weight: var(--font-weight-medium);
-}
-
-/* Scrollbar Styling */
+/* ─── Scrollbar ──────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-background);
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
+  background: var(--border);
+  border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+  background: var(--text-3);
 }
 
-/* Focus Visible */
+/* ─── Focus ──────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+/* ─── App shell ──────────────────────────────────────────── */
+.app_shell {
+  min-height: 100vh;
+  background: var(--bg);
+  transition: background 0.3s ease;
+}
+
+.app_main {
+  padding-top: 1rem;
+  animation: pageFade 0.45s ease-out;
+}
+
+.circle {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--bg);
+  color: var(--text-2);
+  font-weight: 700;
+}
+
+/* ─── Keyframes ──────────────────────────────────────────── */
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spinSlow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulseDot {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes spinBtn {
+  to {
+    transform: rotate(360deg);
+  }
 }

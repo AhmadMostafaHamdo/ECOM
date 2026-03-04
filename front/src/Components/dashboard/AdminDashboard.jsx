@@ -24,6 +24,8 @@ import RateReviewIcon from "@mui/icons-material/RateReview";
 
 import MailIcon from "@mui/icons-material/Mail";
 
+import ChatIcon from "@mui/icons-material/Chat";
+
 import MenuIcon from "@mui/icons-material/Menu";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -42,6 +44,8 @@ import DialogComponent from "./DialogComponent";
 
 import Messages from "./Messages";
 
+import ChatWidget from "../chat/ChatWidget";
+
 const DashboardHome = lazy(() => import("./DashboardHome"));
 
 const UsersManagement = lazy(() => import("./UsersManagement"));
@@ -51,6 +55,8 @@ const CategoriesManagement = lazy(() => import("./CategoriesManagement"));
 const StatisticsPage = lazy(() => import("./StatisticsPage"));
 
 const ProductsManagement = lazy(() => import("./ProductsManagement"));
+
+const AdminChat = lazy(() => import("./AdminChat"));
 
 const getNavItems = (t) => [
   { key: "home", label: t("admin.dashboard"), icon: DashboardIcon, path: "" },
@@ -81,6 +87,13 @@ const getNavItems = (t) => [
     label: t("admin.messages"),
     icon: MailIcon,
     path: "/messages",
+  },
+
+  {
+    key: "chat",
+    label: "Live Chat",
+    icon: ChatIcon,
+    path: "/chat",
   },
 
   {
@@ -416,6 +429,8 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
 
               <Route path="messages" element={<Messages />} />
 
+              <Route path="chat" element={<AdminChat />} />
+
               <Route path="statistics" element={<StatisticsPage />} />
 
               <Route path="*" element={<DashboardHome />} />
@@ -423,6 +438,9 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
           </Suspense>
         </main>
       </div>
+
+      {/* Chat Widget for Admin - always visible */}
+      <ChatWidget />
 
       <DialogComponent
         open={confirmLogoutOpen}
