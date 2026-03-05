@@ -183,6 +183,51 @@
     box-shadow: var(--shadow-gold);
 }
 
+/* Wishlist Save Button */
+.cart_btn_wishlist {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 20px;
+    border: 1.5px solid #fbb6ce;
+    border-radius: 14px;
+    background: transparent;
+    color: #f43f5e;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.25s;
+}
+
+.cart_btn_wishlist:hover {
+    background: #fff1f4;
+    border-color: #f43f5e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2);
+}
+
+.cart_btn_wishlist--saved {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    color: #ffffff;
+    border-color: #e11d48;
+    box-shadow: 0 6px 16px rgba(244, 63, 94, 0.35);
+}
+
+.cart_btn_wishlist--saved:hover {
+    background: linear-gradient(135deg, #e11d48, #be123c);
+    border-color: #be123c;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(244, 63, 94, 0.45);
+}
+
+.cart_btn_wishlist:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* ─── Right Panel ────────────────────────────────────────── */
 .right_cart {
     padding: 36px 40px;

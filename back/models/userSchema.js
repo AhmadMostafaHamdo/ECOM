@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema({
         }
     ],
     carts: Array,
+    wishlist: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "products"
+    }],
     // User rating system
     averageRating: {
         type: Number,
@@ -76,6 +80,19 @@ const userSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+    // Ban system
+    isBanned: {
+        type: Boolean,
+        default: false
+    },
+    banReason: {
+        type: String,
+        default: ""
+    },
+    bannedAt: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true

@@ -1,9 +1,10 @@
 import { getProductsReducers } from "./Productreducers";
-
-import {combineReducers} from "redux";
+import wishlistReducer from "../features/wishlistSlice";
+import { combineReducers } from "redux"; // or from '@reduxjs/toolkit'
 
 const rootreducers = combineReducers({
-    getproductsdata : getProductsReducers
+    getproductsdata: getProductsReducers,
+    wishlist: wishlistReducer,
 });
 
 export default rootreducers;

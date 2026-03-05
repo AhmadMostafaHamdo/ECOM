@@ -7,6 +7,13 @@ const app = express();
 const port = process.env.PORT || 5007;
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
+const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const morgan = require("morgan");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const hpp = require("hpp");
 const DefaultData = require("./defaultdata");
 const connectDB = require("./db/conn");
 const router = require("./routes/router");
@@ -82,34 +89,55 @@ io.on("connection", (socket) => {
 });
 
 // middleware
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+}));
 app.use(compression());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser(""));
-app.use((req, res, next) => {
-    const requestOrigin = req.headers.origin;
-    const originToUse = allowedOrigins.includes(requestOrigin)
-        ? requestOrigin
-        : (process.env.CLIENT_ORIGIN || allowedOrigins[0] || "http://localhost:5173");
 
-    res.header("Access-Control-Allow-Origin", originToUse);
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+}));
 
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
-
-    next();
+// Rate Limiters
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+    standardHeaders: true,
+    legacyHeaders: false,
 });
+app.use(limiter);
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent parameter pollution
+app.use(hpp());
+
+// HTTP request logger
+app.use(morgan("dev"));
 
 // Serve static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Enforce CSRF token strategy on all state-altering requests
+app.use(require("./middleware/csrf"));
+
 app.use(router);
 
 if (process.env.NODE_ENV == "production") {
-    const distPath = path.join(__dirname, "client", "dist");
+    const distPath = path.join(__dirname, "..", "front", "dist");
     app.use(express.static(distPath, {
         maxAge: '1y',
         etag: false
@@ -136,3 +164,5 @@ const startServer = async () => {
 };
 
 startServer();
+
+// Trigger nodemon restart

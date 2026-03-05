@@ -267,8 +267,8 @@ const DynamicTable = ({
         const keys = searchKeys.length
           ? searchKeys
           : Object.keys(item).filter(
-              (k) => typeof item[k] === "string" || typeof item[k] === "number",
-            );
+            (k) => typeof item[k] === "string" || typeof item[k] === "number",
+          );
         return keys.some((k) =>
           String(item[k] ?? "")
             .toLowerCase()
@@ -824,6 +824,11 @@ const DynamicTable = ({
           background: rgba(239,68,68,0.08);
           border: 1px solid rgba(239,68,68,0.18);
         }
+        .dt-badge--banned {
+          color: #7c3aed;
+          background: rgba(124,58,237,0.10);
+          border: 1px solid rgba(124,58,237,0.25);
+        }
 
         /* ── Role chip ── */
         .dt-role {
@@ -1030,7 +1035,7 @@ const DynamicTable = ({
                         <span
                           className={
                             sortConfig.key === col.key &&
-                            sortConfig.direction === "asc"
+                              sortConfig.direction === "asc"
                               ? "dt-sort-active"
                               : ""
                           }
@@ -1040,7 +1045,7 @@ const DynamicTable = ({
                         <span
                           className={
                             sortConfig.key === col.key &&
-                            sortConfig.direction === "desc"
+                              sortConfig.direction === "desc"
                               ? "dt-sort-active"
                               : ""
                           }

@@ -23,6 +23,8 @@ import ReviewList from "../reviews/ReviewList";
 import RatingDistribution from "../reviews/RatingDistribution";
 import StarRating from "../reviews/StarRating";
 import CommentSection from "../comments/CommentSection";
+import ReportModal from "../common/ReportModal";
+import useWishlist from "../wishlist/useWishlist";
 
 
 const Cart = () => {
@@ -40,6 +42,9 @@ const Cart = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSummary, setReviewSummary] = useState(null);
   const [activeTab, setActiveTab] = useState('description');
+  const [reportOpen, setReportOpen] = useState(false);
+  const [initialSaved, setInitialSaved] = useState(false);
+  const [productMongoId, setProductMongoId] = useState(null);
 
   useEffect(() => {
     const getinddata = async () => {
@@ -61,8 +66,22 @@ const Cart = () => {
           alert(message);
         } else {
           setIndedata(data);
+          setProductMongoId(data._id);
           setLikeCount(data.likeCount || 0);
           setLiked(account && data.likedBy?.includes(account._id));
+          // Check wishlist status
+          if (account) {
+            try {
+              const wRes = await fetch(apiUrl("/wishlist"), { credentials: "include" });
+              if (wRes.ok) {
+                const wData = await wRes.json();
+                const isInWishlist = (wData.wishlist || []).some(
+                  (p) => (p._id || p.id)?.toString() === data._id?.toString()
+                );
+                setInitialSaved(isInWishlist);
+              }
+            } catch { }
+          }
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -202,6 +221,15 @@ const Cart = () => {
     // ReviewList will refresh automatically
   };
 
+  // Wishlist
+  const { saved: wishSaved, toggle: toggleWishlist, loading: wishLoading } = useWishlist(
+    initialSaved,
+    productMongoId,
+    inddata?.title?.shortTitle || '',
+    !!account,
+    () => navigate('/login')
+  );
+
   const images = inddata?.images?.length ? inddata.images : [inddata?.detailUrl].filter(Boolean);
 
   if (loading) {
@@ -267,8 +295,39 @@ const Cart = () => {
 
                 <button className="cart_btn_chat" onClick={handleChatWithSeller}>
                   <ChatBubbleOutline className="btn_icon" />
-                  <span>💬 تواصل مع البائع</span>
+                  <span>تواصل مع البائع</span>
                 </button>
+
+                {/* Wishlist Save Button */}
+                <button
+                  className={`cart_btn_wishlist ${wishSaved ? 'cart_btn_wishlist--saved' : ''}`}
+                  onClick={toggleWishlist}
+                  disabled={wishLoading}
+                  title={wishSaved ? 'إزالة من المحفوظات' : 'حفظ في المحفوظات'}
+                >
+                  {wishSaved ? <Favorite className="btn_icon" /> : <FavoriteBorder className="btn_icon" />}
+                  <span>{wishSaved ? 'تم الحفظ' : 'حفظ في المحفوظات'}</span>
+                </button>
+
+                {account && (
+                  <button
+                    className="cart_btn_report"
+                    onClick={() => setReportOpen(true)}
+                    title="الإبلاغ عن هذا المنتج"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '10px 18px', borderRadius: '10px',
+                      border: '1px solid #fecaca', background: '#fff5f5',
+                      color: '#ef4444', cursor: 'pointer',
+                      fontSize: '13px', fontWeight: '700',
+                      transition: 'all 0.2s', marginTop: '8px'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fff5f5'; }}
+                  >
+                    ⚠️ الإبلاغ عن المنتج
+                  </button>
+                )}
 
               </div>
 
@@ -424,6 +483,15 @@ const Cart = () => {
           </div>
         </>
       ) : null}
+
+      {/* Report Modal */}
+      <ReportModal
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        targetType="product"
+        targetId={inddata?._id || inddata?.id}
+        targetName={inddata?.title?.shortTitle || ''}
+      />
     </div>
   );
 };

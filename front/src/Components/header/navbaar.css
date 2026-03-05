@@ -153,6 +153,53 @@
   filter: brightness(1.06);
 }
 
+/* Wishlist Icon Button in Nav */
+.nav_wishlist_btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid #fbb6ce;
+  background: rgba(244, 63, 94, 0.07);
+  color: #f43f5e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nav_wishlist_btn:hover {
+  background: rgba(244, 63, 94, 0.15);
+  border-color: #f43f5e;
+  transform: scale(1.08);
+}
+
+.nav_wishlist_btn svg {
+  animation: none;
+}
+
+.nav_wishlist_btn:hover svg {
+  animation: heartbeat-nav 0.6s ease-in-out;
+}
+
+@keyframes heartbeat-nav {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(1.3);
+  }
+
+  60% {
+    transform: scale(1.1);
+  }
+}
+
 /* Theme toggle */
 .theme_toggle {
   width: 36px;

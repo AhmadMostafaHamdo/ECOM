@@ -22,6 +22,8 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 
 import RateReviewIcon from "@mui/icons-material/RateReview";
 
+import FlagIcon from "@mui/icons-material/Flag";
+
 import MailIcon from "@mui/icons-material/Mail";
 
 import ChatIcon from "@mui/icons-material/Chat";
@@ -57,6 +59,8 @@ const StatisticsPage = lazy(() => import("./StatisticsPage"));
 const ProductsManagement = lazy(() => import("./ProductsManagement"));
 
 const AdminChat = lazy(() => import("./AdminChat"));
+
+const ReportsManagement = lazy(() => import("./ReportsManagement"));
 
 const getNavItems = (t) => [
   { key: "home", label: t("admin.dashboard"), icon: DashboardIcon, path: "" },
@@ -94,6 +98,13 @@ const getNavItems = (t) => [
     label: "Live Chat",
     icon: ChatIcon,
     path: "/chat",
+  },
+
+  {
+    key: "reports",
+    label: "البلاغات",
+    icon: FlagIcon,
+    path: "/reports",
   },
 
   {
@@ -432,6 +443,8 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
               <Route path="chat" element={<AdminChat />} />
 
               <Route path="statistics" element={<StatisticsPage />} />
+
+              <Route path="reports" element={<ReportsManagement />} />
 
               <Route path="*" element={<DashboardHome />} />
             </Routes>

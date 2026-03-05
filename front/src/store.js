@@ -1,14 +1,9 @@
-import { createStore, applyMiddleware } from "redux";
-import { thunk } from "redux-thunk";
-import { composeWithDevTools } from "redux-devtools-extension";
+import { configureStore } from '@reduxjs/toolkit'; // toolkit added
 import rootreducers from "./Components/redux/reducers/main";
 
-
-const middleware = [thunk];
-
-const store = createStore(
-    rootreducers,
-    composeWithDevTools(applyMiddleware(...middleware))
-);
+const store = configureStore({
+    reducer: rootreducers,
+    // Redux Toolkit comes with built-in thunk and DevTools setup.
+});
 
 export default store;

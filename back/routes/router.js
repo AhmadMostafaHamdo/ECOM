@@ -5,6 +5,7 @@ const Category = require("../models/categorySchema");
 const User = require("../models/userSchema");
 const ProductView = require("../models/productViewSchema");
 const Contact = require("../models/contactSchema");
+const Report = require("../models/reportSchema");
 const bcrypt = require("bcryptjs");
 const authenicate = require("../middleware/authenticate");
 const multer = require("multer");
@@ -344,6 +345,9 @@ const toPublicUser = (userDoc) => {
     cartsCount: Array.isArray(user.carts) ? user.carts.length : 0,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+    isBanned: user.isBanned || false,
+    banReason: user.banReason || "",
+    bannedAt: user.bannedAt || null,
   };
 };
 
@@ -2575,6 +2579,315 @@ router.get("/conversations/unread/count", authenicate, async (req, res) => {
   } catch (error) {
     console.log("Unread count error:", error.message);
     res.status(500).json({ error: "Failed to get unread count" });
+  }
+});
+
+
+// ─────────────────────────────────────────────
+// REPORTS API
+// ─────────────────────────────────────────────
+
+// Submit a report (product or user) — authenticated users only
+router.post("/reports", authenicate, async (req, res) => {
+  try {
+    const { targetType, targetId, reason, description } = req.body || {};
+
+    if (!targetType || !targetId || !reason) {
+      return res.status(422).json({ error: "targetType, targetId, and reason are required" });
+    }
+
+    if (!["product", "user"].includes(targetType)) {
+      return res.status(422).json({ error: "targetType must be 'product' or 'user'" });
+    }
+
+    const targetModelRef = targetType === "product" ? "products" : "USER";
+
+    // Prevent self-reporting
+    if (targetType === "user" && targetId.toString() === req.userID.toString()) {
+      return res.status(400).json({ error: "You cannot report yourself" });
+    }
+
+    // Verify target exists
+    if (targetType === "product") {
+      const product = await products.findById(targetId);
+      if (!product) return res.status(404).json({ error: "Product not found" });
+    } else {
+      const user = await User.findById(targetId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+    }
+
+    const report = new Report({
+      reporter: req.userID,
+      targetType,
+      targetId,
+      targetModelRef,
+      reason,
+      description: description || "",
+    });
+
+    await report.save();
+    res.status(201).json({ message: "Report submitted successfully", report });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ error: "You have already reported this item" });
+    }
+    console.log("Report error:", error.message);
+    res.status(500).json({ error: "Failed to submit report" });
+  }
+});
+
+// Admin: Get all reports with pagination & filters
+router.get("/admin/reports", authenicate, requireAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status = "", targetType = "", search = "" } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {};
+    if (status && status !== "all") query.status = status;
+    if (targetType && targetType !== "all") query.targetType = targetType;
+
+    const [reports, totalItems] = await Promise.all([
+      Report.find(query)
+        .populate("reporter", "fname email")
+        .populate("reviewedBy", "fname email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum),
+      Report.countDocuments(query),
+    ]);
+
+    // Manually populate targetId info
+    const enriched = await Promise.all(
+      reports.map(async (report) => {
+        const obj = report.toObject();
+        try {
+          if (report.targetType === "product") {
+            const product = await products.findById(report.targetId, { "title.shortTitle": 1, url: 1 });
+            obj.targetInfo = product
+              ? { name: product.title?.shortTitle || "منتج محذوف", image: product.url }
+              : { name: "منتج محذوف" };
+          } else {
+            const user = await User.findById(report.targetId, { fname: 1, email: 1 });
+            obj.targetInfo = user
+              ? { name: user.fname, email: user.email }
+              : { name: "مستخدم محذوف" };
+          }
+        } catch {
+          obj.targetInfo = { name: "—" };
+        }
+        return obj;
+      })
+    );
+
+    res.status(200).json({
+      data: enriched,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limitNum),
+        currentPage: pageNum,
+        limit: limitNum,
+      },
+    });
+  } catch (error) {
+    console.log("Admin reports error:", error.message);
+    res.status(500).json({ error: "Failed to fetch reports" });
+  }
+});
+
+// Admin: Get report stats summary
+router.get("/admin/reports/stats", authenicate, requireAdmin, async (req, res) => {
+  try {
+    const [total, pending, reviewed, resolved, dismissed, productReports, userReports] = await Promise.all([
+      Report.countDocuments(),
+      Report.countDocuments({ status: "pending" }),
+      Report.countDocuments({ status: "reviewed" }),
+      Report.countDocuments({ status: "resolved" }),
+      Report.countDocuments({ status: "dismissed" }),
+      Report.countDocuments({ targetType: "product" }),
+      Report.countDocuments({ targetType: "user" }),
+    ]);
+    res.status(200).json({ total, pending, reviewed, resolved, dismissed, productReports, userReports });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch report stats" });
+  }
+});
+
+// Admin: Update report status
+router.patch("/admin/reports/:id", authenicate, requireAdmin, async (req, res) => {
+  try {
+    const { status, adminNote } = req.body || {};
+
+    if (status && !["pending", "reviewed", "resolved", "dismissed"].includes(status)) {
+      return res.status(422).json({ error: "Invalid status value" });
+    }
+
+    const report = await Report.findById(req.params.id);
+    if (!report) return res.status(404).json({ error: "Report not found" });
+
+    if (status) report.status = status;
+    if (adminNote !== undefined) report.adminNote = adminNote;
+    report.reviewedBy = req.userID;
+    report.reviewedAt = new Date();
+
+    await report.save();
+    res.status(200).json(report);
+  } catch (error) {
+    console.log("Update report error:", error.message);
+    res.status(500).json({ error: "Failed to update report" });
+  }
+});
+
+// Admin: Delete a report
+router.delete("/admin/reports/:id", authenicate, requireAdmin, async (req, res) => {
+  try {
+    const report = await Report.findByIdAndDelete(req.params.id);
+    if (!report) return res.status(404).json({ error: "Report not found" });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log("Delete report error:", error.message);
+    res.status(500).json({ error: "Failed to delete report" });
+  }
+});
+
+// ─────────────────────────────────────────────
+// BAN / UNBAN USER API
+// ─────────────────────────────────────────────
+
+// Admin: Ban a user
+router.patch("/admin/users/:id/ban", authenicate, requireAdmin, async (req, res) => {
+  try {
+    const { reason } = req.body || {};
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.role === "admin") {
+      return res.status(400).json({ error: "Cannot ban an admin user" });
+    }
+
+    user.isBanned = true;
+    user.banReason = reason || "Violation of terms of service";
+    user.bannedAt = new Date();
+    // Invalidate all sessions
+    user.tokens = [];
+    await user.save();
+
+    res.status(200).json({ message: "User banned successfully", user: toPublicUser(user) });
+  } catch (error) {
+    console.log("Ban user error:", error.message);
+    res.status(500).json({ error: "Failed to ban user" });
+  }
+});
+
+// Admin: Unban a user
+router.patch("/admin/users/:id/unban", authenicate, requireAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    user.isBanned = false;
+    user.banReason = "";
+    user.bannedAt = null;
+    await user.save();
+
+    res.status(200).json({ message: "User unbanned successfully", user: toPublicUser(user) });
+  } catch (error) {
+    console.log("Unban user error:", error.message);
+    res.status(500).json({ error: "Failed to unban user" });
+  }
+});
+
+
+// ─────────────────────────────────────────────
+// WISHLIST API
+// ─────────────────────────────────────────────
+
+// GET: fetch the authenticated user's wishlist with full product details
+router.get("/wishlist", authenicate, async (req, res) => {
+  try {
+    const user = await User.findById(req.userID).populate({
+      path: "wishlist",
+      model: "products",
+      select: "id title url detailUrl price discount rating averageRating totalReviews views category likeCount"
+    });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Convert populated documents to plain objects
+    const wishlist = (user.wishlist || []).map(p => {
+      const obj = p.toObject ? p.toObject() : p;
+      return obj;
+    });
+
+    res.status(200).json({ wishlist });
+  } catch (error) {
+    console.log("Wishlist GET error:", error.message);
+    res.status(500).json({ error: "Failed to fetch wishlist" });
+  }
+});
+
+// POST: toggle a product in/out of the wishlist
+router.post("/wishlist/toggle/:productId", authenicate, async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    // Validate ObjectId format to prevent CastError
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
+
+    // Verify product exists
+    const product = await products.findById(productId);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    const user = await User.findById(req.userID);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Ensure wishlist is initialized
+    if (!user.wishlist) user.wishlist = [];
+
+    const alreadySaved = user.wishlist.some(
+      (id) => id.toString() === productId.toString()
+    );
+
+    if (alreadySaved) {
+      // Remove from wishlist
+      user.wishlist = user.wishlist.filter(
+        (id) => id.toString() !== productId.toString()
+      );
+    } else {
+      // Add to wishlist
+      user.wishlist.push(productId);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      saved: !alreadySaved,
+      wishlistCount: user.wishlist.length,
+      message: alreadySaved ? "Removed from wishlist" : "Added to wishlist"
+    });
+  } catch (error) {
+    console.log("Wishlist toggle error:", error.message);
+    res.status(500).json({ error: "Failed to update wishlist" });
+  }
+});
+
+// DELETE: clear the entire wishlist
+router.delete("/wishlist", authenicate, async (req, res) => {
+  try {
+    const user = await User.findById(req.userID);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    user.wishlist = [];
+    await user.save();
+
+    res.status(200).json({ message: "Wishlist cleared", wishlist: [] });
+  } catch (error) {
+    console.log("Wishlist clear error:", error.message);
+    res.status(500).json({ error: "Failed to clear wishlist" });
   }
 });
 

@@ -30,6 +30,7 @@ const CreateProduct = lazy(() => import("./Components/products/CreateProduct"));
 const AllProducts = lazy(() => import("./Components/products/AllProducts"));
 const ContactUs = lazy(() => import("./Components/ContactUs"));
 const ChatWidget = lazy(() => import("./Components/chat/ChatWidget"));
+const WishlistPage = lazy(() => import("./Components/wishlist/WishlistPage"));
 
 const CATEGORY_ALL = "All Categories";
 
@@ -210,6 +211,9 @@ function App() {
                     } />
                     <Route path="/contact" element={
                       isAdmin ? <Navigate to="/dashboard" replace /> : <ContactUs />
+                    } />
+                    <Route path="/wishlist" element={
+                      !account ? <Navigate to="/login" replace /> : <WishlistPage />
                     } />
                     <Route path="*" element={
                       <Navigate to="/" replace />

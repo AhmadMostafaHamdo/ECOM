@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import "./Navbaar.css";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
 import { apiUrl } from "../../api";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchWishlist } from "../redux/features/wishlistSlice";
 import { useTranslation } from "react-i18next";
 
 // Material UI Components
@@ -19,6 +21,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 // Internal Components
 import Rightheader from "./Rightheader";
@@ -32,6 +35,11 @@ const Navbaar = React.memo(({ onSearch }) => {
   const navigate = useNavigate();
   const { account, setAccount } = useContext(Logincontext);
   const { isDark, toggleTheme } = useTheme();
+  const location = useLocation();
+  const isWishlistPage = location.pathname === "/wishlist";
+
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector(state => state.wishlist?.items || []);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [dropen, setDropen] = useState(false);
@@ -63,6 +71,12 @@ const Navbaar = React.memo(({ onSearch }) => {
     }, 350);
     return () => clearTimeout(tmr);
   }, [text, fetchSuggestions, onSearch]);
+
+  useEffect(() => {
+    if (account) {
+      dispatch(fetchWishlist());
+    }
+  }, [account, dispatch]);
 
   const logoutuser = useCallback(async () => {
     await fetch(apiUrl("/logout"), { credentials: "include" });
@@ -163,6 +177,19 @@ const Navbaar = React.memo(({ onSearch }) => {
             )}
           </div>
 
+          {account && (
+            <NavLink to="/wishlist" className="nav_wishlist_btn" title="محفوظاتي">
+              <Badge badgeContent={wishlistItems.length} color="secondary" className="wishlist_badge">
+                <FavoriteIcon
+                  style={{
+                    fontSize: isWishlistPage ? 25 : 20,
+                    color: isWishlistPage ? "#f43f5e" : "#ff00009e"
+                  }}
+                />
+              </Badge>
+            </NavLink>
+          )}
+
           {/* Dark / Light toggle */}
           <button className="theme_toggle" onClick={toggleTheme} aria-label="toggle theme">
             {isDark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
@@ -204,6 +231,20 @@ const Navbaar = React.memo(({ onSearch }) => {
               </div>
               <span className="menu_item_text">{t("navigation.profile")}</span>
             </MenuItem>
+            {account && (
+              <MenuItem
+                className="profile_menu_item"
+                onClick={() => {
+                  navigate("/wishlist");
+                  setAnchorEl(null);
+                }}
+              >
+                <div className="menu_item_icon">
+                  <FavoriteIcon fontSize="small" style={{ color: '#f43f5e' }} />
+                </div>
+                <span className="menu_item_text">محفوظاتي</span>
+              </MenuItem>
+            )}
             {account && (
               <MenuItem
                 className="profile_menu_item logout_item"

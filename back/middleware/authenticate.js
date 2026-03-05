@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userSchema");
 const keysecret = process.env.KEY
 
-const authenicate = async(req,res,next)=>{
+const authenicate = async (req, res, next) => {
     try {
         const token = req.cookies.eccomerce;
 
@@ -10,20 +10,30 @@ const authenicate = async(req,res,next)=>{
             return res.status(401).json({ error: "Unauthorized: token missing" });
         }
 
-        const verifyToken = jwt.verify(token,keysecret);
+        const verifyToken = jwt.verify(token, keysecret);
 
-        const rootUser = await User.findOne({_id:verifyToken._id,"tokens.token":token});
+        const rootUser = await User.findOne({ _id: verifyToken._id, "tokens.token": token });
 
-        if(!rootUser){
+        if (!rootUser) {
             res.clearCookie("eccomerce", { path: "/" });
             return res.status(401).json({ error: "Unauthorized: invalid token" });
         }
 
-        req.token = token; 
-        req.rootUser = rootUser;   
-        req.userID = rootUser._id;   
-    
-        next();  
+        // Check if user is banned
+        if (rootUser.isBanned) {
+            res.clearCookie("eccomerce", { path: "/" });
+            return res.status(403).json({
+                error: "Account suspended",
+                message: `حسابك محظور. السبب: ${rootUser.banReason || "انتهاك شروط الخدمة"}`,
+                banned: true
+            });
+        }
+
+        req.token = token;
+        req.rootUser = rootUser;
+        req.userID = rootUser._id;
+
+        next();
 
 
     } catch (error) {
@@ -34,3 +44,4 @@ const authenicate = async(req,res,next)=>{
 };
 
 module.exports = authenicate;
+

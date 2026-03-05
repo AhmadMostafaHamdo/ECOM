@@ -83,6 +83,22 @@ const productSchema = new mongoose.Schema({
     timestamps: true
 });
 
+// Optimize database performance with a text index for full-text search
+productSchema.index({
+    "title.shortTitle": "text",
+    "title.longTitle": "text",
+    description: "text",
+    category: "text"
+}, {
+    weights: {
+        "title.shortTitle": 10,
+        "title.longTitle": 5,
+        category: 3,
+        description: 1
+    },
+    name: "ProductTextIndex"
+});
+
 const Products = new mongoose.model("products", productSchema);
 
 module.exports = Products;
