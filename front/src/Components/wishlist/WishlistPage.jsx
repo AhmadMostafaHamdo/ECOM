@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { removeFromWishlistLocal, clearWishlistLocal } from "../redux/features/wishlistSlice";
 import "./wishlist.css";
+import BackButton from "../common/BackButton";
 
 // Icons
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -16,7 +17,6 @@ import StarRateIcon from "@mui/icons-material/StarRate";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const WishlistPage = () => {
     const { account } = useContext(Logincontext);
@@ -107,9 +107,7 @@ const WishlistPage = () => {
             {/* Header */}
             <div className="wishlist_hero">
                 <div className="wishlist_hero_content">
-                    <button className="wishlist_back_btn" onClick={() => navigate(-1)}>
-                        <ArrowBackIcon />
-                    </button>
+                    <BackButton className="wishlist_back_btn" showText={false} />
                     <div className="wishlist_title_block">
                         <div className="wishlist_icon_circle">
                             <FavoriteIcon />

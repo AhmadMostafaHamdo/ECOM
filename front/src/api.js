@@ -1,101 +1,100 @@
-import axios from "axios";
-import { loaderManager } from "./utils/loaderManager";
+import axios from 'axios';
 
-// Default configuration for Axios
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5007";
+// Replace with your backend URL
+const baseURL = 'http://localhost:5007';
 
-const axiosInstance = axios.create({
-    baseURL: API_BASE_URL,
-    withCredentials: true, // Send cookies, authorization headers, etc.
+/**
+ * Normalizes and returns the full API URL for a given path.
+ */
+export const apiUrl = (path) => {
+    if (!path) return baseURL;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${baseURL}${cleanPath}`;
+};
+
+/**
+ * Pre-configured Axios instance for application-wide use.
+ */
+export const axiosInstance = axios.create({
+    baseURL,
+    withCredentials: true,
     headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
     },
 });
 
-// Configure Axios interceptor to automatically add the CSRF token to headers
+// Helper to get cookie value by name
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
+
+// Request interceptor to add CSRF token manually
 axiosInstance.interceptors.request.use((config) => {
-    // Look for csrfToken in cookies
-    const match = document.cookie.match(new RegExp('(^| )csrfToken=([^;]+)'));
-    if (match && match[2]) {
-        config.headers['X-CSRF-Token'] = match[2];
+    const token = getCookie('csrfToken');
+    if (token) {
+        config.headers['x-csrf-token'] = token;
     }
-    loaderManager.showLoader();
     return config;
 }, (error) => {
-    loaderManager.hideLoader();
     return Promise.reject(error);
 });
 
-axiosInstance.interceptors.response.use((response) => {
-    loaderManager.hideLoader();
-    return response;
-}, (error) => {
-    loaderManager.hideLoader();
-    return Promise.reject(error);
-});
-
-// Polyfill function replacing standard `fetch(apiUrl(url), options)` completely
+/**
+ * Polyfill for window.fetch that uses Axios internally.
+ * This allows keeping existing fetch calls while benefiting from Axios.
+ */
 export const fetchViaAxios = async (url, options = {}) => {
-    // Try to clean up URL if it already contains the base (apiUrl wrapping)
-    let cleanUrl = typeof url === 'string' ? url : url.toString();
-    if (cleanUrl.startsWith(API_BASE_URL)) {
-        cleanUrl = cleanUrl.replace(API_BASE_URL, '');
-    }
-
-    const method = (options.method || "GET").toLowerCase();
-
-    // Parse headers 
-    const headers = options.headers || {};
-
-    // Handle body
-    let data = options.body;
-
     try {
         const config = {
-            method,
-            url: cleanUrl,
-            headers,
-            data,
+            url: typeof url === 'object' && url.toString ? url.toString() : url,
+            method: options.method || 'GET',
+            headers: options.headers || {},
+            data: options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : undefined,
+            ...options
         };
 
-        // Make request via axios
+        // Remove fetch-specific options that aren't valid in Axios config
+        delete config.body;
+        delete config.credentials;
+
         const response = await axiosInstance(config);
 
-        // Polyfill the standard Fetch API response object mapping from Axios
+        // Transform Axios response to match the native Fetch API response structure
         return {
             ok: response.status >= 200 && response.status < 300,
             status: response.status,
             statusText: response.statusText,
-            headers: new Headers(response.headers),
+            headers: {
+                get: (name) => response.headers[name.toLowerCase()] || null,
+                forEach: (cb) => Object.entries(response.headers).forEach(([k, v]) => cb(v, k)),
+            },
             json: async () => response.data,
-            text: async () => typeof response.data === 'string' ? response.data : JSON.stringify(response.data),
+            text: async () => (typeof response.data === 'string' ? response.data : JSON.stringify(response.data)),
+            blob: async () => new Blob([JSON.stringify(response.data)]),
         };
     } catch (error) {
         if (error.response) {
-            // The request was made and the server responded with a status code
-            // We still need to return a valid Fetch-like response block for handling on the client side
+            const { response } = error;
             return {
                 ok: false,
-                status: error.response.status,
-                statusText: error.response.statusText,
-                headers: new Headers(error.response.headers),
-                json: async () => error.response.data,
-                text: async () => typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data),
+                status: response.status,
+                statusText: response.statusText,
+                headers: {
+                    get: (name) => response.headers[name.toLowerCase()] || null,
+                },
+                json: async () => response.data,
+                text: async () => (typeof response.data === 'string' ? response.data : JSON.stringify(response.data)),
             };
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.error('API Network Error', error.message);
-            // throw error; // let the caller catch the error as typical fetch behaviour
-            throw new Error(`[Axios Network Error]: ${error.message}`);
         }
-    }
-};
 
-// Return full API URL to preserve backward compatibility across all modules natively
-export const apiUrl = (path = "") => {
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    return `${API_BASE_URL}${normalizedPath}`;
+        // Handle network errors or other issues
+        console.error('API Fetch Error:', error);
+        throw error;
+    }
 };
 
 export default axiosInstance;

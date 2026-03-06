@@ -41,11 +41,12 @@ const ChatWidget = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const fetchUnreadCount = useCallback(async () => {
+    const fetchUnreadCount = useCallback(async (isBackground = false) => {
         if (!accountId) return;
         try {
             const res = await fetch(apiUrl('/conversations/unread/count'), {
                 credentials: 'include',
+                skipLoader: isBackground, // Bypass global loader for polling
             });
             if (res.ok) {
                 const data = await res.json();
@@ -96,14 +97,32 @@ const ChatWidget = () => {
         }
     }, [isOpen, accountId, fetchConversations, fetchUnreadCount]);
 
-    // Poll unread count in background
+    // Poll unread count in background (Fallback)
     useEffect(() => {
         if (accountId) {
-            fetchUnreadCount();
-            const interval = setInterval(fetchUnreadCount, 15000);
+            fetchUnreadCount(true);
+            const interval = setInterval(() => fetchUnreadCount(true), 60000); // 1 minute is enough with socket updates
             return () => clearInterval(interval);
         }
     }, [accountId, fetchUnreadCount]);
+
+    // Global real-time unread count updates
+    useEffect(() => {
+        if (socketRef.current) {
+            const handleGlobalMessage = (data) => {
+                // Only refresh if the message is from someone else
+                const senderId = data.message?.senderId?._id || data.message?.senderId;
+                if (senderId && senderId !== accountId) {
+                    fetchUnreadCount(true);
+                    if (isOpen && !activeConversation) {
+                        fetchConversations();
+                    }
+                }
+            };
+            socketRef.current.on("receive_message", handleGlobalMessage);
+            return () => socketRef.current.off("receive_message", handleGlobalMessage);
+        }
+    }, [isOpen, activeConversation, fetchUnreadCount, fetchConversations, accountId]);
 
     // Handle pending conversation from "Chat with Seller" button
     useEffect(() => {
@@ -171,13 +190,7 @@ const ChatWidget = () => {
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
                 fetchConversations();
-
-                if (socketRef.current) {
-                    socketRef.current.emit("send_message", {
-                        conversationId: activeConversation._id,
-                        message: msg
-                    });
-                }
+                fetchUnreadCount(true);
             }
         } catch (err) {
             console.error('Failed to send message:', err);

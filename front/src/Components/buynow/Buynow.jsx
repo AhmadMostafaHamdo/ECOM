@@ -6,6 +6,7 @@ import Right from "./Right";
 import Subtotal from "./Subtotal";
 import { apiUrl } from "../../api";
 import "./buynow.css";
+import BackButton from "../common/BackButton";
 
 const Buynow = () => {
     const { t } = useTranslation();
@@ -39,6 +40,9 @@ const Buynow = () => {
             {cartdata.length ? (
                 <div className="cart-wrapper">
                     <div className="cart-container">
+                        <div style={{ width: '100%', padding: '0 20px' }}>
+                            <BackButton />
+                        </div>
                         {/* Left Section - Cart Items */}
                         <div className="cart-main">
                             <div className="cart-header">

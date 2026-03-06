@@ -21,7 +21,7 @@ import { toast } from "react-toastify";
 import ReportModal from "../common/ReportModal";
 import useWishlist from "../wishlist/useWishlist";
 import ProductLayout from "./components/ProductLayout";
-
+import BackButton from "../common/BackButton";
 
 const Cart = () => {
   const { t } = useTranslation();
@@ -238,6 +238,9 @@ const Cart = () => {
 
   return (
     <div className="cart_section">
+      <div className="container" style={{ padding: '20px 0 0 0' }}>
+        <BackButton />
+      </div>
       {inddata && Object.keys(inddata).length ? (
         <>
           <ProductLayout

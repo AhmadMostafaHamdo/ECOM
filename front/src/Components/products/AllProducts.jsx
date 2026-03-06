@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-    ArrowBack,
     Search,
     FilterList,
     GridView,
@@ -17,6 +16,7 @@ import {
 import { apiUrl } from "../../api";
 import "./AllProducts.css";
 import Pagination from "../common/Pagination";
+import BackButton from "../common/BackButton";
 
 const AllProducts = () => {
     const { t } = useTranslation();
@@ -126,10 +126,6 @@ const AllProducts = () => {
         });
     }, [products, sortBy]);
 
-    const handleBack = () => {
-        history.goBack();
-    };
-
     const handleProductClick = (productId) => {
         navigate(`/getproductsone/${productId}`);
     };
@@ -140,10 +136,7 @@ const AllProducts = () => {
             <header className="allproducts_hero">
                 <div className="hero_glass">
                     <div className="hero_content">
-                        <button className="glass_back_btn" onClick={handleBack}>
-                            <ArrowBack />
-                            <span>{t('allProducts.back')}</span>
-                        </button>
+                        <BackButton className="glass_back_btn" />
                         <div className="title_area">
                             <span className="category_tag">{t('allProducts.exploring')}</span>
                             <h1>{displayCategoryName}</h1>

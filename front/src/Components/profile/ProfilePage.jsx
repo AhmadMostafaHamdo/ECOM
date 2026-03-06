@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
 import "./profile.css";
+import BackButton from "../common/BackButton";
 
 // Icons (Using standard MUI or Heroicons style)
 import PersonIcon from "@mui/icons-material/Person";
@@ -114,6 +115,9 @@ const ProfilePage = () => {
   return (
     <main className="profile_wrapper">
       <div className="profile_container">
+        <div style={{ width: '100%', marginBottom: '10px' }}>
+          <BackButton />
+        </div>
         {/* LEFT SIDEBAR: User Overview */}
         <aside className="profile_sidebar">
           <div className="profile_card user_summary">

@@ -2,26 +2,36 @@ import React from 'react';
 import { NavLink } from "react-router-dom";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
+import { useLocation } from "react-router-dom";
+import BackButton from "../../common/BackButton";
 
 const AdminHeader = ({ t }) => {
+    const location = useLocation();
+    const isDashboardHome = location.pathname === "/dashboard" || location.pathname === "/dashboard/";
+
     return (
         <header className="admin_top_header">
-            <div className="admin_search_bar">
-                <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ color: "var(--color-text-muted)" }}
-                >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" placeholder={t("navigation.search")} />
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
+                {!isDashboardHome && (
+                    <BackButton showText={false} style={{ marginBottom: 0, padding: '8px' }} />
+                )}
+                <div className="admin_search_bar">
+                    <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ color: "var(--color-text-muted)" }}
+                    >
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" placeholder={t("navigation.search")} />
+                </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
                 <div
