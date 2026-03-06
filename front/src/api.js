@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Replace with your backend URL
-const baseURL = 'http://localhost:5007';
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5007';
 
 /**
  * Normalizes and returns the full API URL for a given path.
