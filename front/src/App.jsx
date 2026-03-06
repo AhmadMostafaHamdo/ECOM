@@ -3,7 +3,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  Suspense,
+  Suspense, 
   lazy,
 } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
