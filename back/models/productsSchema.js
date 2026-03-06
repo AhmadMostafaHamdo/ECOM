@@ -99,6 +99,10 @@ productSchema.index({
     name: "ProductTextIndex"
 });
 
+// Add indexing for sorting optimization
+productSchema.index({ createdAt: -1 });
+productSchema.index({ category: 1, createdAt: -1 });
+
 const Products = new mongoose.model("products", productSchema);
 
 module.exports = Products;

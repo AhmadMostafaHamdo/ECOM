@@ -44,8 +44,8 @@ const UsersManagement = () => {
 
   // Data Actions
   const handleSearch = useCallback((term) => loadUsers(1, term, pagination.limit), [loadUsers, pagination.limit]);
-  const handlePageChange = (newPage) => loadUsers(newPage, "", pagination.limit);
-  const handlePageSizeChange = (newSize) => loadUsers(1, "", newSize);
+  const handlePageChange = useCallback((newPage) => loadUsers(newPage, "", pagination.limit), [loadUsers, pagination.limit]);
+  const handlePageSizeChange = useCallback((newSize) => loadUsers(1, "", newSize), [loadUsers]);
 
   // Form Management
   const resetForm = useCallback(() => {
@@ -100,12 +100,12 @@ const UsersManagement = () => {
     setConfirmOpen(true);
   }, []);
 
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = useCallback(async () => {
     if (!deleteTarget) return;
     await deleteUser(deleteTarget._id);
     setConfirmOpen(false);
     setDeleteTarget(null);
-  };
+  }, [deleteTarget, deleteUser]);
 
   // Ban Management
   const requestBan = useCallback((user) => {
@@ -114,31 +114,98 @@ const UsersManagement = () => {
     setBanDialogOpen(true);
   }, []);
 
-  const handleBanUser = async () => {
+  const handleBanUser = useCallback(async () => {
     if (!banTarget) return;
     await banUser(banTarget._id, banReason);
     setBanDialogOpen(false);
     setBanTarget(null);
-  };
+  }, [banTarget, banUser, banReason]);
 
   const requestUnban = useCallback((user) => {
     setUnbanTarget(user);
     setUnbanDialogOpen(true);
   }, []);
 
-  const handleUnbanUser = async () => {
+  const handleUnbanUser = useCallback(async () => {
     if (!unbanTarget) return;
     await unbanUser(unbanTarget._id);
     setUnbanDialogOpen(false);
     setUnbanTarget(null);
-  };
+  }, [unbanTarget, unbanUser]);
 
-  const handleToggleAdmin = async (user) => {
+  const handleToggleAdmin = useCallback(async (user) => {
     const res = await toggleAdmin(user);
     if (!res.success) {
       alert(res.error || "فشل تحديث دور المستخدم");
     }
-  };
+  }, [toggleAdmin]);
+
+  const tableFilters = React.useMemo(() => [
+    {
+      key: "role",
+      label: t("admin.role"),
+      options: [
+        { value: "all", label: t("admin.allRoles") },
+        { value: "admin", label: t("admin.adminRole") },
+        { value: "user", label: t("admin.userRole") },
+      ],
+    },
+  ], [t]);
+
+  const tableColumns = React.useMemo(() => [
+    {
+      key: "fname",
+      title: t("profile.personalInfo"),
+      type: "avatar",
+      getAvatarText: (user) => (user.fname ? user.fname[0].toUpperCase() : "?"),
+      getName: (user) => `${user.fname ?? ""} ${user.lname ?? ""}`.trim() || "—",
+      getSubtitle: (user) => (user._id ? `ID: ${user._id.slice(-8)}` : ""),
+      sortable: true,
+    },
+    { key: "email", title: t("auth.email"), sortable: true },
+    { key: "mobile", title: t("auth.mobile") || "Mobile", sortable: false },
+    { key: "role", title: t("auth.role"), type: "role", align: "center", sortable: true },
+    {
+      key: "status",
+      title: t("common.status"),
+      type: "status",
+      getStatusClass: (_, item) => (item?.isBanned ? "banned" : "active"),
+      getStatusText: (_, item) => (item?.isBanned ? "محظور" : t("common.active") || "Active"),
+      align: "center",
+    },
+    { key: "actions", title: t("common.actions") || "Actions", type: "actions", align: "center" },
+  ], [t]);
+
+  const tableActions = React.useMemo(() => [
+    {
+      icon: Pencil, label: t("common.edit"), tooltipKey: "common.edit",
+      variant: "edit", onClick: handleEdit,
+    },
+    {
+      icon: Trash2, label: t("common.delete"), tooltipKey: "common.delete",
+      variant: "delete", onClick: requestDelete,
+    },
+    {
+      icon: Ban, label: "حظر", tooltipKey: "حظر المستخدم",
+      variant: "delete", isVisible: (user) => !user.isBanned && user.role !== "admin",
+      onClick: requestBan,
+    },
+    {
+      icon: ShieldCheck, label: "إلغاء حظر", tooltipKey: "إلغاء الحظر",
+      variant: "edit", isVisible: (user) => user.isBanned,
+      onClick: requestUnban,
+    },
+    {
+      icon: ShieldCheck, label: "أدمن", tooltipKey: "ترقية كمسؤول",
+      variant: "edit", isVisible: (user) => user.role !== "admin" && !user.isBanned,
+      onClick: handleToggleAdmin,
+    },
+    {
+      icon: ShieldOff, label: "سحب أدمن", tooltipKey: "إلغاء المسؤول",
+      variant: "delete", isVisible: (user) => user.role === "admin",
+      onClick: handleToggleAdmin,
+    },
+  ], [t, handleEdit, requestDelete, requestBan, requestUnban, handleToggleAdmin]);
 
   return (
     <div className="admin_page bg-transparent">
@@ -188,70 +255,9 @@ const UsersManagement = () => {
             onSearch={handleSearch}
             searchDebounceMs={450}
             searchKeys={["fname", "lname", "email", "mobile"]}
-            filters={[
-              {
-                key: "role",
-                label: t("admin.role"),
-                options: [
-                  { value: "all", label: t("admin.allRoles") },
-                  { value: "admin", label: t("admin.adminRole") },
-                  { value: "user", label: t("admin.userRole") },
-                ],
-              },
-            ]}
-            columns={[
-              {
-                key: "fname",
-                title: t("profile.personalInfo"),
-                type: "avatar",
-                getAvatarText: (user) => (user.fname ? user.fname[0].toUpperCase() : "?"),
-                getName: (user) => `${user.fname ?? ""} ${user.lname ?? ""}`.trim() || "—",
-                getSubtitle: (user) => (user._id ? `ID: ${user._id.slice(-8)}` : ""),
-                sortable: true,
-              },
-              { key: "email", title: t("auth.email"), sortable: true },
-              { key: "mobile", title: t("auth.mobile") || "Mobile", sortable: false },
-              { key: "role", title: t("auth.role"), type: "role", align: "center", sortable: true },
-              {
-                key: "status",
-                title: t("common.status"),
-                type: "status",
-                getStatusClass: (_, item) => (item?.isBanned ? "banned" : "active"),
-                getStatusText: (_, item) => (item?.isBanned ? "محظور" : t("common.active") || "Active"),
-                align: "center",
-              },
-              { key: "actions", title: t("common.actions") || "Actions", type: "actions", align: "center" },
-            ]}
-            actions={[
-              {
-                icon: Pencil, label: t("common.edit"), tooltipKey: "common.edit",
-                variant: "edit", onClick: handleEdit,
-              },
-              {
-                icon: Trash2, label: t("common.delete"), tooltipKey: "common.delete",
-                variant: "delete", onClick: requestDelete,
-              },
-              {
-                icon: Ban, label: "حظر", tooltipKey: "حظر المستخدم",
-                variant: "delete", isVisible: (user) => !user.isBanned && user.role !== "admin",
-                onClick: requestBan,
-              },
-              {
-                icon: ShieldCheck, label: "إلغاء حظر", tooltipKey: "إلغاء الحظر",
-                variant: "edit", isVisible: (user) => user.isBanned,
-                onClick: requestUnban,
-              },
-              {
-                icon: ShieldCheck, label: "أدمن", tooltipKey: "ترقية كمسؤول",
-                variant: "edit", isVisible: (user) => user.role !== "admin" && !user.isBanned,
-                onClick: handleToggleAdmin,
-              },
-              {
-                icon: ShieldOff, label: "سحب أدمن", tooltipKey: "إلغاء المسؤول",
-                variant: "delete", isVisible: (user) => user.role === "admin",
-                onClick: handleToggleAdmin,
-              },
-            ]}
+            filters={tableFilters}
+            columns={tableColumns}
+            actions={tableActions}
           />
         </section>
 

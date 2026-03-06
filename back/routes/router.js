@@ -261,77 +261,93 @@ const buildProductPayload = (body = {}, fallback = {}) => {
   };
 };
 
+let isCategoryCatalogEnsured = false;
+let catalogEnsurePromise = null;
+
 const ensureCategoryCatalog = async () => {
-  const productsData = await products.find({}, { category: 1, title: 1 });
-  const backfillOperations = [];
-  const hasSpecificCategory = productsData.some((product) => {
-    const categoryValue =
-      typeof product.category === "string" ? product.category.trim() : "";
-    return (
-      categoryValue &&
-      normalizeCategory(categoryValue) !== normalizeCategory(UNCATEGORIZED)
-    );
-  });
+  if (isCategoryCatalogEnsured) return;
+  if (catalogEnsurePromise) return catalogEnsurePromise;
 
-  const resolvedCategories = productsData.map((product) => {
-    const currentCategory =
-      typeof product.category === "string" ? product.category.trim() : "";
-    const shortTitleValue =
-      typeof product?.title?.shortTitle === "string"
-        ? product.title.shortTitle.trim()
-        : "";
-    const shouldInitializeFromTitle =
-      !hasSpecificCategory &&
-      normalizeCategory(currentCategory) === normalizeCategory(UNCATEGORIZED) &&
-      Boolean(shortTitleValue);
-
-    const resolvedCategory = shouldInitializeFromTitle
-      ? shortTitleValue
-      : currentCategory || shortTitleValue || UNCATEGORIZED;
-
-    if (
-      (!currentCategory || shouldInitializeFromTitle) &&
-      resolvedCategory !== UNCATEGORIZED
-    ) {
-      backfillOperations.push({
-        updateOne: {
-          filter: { _id: product._id },
-          update: { $set: { category: resolvedCategory } },
-        },
+  catalogEnsurePromise = (async () => {
+    try {
+      const productsData = await products.find({}, { category: 1, title: 1 }).lean();
+      const backfillOperations = [];
+      const hasSpecificCategory = productsData.some((product) => {
+        const categoryValue =
+          typeof product.category === "string" ? product.category.trim() : "";
+        return (
+          categoryValue &&
+          normalizeCategory(categoryValue) !== normalizeCategory(UNCATEGORIZED)
+        );
       });
+
+      const resolvedCategories = productsData.map((product) => {
+        const currentCategory =
+          typeof product.category === "string" ? product.category.trim() : "";
+        const shortTitleValue =
+          typeof product?.title?.shortTitle === "string"
+            ? product.title.shortTitle.trim()
+            : "";
+        const shouldInitializeFromTitle =
+          !hasSpecificCategory &&
+          normalizeCategory(currentCategory) === normalizeCategory(UNCATEGORIZED) &&
+          Boolean(shortTitleValue);
+
+        const resolvedCategory = shouldInitializeFromTitle
+          ? shortTitleValue
+          : currentCategory || shortTitleValue || UNCATEGORIZED;
+
+        if (
+          (!currentCategory || shouldInitializeFromTitle) &&
+          resolvedCategory !== UNCATEGORIZED
+        ) {
+          backfillOperations.push({
+            updateOne: {
+              filter: { _id: product._id },
+              update: { $set: { category: resolvedCategory } },
+            },
+          });
+        }
+
+        return resolvedCategory;
+      });
+
+      if (backfillOperations.length) {
+        await products.bulkWrite(backfillOperations);
+      }
+
+      const categoryNames = [...new Set(resolvedCategories.filter(Boolean))];
+
+      if (!categoryNames.includes(UNCATEGORIZED)) {
+        categoryNames.push(UNCATEGORIZED);
+      }
+
+      if (!categoryNames.length) {
+        categoryNames.push(UNCATEGORIZED);
+      }
+
+      const existingCategories = await Category.find({}, { normalizedName: 1 }).lean();
+      const existingNormalized = new Set(
+        existingCategories.map((category) => category.normalizedName),
+      );
+      const missingCategoryNames = categoryNames.filter(
+        (name) => !existingNormalized.has(normalizeCategory(name)),
+      );
+
+      if (missingCategoryNames.length) {
+        await Category.insertMany(
+          missingCategoryNames.map((name) => ({ name })),
+          { ordered: false },
+        );
+      }
+      isCategoryCatalogEnsured = true;
+    } catch (e) {
+      console.error("Error in ensureCategoryCatalog:", e);
+    } finally {
+      catalogEnsurePromise = null;
     }
-
-    return resolvedCategory;
-  });
-
-  if (backfillOperations.length) {
-    await products.bulkWrite(backfillOperations);
-  }
-
-  const categoryNames = [...new Set(resolvedCategories.filter(Boolean))];
-
-  if (!categoryNames.includes(UNCATEGORIZED)) {
-    categoryNames.push(UNCATEGORIZED);
-  }
-
-  if (!categoryNames.length) {
-    categoryNames.push(UNCATEGORIZED);
-  }
-
-  const existingCategories = await Category.find({}, { normalizedName: 1 });
-  const existingNormalized = new Set(
-    existingCategories.map((category) => category.normalizedName),
-  );
-  const missingCategoryNames = categoryNames.filter(
-    (name) => !existingNormalized.has(normalizeCategory(name)),
-  );
-
-  if (missingCategoryNames.length) {
-    await Category.insertMany(
-      missingCategoryNames.map((name) => ({ name })),
-      { ordered: false },
-    );
-  }
+  })();
+  return catalogEnsurePromise;
 };
 
 const toPublicUser = (userDoc) => {
@@ -384,8 +400,8 @@ const getCategoryDashboardPayload = async (categories = null) => {
   await ensureCategoryCatalog();
 
   const [categoryDocs, productsData] = await Promise.all([
-    categories || Category.find().sort({ name: 1 }),
-    products.find({}, { category: 1, title: 1 }),
+    categories || Category.find().sort({ name: 1 }).lean(),
+    products.find({}, { category: 1, title: 1 }).lean(),
   ]);
 
   const productCountByCategory = productsData.reduce((acc, product) => {
@@ -565,7 +581,7 @@ router.get("/getproducts", async (req, res) => {
     }
 
     const [productsData, totalItems] = await Promise.all([
-      products.find(query).skip(skip).limit(limitNum).sort({ createdAt: -1 }),
+      products.find(query).skip(skip).limit(limitNum).sort({ createdAt: -1 }).lean(),
       products.all
         ? products.countDocuments(query)
         : products.countDocuments(query),
@@ -659,7 +675,7 @@ router.post("/products/filter", async (req, res) => {
     const query = clauses.length ? { $and: clauses } : {};
 
     const [productsData, totalItems] = await Promise.all([
-      products.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+      products.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum).lean(),
       products.countDocuments(query),
     ]);
 
@@ -749,7 +765,7 @@ router.get("/products/filter", async (req, res) => {
     }
 
     const query = clauses.length ? { $and: clauses } : {};
-    const productsData = await products.find(query);
+    const productsData = await products.find(query).lean();
     const productsWithCategory = productsData.map(resolveProductCategory);
 
     res.status(200).json(productsWithCategory);

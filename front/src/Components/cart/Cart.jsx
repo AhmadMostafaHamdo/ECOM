@@ -18,13 +18,9 @@ import {
 } from "@mui/icons-material";
 import { apiUrl } from "../../api";
 import { toast } from "react-toastify";
-import ReviewForm from "../reviews/ReviewForm";
-import ReviewList from "../reviews/ReviewList";
-import RatingDistribution from "../reviews/RatingDistribution";
-import StarRating from "../reviews/StarRating";
-import CommentSection from "../comments/CommentSection";
 import ReportModal from "../common/ReportModal";
 import useWishlist from "../wishlist/useWishlist";
+import ProductLayout from "./components/ProductLayout";
 
 
 const Cart = () => {
@@ -38,10 +34,6 @@ const Cart = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewSummary, setReviewSummary] = useState(null);
-  const [activeTab, setActiveTab] = useState('description');
   const [reportOpen, setReportOpen] = useState(false);
   const [initialSaved, setInitialSaved] = useState(false);
   const [productMongoId, setProductMongoId] = useState(null);
@@ -216,11 +208,6 @@ const Cart = () => {
   };
 
 
-  const handleReviewSubmit = () => {
-    setShowReviewForm(false);
-    // ReviewList will refresh automatically
-  };
-
   // Wishlist
   const { saved: wishSaved, toggle: toggleWishlist, loading: wishLoading } = useWishlist(
     initialSaved,
@@ -253,234 +240,19 @@ const Cart = () => {
     <div className="cart_section">
       {inddata && Object.keys(inddata).length ? (
         <>
-          {/* Main Product Card */}
-          <div className="cart_container">
-            {/* Left - Image Gallery */}
-            <div className="left_cart">
-              <div className="product_image_wrapper">
-                <img
-                  src={images[selectedImage] || inddata.detailUrl}
-                  alt={inddata.title?.shortTitle || 'product'}
-                />
-                {inddata.discount && (
-                  <div className="product_discount_badge">
-                    <LocalOffer className="offer_icon_small" />
-                    {inddata.discount}
-                  </div>
-                )}
-                {/* Like Button Overlay */}
-                <button className={`product-like-overlay ${liked ? 'liked' : ''}`} onClick={handleLike}>
-                  {liked ? <Favorite /> : <FavoriteBorder />}
-                  <span>{likeCount}</span>
-                </button>
-              </div>
-
-              {/* Image Thumbnails */}
-              {images.length > 1 && (
-                <div className="product-thumbnails">
-                  {images.map((img, idx) => (
-                    <button
-                      key={idx}
-                      className={`product-thumb ${selectedImage === idx ? 'active' : ''}`}
-                      onClick={() => setSelectedImage(idx)}
-                    >
-                      <img src={img} alt={`view ${idx + 1}`} />
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="cart_btn">
-
-                <button className="cart_btn_chat" onClick={handleChatWithSeller}>
-                  <ChatBubbleOutline className="btn_icon" />
-                  <span>تواصل مع البائع</span>
-                </button>
-
-                {/* Wishlist Save Button */}
-                <button
-                  className={`cart_btn_wishlist ${wishSaved ? 'cart_btn_wishlist--saved' : ''}`}
-                  onClick={toggleWishlist}
-                  disabled={wishLoading}
-                  title={wishSaved ? 'إزالة من المحفوظات' : 'حفظ في المحفوظات'}
-                >
-                  {wishSaved ? <Favorite className="btn_icon" /> : <FavoriteBorder className="btn_icon" />}
-                  <span>{wishSaved ? 'تم الحفظ' : 'حفظ في المحفوظات'}</span>
-                </button>
-
-                {account && (
-                  <button
-                    className="cart_btn_report"
-                    onClick={() => setReportOpen(true)}
-                    title="الإبلاغ عن هذا المنتج"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      padding: '10px 18px', borderRadius: '10px',
-                      border: '1px solid #fecaca', background: '#fff5f5',
-                      color: '#ef4444', cursor: 'pointer',
-                      fontSize: '13px', fontWeight: '700',
-                      transition: 'all 0.2s', marginTop: '8px'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fff5f5'; }}
-                  >
-                    ⚠️ الإبلاغ عن المنتج
-                  </button>
-                )}
-
-              </div>
-
-            </div>
-
-            {/* Right - Product Details */}
-            <div className="right_cart">
-              <div className="product_header">
-                <div className="product-category-tag">
-                  {inddata.category || 'Product'}
-                </div>
-                <h3>{inddata.title.shortTitle}</h3>
-                <h4>{inddata.title.longTitle}</h4>
-                <div className="product_meta">
-                  <span className="rating_chip">
-                    <StarRate />
-                    {Number(inddata.averageRating || inddata.rating || 0).toFixed(1)}
-                    {inddata.totalReviews > 0 && (
-                      <span className="review-count-mini">({inddata.totalReviews})</span>
-                    )}
-                  </span>
-                  <span className="views_chip">
-                    <Visibility />
-                    {inddata.views || 0} {t("product.views")}
-                  </span>
-                  <span className="like_chip">
-                    <Favorite />
-                    {likeCount}
-                  </span>
-                </div>
-              </div>
-
-              <Divider className="product_divider" />
-
-              {/* Price Section */}
-              <div className="price_section_cart">
-                <p className="mrp">
-                  MRP: <del>Rs. {inddata.price.mrp}</del>
-                </p>
-                <div className="deal_price">
-                  <span className="deal_label">{t("cart.todayPrice")}:</span>
-                  <span className="price_value">Rs. {inddata.price.cost}</span>
-                </div>
-                <div className="savings">
-                  <span>{t("cart.youSave")}:</span>
-                  <span className="save_value">
-                    Rs. {inddata.price.mrp - inddata.price.cost} (
-                    {inddata.price.discount})
-                  </span>
-                </div>
-              </div>
-
-              {/* Info Boxes */}
-              <div className="discount_box">
-                <div className="discount_item">
-                  <LocalOffer className="discount_icon" />
-                  <div>
-                    <h5>
-                      {t("cart.discount")}: <span>{inddata.discount}</span>
-                    </h5>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Rating Summary */}
-              {reviewSummary && reviewSummary.totalReviews > 0 && (
-                <div className="product-rating-summary">
-                  <div className="rating-summary-left">
-                    <div className="rating-big-number">{reviewSummary.averageRating.toFixed(1)}</div>
-                    <StarRating rating={reviewSummary.averageRating} size="md" />
-                    <span className="rating-total">{reviewSummary.totalReviews} reviews</span>
-                  </div>
-                  <div className="rating-summary-right">
-                    <RatingDistribution
-                      distribution={reviewSummary.ratingDistribution}
-                      totalReviews={reviewSummary.totalReviews}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Tabs Section */}
-          <div className="product-tabs-section">
-            <div className="product-tabs-nav">
-              <button
-                className={`tab-btn ${activeTab === 'description' ? 'active' : ''}`}
-                onClick={() => setActiveTab('description')}
-              >
-                About
-              </button>
-              <button
-                className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
-                onClick={() => setActiveTab('reviews')}
-              >
-                Reviews {reviewSummary?.totalReviews ? `(${reviewSummary.totalReviews})` : ''}
-              </button>
-              <button
-                className={`tab-btn ${activeTab === 'comments' ? 'active' : ''}`}
-                onClick={() => setActiveTab('comments')}
-              >
-                Comments
-              </button>
-            </div>
-
-            <div className="product-tab-content">
-              {activeTab === 'description' && (
-                <div className="description_box">
-                  <h5>{t("cart.aboutItem")}</h5>
-                  <p>{inddata.description || 'No description available.'}</p>
-                  {inddata.tagline && (
-                    <div className="product-tagline">
-                      <span>"{inddata.tagline}"</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'reviews' && (
-                <div className="reviews-tab-content">
-                  <div className="review-form-toggle">
-                    {showReviewForm ? (
-                      <ReviewForm
-                        targetType="product"
-                        targetId={inddata.id}
-                        onSubmit={handleReviewSubmit}
-                        onCancel={() => setShowReviewForm(false)}
-                      />
-                    ) : (
-                      <button
-                        className="write-review-btn"
-                        onClick={() => setShowReviewForm(true)}
-                      >
-                        <StarRate />
-                        Write a Review
-                      </button>
-                    )}
-                  </div>
-                  <ReviewList
-                    targetType="product"
-                    targetId={inddata.id}
-                    onReviewsUpdate={setReviewSummary}
-                  />
-                </div>
-              )}
-
-              {activeTab === 'comments' && (
-                <CommentSection productId={inddata.id} />
-              )}
-            </div>
-          </div>
+          <ProductLayout
+            product={inddata}
+            images={images}
+            liked={liked}
+            handleLike={handleLike}
+            likeCount={likeCount}
+            handleChatWithSeller={handleChatWithSeller}
+            wishSaved={wishSaved}
+            toggleWishlist={toggleWishlist}
+            wishLoading={wishLoading}
+            setReportOpen={setReportOpen}
+            account={account}
+          />
         </>
       ) : null}
 

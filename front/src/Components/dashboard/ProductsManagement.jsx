@@ -5,6 +5,7 @@ import DynamicTable from "./DynamicTable";
 import DialogComponent from "./DialogComponent";
 import { Button } from "./Button";
 import { Pencil, Trash2 } from "lucide-react";
+import ProductForm from "./products/ProductForm";
 
 const CATEGORY_ALL = "All Categories";
 
@@ -122,12 +123,15 @@ const ProductsManagement = () => {
     loadProducts(1);
   }, [loadProducts]);
 
-  const handlePageChange = (newPage) =>
+  const handlePageChange = useCallback((newPage) => {
     loadProducts(newPage, searchTerm, pagination.limit);
-  const handlePageSizeChange = (newSize) =>
-    loadProducts(1, searchTerm, newSize);
+  }, [loadProducts, searchTerm, pagination.limit]);
 
-  const handleEdit = (product) => {
+  const handlePageSizeChange = useCallback((newSize) => {
+    loadProducts(1, searchTerm, newSize);
+  }, [loadProducts, searchTerm]);
+
+  const handleEdit = useCallback((product) => {
     setEditingId(product._id);
     setForm({
       shortTitle: product?.title?.shortTitle || "",
@@ -143,7 +147,7 @@ const ProductsManagement = () => {
       category: product?.category || "",
     });
     setShowForm(true);
-  };
+  }, []);
 
   const resetForm = () => {
     setForm(emptyForm);
@@ -187,12 +191,12 @@ const ProductsManagement = () => {
     }
   };
 
-  const requestDelete = (product) => {
+  const requestDelete = useCallback((product) => {
     setDeleteTarget(product);
     setConfirmOpen(true);
-  };
+  }, []);
 
-  const handleDeleteProduct = async () => {
+  const handleDeleteProduct = useCallback(async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
@@ -215,7 +219,79 @@ const ProductsManagement = () => {
       setConfirmOpen(false);
       setDeleteTarget(null);
     }
-  };
+  }, [deleteTarget, loadProducts, pagination.currentPage]);
+
+  const tableFilters = React.useMemo(() => [
+    {
+      key: "category",
+      label: "Category",
+      options: [
+        { value: "All Categories", label: "All Categories" },
+        ...categories.map((cat) => ({ value: cat, label: cat })),
+      ],
+    },
+  ], [categories]);
+
+  const tableColumns = React.useMemo(() => [
+    {
+      key: "title",
+      title: t("productCreator.productName"),
+      type: "avatar",
+      getAvatarText: (product) =>
+        product?.title?.shortTitle?.[0]?.toUpperCase() || "?",
+      getName: (product) => product?.title?.shortTitle,
+      getSubtitle: (product) =>
+        `ID: ${product._id?.substring(product._id.length - 8)}`,
+      sortable: true,
+    },
+    {
+      key: "category",
+      title: t("navigation.categories"),
+      type: "role",
+      sortable: true,
+    },
+    {
+      key: "price",
+      title: t("product.price"),
+      type: "custom",
+      render: (product) => (
+        <div>
+          <div className="product-price">${product?.price?.cost}</div>
+          <div className="product-category line-through">
+            ${product?.price?.mrp}
+          </div>
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      key: "status",
+      title: t("common.status"),
+      type: "status",
+      getStatusClass: () => "active",
+      sortable: true,
+    },
+    {
+      key: "actions",
+      title: t("common.actions") || t("common.results"),
+      type: "actions",
+    },
+  ], [t]);
+
+  const tableActions = React.useMemo(() => [
+    {
+      icon: Pencil,
+      label: t("common.edit"),
+      onClick: handleEdit,
+      variant: "edit",
+    },
+    {
+      icon: Trash2,
+      label: t("common.delete"),
+      onClick: requestDelete,
+      variant: "delete",
+    },
+  ], [t, handleEdit, requestDelete]);
 
   return (
     <div className="admin_page" style={{ background: "transparent" }}>
@@ -326,227 +402,23 @@ const ProductsManagement = () => {
             onRefresh={() =>
               loadProducts(pagination.currentPage, searchTerm, pagination.limit)
             }
-            filters={[
-              {
-                key: "category",
-                label: "Category",
-                options: [
-                  { value: "All Categories", label: "All Categories" },
-                  ...categories.map((cat) => ({ value: cat, label: cat })),
-                ],
-              },
-            ]}
-            columns={[
-              {
-                key: "title",
-                title: t("productCreator.productName"),
-                type: "avatar",
-                getAvatarText: (product) =>
-                  product?.title?.shortTitle?.[0]?.toUpperCase() || "?",
-                getName: (product) => product?.title?.shortTitle,
-                getSubtitle: (product) =>
-                  `ID: ${product._id.substring(product._id.length - 8)}`,
-                sortable: true,
-              },
-              {
-                key: "category",
-                title: t("navigation.categories"),
-                type: "role",
-                sortable: true,
-              },
-              {
-                key: "price",
-                title: t("product.price"),
-                type: "custom",
-                render: (product) => (
-                  <div>
-                    <div className="product-price">${product?.price?.cost}</div>
-                    <div className="product-category line-through">
-                      ${product?.price?.mrp}
-                    </div>
-                  </div>
-                ),
-                sortable: true,
-              },
-              {
-                key: "status",
-                title: t("common.status"),
-                type: "status",
-                getStatusClass: () => "active",
-                sortable: true,
-              },
-              {
-                key: "actions",
-                title: t("common.actions") || t("common.results"),
-                type: "actions",
-              },
-            ]}
-            actions={[
-              {
-                icon: Pencil,
-                label: t("common.edit"),
-                onClick: (product) => handleEdit(product),
-                variant: "edit",
-              },
-              {
-                icon: Trash2,
-                label: t("common.delete"),
-                onClick: (product) => requestDelete(product),
-                variant: "delete",
-              },
-            ]}
+            filters={tableFilters}
+            columns={tableColumns}
+            actions={tableActions}
           />
         </section>
 
         {showForm && (
-          <section
-            className="admin_card"
-            style={{
-              position: "sticky",
-              top: "104px",
-              maxHeight: "calc(100vh - 140px)",
-              overflowY: "auto",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "24px",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "800",
-                  color: "#1e293b",
-                  margin: 0,
-                }}
-              >
-                {isEditing ? t("admin.editProduct") : t("admin.createProduct")}
-              </h2>
-              <button
-                onClick={resetForm}
-                style={{
-                  border: "none",
-                  background: "none",
-                  cursor: "pointer",
-                  color: "#94a3b8",
-                }}
-              >
-                x
-              </button>
-            </div>
-            <form className="admin_form" onSubmit={handleSubmit}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                }}
-              >
-                <div>
-                  <label>Mark Name</label>
-                  <input
-                    type="text"
-                    name="shortTitle"
-                    value={form.shortTitle}
-                    onChange={updateField}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Sector</label>
-                  <select
-                    name="category"
-                    value={form.category}
-                    onChange={updateField}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label>Legal Designation</label>
-                <input
-                  type="text"
-                  name="longTitle"
-                  value={form.longTitle}
-                  onChange={updateField}
-                  required
-                />
-              </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                }}
-              >
-                <div>
-                  <label>Market Price ($)</label>
-                  <input
-                    type="number"
-                    name="cost"
-                    value={form.cost}
-                    onChange={updateField}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Base MSRP ($)</label>
-                  <input
-                    type="number"
-                    name="mrp"
-                    value={form.mrp}
-                    onChange={updateField}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label>Product Resource URL</label>
-                <input
-                  type="text"
-                  name="url"
-                  value={form.url}
-                  onChange={updateField}
-                  required
-                />
-              </div>
-              <div>
-                <label>Description</label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={updateField}
-                  rows="3"
-                  style={{ resize: "none" }}
-                />
-              </div>
-              <div style={{ marginTop: "16px" }}>
-                <button
-                  type="submit"
-                  className="btn_primary"
-                  style={{ width: "100%" }}
-                  disabled={saving}
-                >
-                  {saving
-                    ? t("common.loading")
-                    : isEditing
-                      ? t("common.save")
-                      : t("admin.createProduct")}
-                </button>
-              </div>
-            </form>
-          </section>
+          <ProductForm
+            isEditing={isEditing}
+            form={form}
+            categories={categories}
+            updateField={updateField}
+            handleSubmit={handleSubmit}
+            resetForm={resetForm}
+            saving={saving}
+            t={t}
+          />
         )}
       </div>
 

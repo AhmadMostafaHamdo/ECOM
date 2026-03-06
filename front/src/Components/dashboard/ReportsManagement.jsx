@@ -5,14 +5,12 @@ import {
     Flag,
     User,
     Package,
-    Clock,
-    CheckCircle,
-    XCircle,
     Eye,
     Trash2,
-    AlertTriangle,
     RefreshCw,
 } from "lucide-react";
+import ReportsStats from "./reports/ReportsStats";
+import ReportsDetailModal from "./reports/ReportsDetailModal";
 
 const STATUS_COLORS = {
     pending: { bg: "#fef3c7", text: "#92400e", dot: "#f59e0b" },
@@ -39,42 +37,7 @@ const REASON_LABELS = {
     other: "أخرى",
 };
 
-const StatCard = ({ icon: Icon, label, value, color }) => (
-    <div
-        style={{
-            background: "#fff",
-            borderRadius: "16px",
-            padding: "20px 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-            border: "1px solid #e2e8f0",
-        }}
-    >
-        <div
-            style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "12px",
-                background: color + "20",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color,
-                flexShrink: 0,
-            }}
-        >
-            <Icon size={22} />
-        </div>
-        <div>
-            <div style={{ fontSize: "26px", fontWeight: "800", color: "#0f172a", lineHeight: 1 }}>
-                {value}
-            </div>
-            <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>{label}</div>
-        </div>
-    </div>
-);
+
 
 const ReportsManagement = () => {
     const [reports, setReports] = useState([]);
@@ -197,16 +160,7 @@ const ReportsManagement = () => {
             </header>
 
             {/* Stats */}
-            {stats && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: "16px", marginBottom: "28px" }}>
-                    <StatCard icon={Flag} label="إجمالي البلاغات" value={stats.total} color="#6366f1" />
-                    <StatCard icon={Clock} label="قيد الانتظار" value={stats.pending} color="#f59e0b" />
-                    <StatCard icon={Eye} label="تمت المراجعة" value={stats.reviewed} color="#3b82f6" />
-                    <StatCard icon={CheckCircle} label="تم الحل" value={stats.resolved} color="#22c55e" />
-                    <StatCard icon={Package} label="بلاغات المنتجات" value={stats.productReports} color="#8b5cf6" />
-                    <StatCard icon={User} label="بلاغات المستخدمين" value={stats.userReports} color="#ec4899" />
-                </div>
-            )}
+            <ReportsStats stats={stats} />
 
             {/* Filters */}
             <div style={{ background: "#fff", borderRadius: "14px", padding: "16px 20px", marginBottom: "20px", display: "flex", gap: "16px", alignItems: "center", border: "1px solid #e2e8f0", flexWrap: "wrap" }}>
@@ -358,107 +312,18 @@ const ReportsManagement = () => {
             )}
 
             {/* Detail Modal */}
-            {detailOpen && selectedReport && (
-                <div
-                    onClick={() => setDetailOpen(false)}
-                    style={{
-                        position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        zIndex: 9999, padding: "20px"
-                    }}
-                >
-                    <div
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                            background: "#fff", borderRadius: "20px",
-                            width: "100%", maxWidth: "560px",
-                            maxHeight: "90vh", overflowY: "auto",
-                            padding: "28px", direction: "rtl"
-                        }}
-                    >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                            <h2 style={{ fontSize: "18px", fontWeight: "800", color: "#0f172a", margin: 0 }}>تفاصيل البلاغ</h2>
-                            <button onClick={() => setDetailOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "20px", color: "#94a3b8" }}>✕</button>
-                        </div>
-
-                        <div style={{ display: "grid", gap: "16px" }}>
-                            <div style={{ background: "#f8fafc", borderRadius: "12px", padding: "16px" }}>
-                                <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "8px", fontWeight: "700" }}>معلومات البلاغ</div>
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                                    <div>
-                                        <span style={{ fontSize: "12px", color: "#94a3b8" }}>النوع</span>
-                                        <p style={{ margin: "2px 0 0", fontWeight: "700", color: "#374151", fontSize: "14px" }}>
-                                            {selectedReport.targetType === "product" ? "🛍️ منتج" : "👤 مستخدم"}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <span style={{ fontSize: "12px", color: "#94a3b8" }}>السبب</span>
-                                        <p style={{ margin: "2px 0 0", fontWeight: "700", color: "#ef4444", fontSize: "14px" }}>
-                                            {REASON_LABELS[selectedReport.reason] || selectedReport.reason}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <span style={{ fontSize: "12px", color: "#94a3b8" }}>المُبلَّغ عنه</span>
-                                        <p style={{ margin: "2px 0 0", fontWeight: "700", color: "#374151", fontSize: "14px" }}>
-                                            {selectedReport.targetInfo?.name || "—"}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <span style={{ fontSize: "12px", color: "#94a3b8" }}>المُبلِّغ</span>
-                                        <p style={{ margin: "2px 0 0", fontWeight: "700", color: "#374151", fontSize: "14px" }}>
-                                            {selectedReport.reporter?.fname || "مجهول"}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {selectedReport.description && (
-                                <div style={{ background: "#fef9c3", borderRadius: "12px", padding: "16px", border: "1px solid #fde68a" }}>
-                                    <div style={{ fontSize: "12px", color: "#92400e", marginBottom: "6px", fontWeight: "700" }}>تفاصيل البلاغ</div>
-                                    <p style={{ margin: 0, fontSize: "14px", color: "#78350f", lineHeight: 1.6 }}>{selectedReport.description}</p>
-                                </div>
-                            )}
-
-                            <div>
-                                <label style={{ fontSize: "13px", fontWeight: "700", color: "#374151", display: "block", marginBottom: "8px" }}>
-                                    ملاحظة الإدارة
-                                </label>
-                                <textarea
-                                    value={adminNote}
-                                    onChange={(e) => setAdminNote(e.target.value)}
-                                    rows={3}
-                                    placeholder="اكتب ملاحظة..."
-                                    style={{ width: "100%", padding: "10px 14px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "14px", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
-                                />
-                            </div>
-
-                            <div style={{ fontSize: "13px", fontWeight: "700", color: "#374151", marginBottom: "8px" }}>تغيير الحالة</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                                {["reviewed", "resolved", "dismissed", "pending"].map((s) => {
-                                    const sc = STATUS_COLORS[s];
-                                    return (
-                                        <button
-                                            key={s}
-                                            onClick={() => handleUpdateStatus(selectedReport._id, s)}
-                                            disabled={updating || selectedReport.status === s}
-                                            style={{
-                                                padding: "10px 16px", borderRadius: "10px",
-                                                border: `2px solid ${selectedReport.status === s ? sc.dot : "#e2e8f0"}`,
-                                                background: selectedReport.status === s ? sc.bg : "#f8fafc",
-                                                color: selectedReport.status === s ? sc.text : "#64748b",
-                                                fontWeight: "700", cursor: selectedReport.status === s ? "default" : "pointer",
-                                                fontSize: "13px", transition: "all 0.2s"
-                                            }}
-                                        >
-                                            {STATUS_LABELS[s]}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ReportsDetailModal
+                detailOpen={detailOpen}
+                setDetailOpen={setDetailOpen}
+                selectedReport={selectedReport}
+                adminNote={adminNote}
+                setAdminNote={setAdminNote}
+                updating={updating}
+                handleUpdateStatus={handleUpdateStatus}
+                REASON_LABELS={REASON_LABELS}
+                STATUS_LABELS={STATUS_LABELS}
+                STATUS_COLORS={STATUS_COLORS}
+            />
 
             {/* Delete Confirm */}
             <DialogComponent

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
 import { Logincontext } from '../context/Contextprovider';
 import { apiUrl } from '../../api';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -7,7 +8,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import './admin-chat.css';
-
+import AdminChatHeader from './components/AdminChatHeader';
+import AdminChatSidebar from './components/AdminChatSidebar';
+import AdminMessagesPanel from './components/AdminMessagesPanel';
 const AdminChat = () => {
     const { account } = useContext(Logincontext);
     const [conversations, setConversations] = useState([]);
@@ -17,7 +20,20 @@ const AdminChat = () => {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef(null);
-    const pollRef = useRef(null);
+    const socketRef = useRef(null);
+
+    // Initialize Global Socket
+    useEffect(() => {
+        socketRef.current = io(apiUrl('/').replace(/\/$/, ""), {
+            withCredentials: true
+        });
+        if (account) {
+            socketRef.current.emit("user_online", account._id);
+        }
+        return () => {
+            if (socketRef.current) socketRef.current.disconnect();
+        };
+    }, [account]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -61,14 +77,27 @@ const AdminChat = () => {
     }, [fetchConversations]);
 
     useEffect(() => {
-        if (activeConversation) {
+        if (activeConversation && socketRef.current) {
             fetchMessages(activeConversation._id);
-            pollRef.current = setInterval(() => {
-                fetchMessages(activeConversation._id);
-            }, 3000);
-            return () => clearInterval(pollRef.current);
+
+            const socket = socketRef.current;
+            socket.emit("join_conversation", activeConversation._id);
+
+            const handleMessage = (data) => {
+                if (data.conversationId === activeConversation._id) {
+                    fetchMessages(activeConversation._id);
+                    fetchConversations();
+                }
+            };
+
+            socket.on("receive_message", handleMessage);
+
+            return () => {
+                socket.emit("leave_conversation", activeConversation._id);
+                socket.off("receive_message", handleMessage);
+            };
         }
-    }, [activeConversation, fetchMessages]);
+    }, [activeConversation, fetchMessages, fetchConversations]);
 
     const openConversation = async (conv) => {
         setActiveConversation(conv);
@@ -96,6 +125,13 @@ const AdminChat = () => {
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
                 fetchConversations();
+
+                if (socketRef.current) {
+                    socketRef.current.emit("send_message", {
+                        conversationId: activeConversation._id,
+                        message: msg
+                    });
+                }
             }
         } catch (err) {
             console.error('Failed to send message:', err);
@@ -130,165 +166,34 @@ const AdminChat = () => {
 
     return (
         <div className="admin-chat-wrapper">
-            {/* Header */}
-            <div className="admin-chat-header">
-                <div className="admin-chat-header-left">
-                    <ChatIcon />
-                    <div>
-                        <h1>Live Chat</h1>
-                        <p>التواصل مع أصحاب المنتجات</p>
-                    </div>
-                </div>
-                <div className="admin-chat-stats">
-                    <span className="chat-stat-badge">
-                        {conversations.length} محادثة
-                    </span>
-                    <span className="chat-stat-badge online">
-                        {conversations.filter(c => {
-                            const myUnread = c.unreadCount?.[account?._id] || 0;
-                            return myUnread > 0;
-                        }).length} غير مقروءة
-                    </span>
-                </div>
-            </div>
+            <AdminChatHeader
+                conversations={conversations}
+                account={account}
+            />
 
             <div className="admin-chat-body">
-                {/* Conversations List */}
-                <div className={`admin-chat-sidebar ${activeConversation ? 'mobile-hidden' : ''}`}>
-                    <div className="admin-chat-sidebar-title">
-                        <PersonIcon />
-                        <span>المحادثات</span>
-                    </div>
+                <AdminChatSidebar
+                    conversations={conversations}
+                    activeConversation={activeConversation}
+                    openConversation={openConversation}
+                    account={account}
+                    getOtherParticipant={getOtherParticipant}
+                    formatTime={formatTime}
+                />
 
-                    {conversations.length === 0 ? (
-                        <div className="admin-chat-empty">
-                            <ChatIcon className="empty-icon" />
-                            <h3>لا توجد محادثات</h3>
-                            <p>ستظهر المحادثات هنا عندما يتواصل معك المستخدمون</p>
-                        </div>
-                    ) : (
-                        <div className="admin-conv-list">
-                            {conversations.map((conv) => {
-                                const other = getOtherParticipant(conv);
-                                const myUnread = conv.unreadCount?.[account?._id] || 0;
-                                const isActive = activeConversation?._id === conv._id;
-
-                                return (
-                                    <button
-                                        key={conv._id}
-                                        className={`admin-conv-item ${isActive ? 'active' : ''}`}
-                                        onClick={() => openConversation(conv)}
-                                    >
-                                        <div className="admin-conv-avatar">
-                                            {other.fname?.[0]?.toUpperCase() || 'U'}
-                                        </div>
-                                        <div className="admin-conv-info">
-                                            <div className="admin-conv-name-row">
-                                                <span className="admin-conv-name">{other.fname}</span>
-                                                <span className="admin-conv-time">
-                                                    {conv.lastMessage?.createdAt && formatTime(conv.lastMessage.createdAt)}
-                                                </span>
-                                            </div>
-                                            <p className="admin-conv-preview">
-                                                {conv.lastMessage?.text || 'لا توجد رسائل'}
-                                            </p>
-                                            {conv.productId && (
-                                                <span className="admin-conv-product-tag">
-                                                    <StorefrontIcon style={{ fontSize: 10 }} />
-                                                    منتج
-                                                </span>
-                                            )}
-                                        </div>
-                                        {myUnread > 0 && (
-                                            <span className="admin-conv-badge">{myUnread > 9 ? '9+' : myUnread}</span>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-
-                {/* Messages Panel */}
-                <div className={`admin-messages-panel ${!activeConversation ? 'mobile-hidden' : ''}`}>
-                    {activeConversation ? (
-                        <>
-                            {/* Message Header */}
-                            <div className="admin-msg-header">
-                                <button
-                                    className="admin-msg-back"
-                                    onClick={() => setActiveConversation(null)}
-                                >
-                                    <ArrowBackIcon fontSize="small" />
-                                </button>
-                                <div className="admin-msg-avatar-large">
-                                    {getOtherParticipant(activeConversation).fname?.[0]?.toUpperCase() || 'U'}
-                                </div>
-                                <div className="admin-msg-user-info">
-                                    <h3>{getOtherParticipant(activeConversation).fname}</h3>
-                                    <span>{getOtherParticipant(activeConversation).email}</span>
-                                </div>
-                            </div>
-
-                            {/* Messages */}
-                            <div className="admin-messages-area">
-                                {messages.length === 0 ? (
-                                    <div className="admin-messages-empty">
-                                        <ChatIcon />
-                                        <p>ابدأ المحادثة الآن</p>
-                                    </div>
-                                ) : (
-                                    messages.map((msg) => {
-                                        const isMine = msg.senderId?._id === account?._id || msg.senderId === account?._id;
-                                        return (
-                                            <div
-                                                key={msg._id}
-                                                className={`admin-msg-bubble-wrap ${isMine ? 'mine' : 'theirs'}`}
-                                            >
-                                                {!isMine && (
-                                                    <div className="admin-msg-sender-avatar">
-                                                        {msg.senderId?.fname?.[0]?.toUpperCase() || 'U'}
-                                                    </div>
-                                                )}
-                                                <div className="admin-msg-bubble">
-                                                    <p>{msg.text}</p>
-                                                    <span className="admin-msg-time">{formatTime(msg.createdAt)}</span>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                                <div ref={messagesEndRef} />
-                            </div>
-
-                            {/* Input */}
-                            <form className="admin-msg-input-area" onSubmit={sendMessage}>
-                                <input
-                                    type="text"
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder="اكتب رسالتك هنا..."
-                                    className="admin-msg-input"
-                                    id="admin-chat-message-input"
-                                    disabled={sending}
-                                />
-                                <button
-                                    type="submit"
-                                    className="admin-msg-send-btn"
-                                    disabled={!newMessage.trim() || sending}
-                                >
-                                    <SendIcon />
-                                </button>
-                            </form>
-                        </>
-                    ) : (
-                        <div className="admin-messages-placeholder">
-                            <ChatIcon className="placeholder-icon" />
-                            <h2>اختر محادثة</h2>
-                            <p>اختر محادثة من القائمة على اليسار للبدء</p>
-                        </div>
-                    )}
-                </div>
+                <AdminMessagesPanel
+                    activeConversation={activeConversation}
+                    setActiveConversation={setActiveConversation}
+                    messages={messages}
+                    newMessage={newMessage}
+                    setNewMessage={setNewMessage}
+                    sendMessage={sendMessage}
+                    sending={sending}
+                    messagesEndRef={messagesEndRef}
+                    getOtherParticipant={getOtherParticipant}
+                    formatTime={formatTime}
+                    account={account}
+                />
             </div>
         </div>
     );

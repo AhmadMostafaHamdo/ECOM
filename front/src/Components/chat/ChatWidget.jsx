@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
 import { Logincontext } from '../context/Contextprovider';
 import { useChatContext } from '../context/ChatContext';
 import { apiUrl } from '../../api';
@@ -19,14 +20,29 @@ const ChatWidget = () => {
     const [loading, setLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const messagesEndRef = useRef(null);
-    const pollRef = useRef(null);
+    const socketRef = useRef(null);
+
+    const accountId = account?._id;
+
+    // Initialize Global Socket
+    useEffect(() => {
+        socketRef.current = io(apiUrl('/').replace(/\/$/, ""), {
+            withCredentials: true
+        });
+        if (accountId) {
+            socketRef.current.emit("user_online", accountId);
+        }
+        return () => {
+            if (socketRef.current) socketRef.current.disconnect();
+        };
+    }, [accountId]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     const fetchUnreadCount = useCallback(async () => {
-        if (!account) return;
+        if (!accountId) return;
         try {
             const res = await fetch(apiUrl('/conversations/unread/count'), {
                 credentials: 'include',
@@ -38,10 +54,10 @@ const ChatWidget = () => {
         } catch (err) {
             // silent
         }
-    }, [account]);
+    }, [accountId]);
 
     const fetchConversations = useCallback(async () => {
-        if (!account) return;
+        if (!accountId) return;
         try {
             const res = await fetch(apiUrl('/conversations'), {
                 credentials: 'include',
@@ -55,7 +71,7 @@ const ChatWidget = () => {
             console.error('Failed to fetch conversations:', err);
         }
         return [];
-    }, [account]);
+    }, [accountId]);
 
     const fetchMessages = useCallback(async (convId) => {
         try {
@@ -74,24 +90,24 @@ const ChatWidget = () => {
 
     // When widget opens: fetch conversations
     useEffect(() => {
-        if (isOpen && account) {
+        if (isOpen && accountId) {
             fetchConversations();
             fetchUnreadCount();
         }
-    }, [isOpen, account, fetchConversations, fetchUnreadCount]);
+    }, [isOpen, accountId, fetchConversations, fetchUnreadCount]);
 
     // Poll unread count in background
     useEffect(() => {
-        if (account) {
+        if (accountId) {
             fetchUnreadCount();
             const interval = setInterval(fetchUnreadCount, 15000);
             return () => clearInterval(interval);
         }
-    }, [account, fetchUnreadCount]);
+    }, [accountId, fetchUnreadCount]);
 
     // Handle pending conversation from "Chat with Seller" button
     useEffect(() => {
-        if (pendingConversation && account) {
+        if (pendingConversation && accountId) {
             setIsOpen(true);
             fetchConversations().then((convList) => {
                 // Find the conversation in the list by _id
@@ -102,18 +118,31 @@ const ChatWidget = () => {
                 clearPending();
             });
         }
-    }, [pendingConversation, account, fetchConversations, fetchMessages, clearPending, setIsOpen]);
+    }, [pendingConversation, accountId, fetchConversations, fetchMessages, clearPending, setIsOpen]);
 
-    // Poll messages when conversation is active
+    // Join socket room and listen for real-time messages when active
     useEffect(() => {
-        if (activeConversation) {
+        if (activeConversation && socketRef.current) {
             fetchMessages(activeConversation._id);
-            pollRef.current = setInterval(() => {
-                fetchMessages(activeConversation._id);
-            }, 3000);
-            return () => clearInterval(pollRef.current);
+
+            const socket = socketRef.current;
+            socket.emit("join_conversation", activeConversation._id);
+
+            const handleMessage = (data) => {
+                if (data.conversationId === activeConversation._id) {
+                    fetchMessages(activeConversation._id);
+                    fetchConversations();
+                }
+            };
+
+            socket.on("receive_message", handleMessage);
+
+            return () => {
+                socket.emit("leave_conversation", activeConversation._id);
+                socket.off("receive_message", handleMessage);
+            };
         }
-    }, [activeConversation, fetchMessages]);
+    }, [activeConversation, fetchMessages, fetchConversations]);
 
     const openConversation = async (conv) => {
         setActiveConversation(conv);
@@ -142,6 +171,13 @@ const ChatWidget = () => {
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
                 fetchConversations();
+
+                if (socketRef.current) {
+                    socketRef.current.emit("send_message", {
+                        conversationId: activeConversation._id,
+                        message: msg
+                    });
+                }
             }
         } catch (err) {
             console.error('Failed to send message:', err);
@@ -224,7 +260,7 @@ const ChatWidget = () => {
                                     {messages.map((msg) => (
                                         <div
                                             key={msg._id}
-                                            className={`chat-message ${msg.senderId?._id === account._id || msg.senderId === account._id ? 'sent' : 'received'}`}
+                                            className={`chat-message ${msg.senderId?._id === accountId || msg.senderId === accountId ? 'sent' : 'received'}`}
                                         >
                                             <div className="chat-bubble">
                                                 <p>{msg.text}</p>
@@ -261,7 +297,7 @@ const ChatWidget = () => {
                                 ) : (
                                     conversations.map((conv) => {
                                         const other = getOtherParticipant(conv);
-                                        const myUnread = conv.unreadCount?.[account._id] || 0;
+                                        const myUnread = conv.unreadCount?.[accountId] || 0;
                                         return (
                                             <button
                                                 key={conv._id}
