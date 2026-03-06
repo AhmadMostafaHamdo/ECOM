@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
-import "./Rightheader.css";
+import "./rightheader.css";
 import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import LogoutIcon from "@mui/icons-material/Logout";
