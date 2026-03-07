@@ -4,7 +4,7 @@ import { apiUrl } from "../../api";
 import DynamicTable from "./DynamicTable";
 import { Pencil, Trash2 } from "lucide-react";
 import CategoryForm from "./categories/CategoryForm";
-import "../../styles/admin-dashboard.css";
+import "./admin-dashboard.css";
 import ConfirmDialog from "../common/ConfirmDialog";
 
 const UNCATEGORIZED = "uncategorized";
