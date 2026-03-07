@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Logincontext } from '../context/Contextprovider';
-import { apiUrl } from '../../api';
+import { apiUrl, getCookie } from '../../api';
 import { toast } from 'react-toastify';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -50,7 +50,10 @@ const CommentSection = ({ productId }) => {
         try {
             const res = await fetch(apiUrl('/comments'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCookie('csrfToken')
+                },
                 credentials: 'include',
                 body: JSON.stringify({ productId, text: text.trim() }),
             });
@@ -76,7 +79,10 @@ const CommentSection = ({ productId }) => {
         try {
             const res = await fetch(apiUrl('/comments'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCookie('csrfToken')
+                },
                 credentials: 'include',
                 body: JSON.stringify({ productId, text: replyText.trim(), parentId }),
             });
@@ -96,6 +102,9 @@ const CommentSection = ({ productId }) => {
         try {
             const res = await fetch(apiUrl(`/comments/${commentId}/like`), {
                 method: 'POST',
+                headers: {
+                    'x-csrf-token': getCookie('csrfToken')
+                },
                 credentials: 'include',
             });
             if (res.ok) {
@@ -120,6 +129,9 @@ const CommentSection = ({ productId }) => {
         try {
             const res = await fetch(apiUrl(`/comments/${commentToDelete}`), {
                 method: 'DELETE',
+                headers: {
+                    'x-csrf-token': getCookie('csrfToken')
+                },
                 credentials: 'include',
             });
             if (res.ok) {

@@ -16,7 +16,7 @@ import {
   ChatBubbleOutline,
   Share,
 } from "@mui/icons-material";
-import { apiUrl } from "../../api";
+import { apiUrl, getCookie } from "../../api";
 import { toast } from "react-toastify";
 import ReportModal from "../common/ReportModal";
 import useWishlist from "../wishlist/useWishlist";
@@ -191,7 +191,10 @@ const Cart = () => {
 
       const res = await fetch(apiUrl('/conversations'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-csrf-token': getCookie('csrfToken')
+        },
         credentials: 'include',
         body: JSON.stringify({ recipientId: sellerId, productId: inddata._id || id }),
       });

@@ -152,7 +152,13 @@
 .chat-header-status {
     font-size: 0.72rem;
     opacity: 0.8;
-    color: #a5f3fc;
+    color: #cbd5e1;
+    transition: color 0.3s;
+}
+
+.chat-header-status.online {
+    color: #4ade80;
+    opacity: 1;
 }
 
 .chat-header-info svg {

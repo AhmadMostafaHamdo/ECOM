@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef, useCallback } from 'rea
 import { io } from 'socket.io-client';
 import { Logincontext } from '../context/Contextprovider';
 import { useChatContext } from '../context/ChatContext';
-import { apiUrl } from '../../api';
+import { apiUrl, getCookie } from '../../api';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
@@ -19,6 +19,7 @@ const ChatWidget = () => {
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [onlineUsers, setOnlineUsers] = useState([]);
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
 
@@ -32,8 +33,14 @@ const ChatWidget = () => {
         if (accountId) {
             socketRef.current.emit("user_online", accountId);
         }
+        socketRef.current.on("online_users", (users) => {
+            setOnlineUsers(users || []);
+        });
         return () => {
-            if (socketRef.current) socketRef.current.disconnect();
+            if (socketRef.current) {
+                socketRef.current.off("online_users");
+                socketRef.current.disconnect();
+            }
         };
     }, [accountId]);
 
@@ -65,8 +72,9 @@ const ChatWidget = () => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setConversations(data);
-                return data;
+                const conversationsArray = Array.isArray(data) ? data : (data.data || data.conversations || []);
+                setConversations(conversationsArray);
+                return conversationsArray;
             }
         } catch (err) {
             console.error('Failed to fetch conversations:', err);
@@ -81,7 +89,8 @@ const ChatWidget = () => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setMessages((data.messages || []).slice().reverse());
+                const messagesArray = Array.isArray(data.messages) ? data.messages : [];
+                setMessages(messagesArray.slice().reverse());
                 setTimeout(scrollToBottom, 100);
             }
         } catch (err) {
@@ -180,7 +189,10 @@ const ChatWidget = () => {
         try {
             const res = await fetch(apiUrl(`/conversations/${activeConversation._id}/messages`), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCookie('csrfToken')
+                },
                 credentials: 'include',
                 body: JSON.stringify({ text: textToSend }),
             });
@@ -189,6 +201,15 @@ const ChatWidget = () => {
                 const msg = await res.json();
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
+                
+                // Emit socket event for real-time update
+                if (socketRef.current) {
+                    socketRef.current.emit("send_message", {
+                        conversationId: activeConversation._id,
+                        message: msg
+                    });
+                }
+
                 fetchConversations();
                 fetchUnreadCount(true);
             }
@@ -248,7 +269,9 @@ const ChatWidget = () => {
                                     </div>
                                     <div>
                                         <h4>{getOtherParticipant(activeConversation).fname}</h4>
-                                        <span className="chat-header-status">● متصل</span>
+                                        <span className={`chat-header-status ${onlineUsers.includes(getOtherParticipant(activeConversation)._id) ? 'online' : ''}`}>
+                                            ● {onlineUsers.includes(getOtherParticipant(activeConversation)._id) ? 'متصل' : 'غير متصل'}
+                                        </span>
                                     </div>
                                 </div>
                             </>
@@ -301,7 +324,7 @@ const ChatWidget = () => {
 
                         ) : (
                             <div className="chat-conversations-list">
-                                {conversations.length === 0 ? (
+                                {(!Array.isArray(conversations) || conversations.length === 0) ? (
                                     <div className="chat-empty">
                                         <ChatIcon className="chat-empty-icon" />
                                         <p>لا توجد محادثات</p>
