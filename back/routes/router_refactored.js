@@ -413,12 +413,11 @@ const getCategoryDashboardPayload = async (categories = null) => {
   return categoryDocs.map((categoryDoc) => ({
     _id: categoryDoc._id,
     name: categoryDoc.name,
-    image: categoryDoc.image || "",
     productCount: productCountByCategory[categoryDoc.name] || 0,
   }));
 };
 
-const createCategoryRecord = async (rawName = "", rawImage = "") => {
+const createCategoryRecord = async (rawName = "") => {
   await ensureCategoryCatalog();
 
   const categoryName = typeof rawName === "string" ? rawName.trim() : "";
@@ -443,15 +442,11 @@ const createCategoryRecord = async (rawName = "", rawImage = "") => {
     return { status: 409, body: { error: "Category already exists" } };
   }
 
-  const newCategoryParams = { name: categoryName };
-  if (typeof rawImage === "string") {
-    newCategoryParams.image = rawImage.trim();
-  }
-  const createdCategory = await Category.create(newCategoryParams);
+  const createdCategory = await Category.create({ name: categoryName });
   return { status: 201, body: createdCategory };
 };
 
-const updateCategoryRecord = async (categoryId, rawName = "", rawImage = "") => {
+const updateCategoryRecord = async (categoryId, rawName = "") => {
   await ensureCategoryCatalog();
 
   const category = await Category.findById(categoryId);
@@ -483,7 +478,7 @@ const updateCategoryRecord = async (categoryId, rawName = "", rawImage = "") => 
     };
   }
 
-  if (normalizedName === normalizeCategory(category.name) && typeof rawImage !== "string") {
+  if (normalizedName === normalizeCategory(category.name)) {
     return { status: 200, body: { category, renamedProducts: 0 } };
   }
 
@@ -501,9 +496,6 @@ const updateCategoryRecord = async (categoryId, rawName = "", rawImage = "") => 
   );
 
   category.name = nextName;
-  if (typeof rawImage === "string") {
-    category.image = rawImage.trim();
-  }
   await category.save();
 
   return {
@@ -769,23 +761,10 @@ router.get("/products/filter", async (req, res) => {
     }
 
     const query = clauses.length ? { $and: clauses } : {};
-    const pageNum = parseInt(req.query.page) || 1;
-    const limitNum = parseInt(req.query.limit) || 12;
-    const skip = (pageNum - 1) * limitNum;
-    
-    const [productsData, totalItems] = await Promise.all([
-      products.find(query).skip(skip).limit(limitNum).lean(),
-      products.countDocuments(query)
-    ]);
+    const productsData = await products.find(query).lean();
     const productsWithCategory = productsData.map(resolveProductCategory);
 
-    res.status(200).json({
-      data: productsWithCategory,
-      page: pageNum,
-      limit: limitNum,
-      total: totalItems,
-      total_pages: Math.ceil(totalItems / limitNum)
-    });
+    res.status(200).json(productsWithCategory);
   } catch (error) {
     console.log("error " + error.message);
     res.status(500).json({ error: "Failed to fetch filtered products" });
@@ -795,22 +774,12 @@ router.get("/products/filter", async (req, res) => {
 router.get("/getcategories", async (req, res) => {
   try {
     await ensureCategoryCatalog();
-    const pageNum = parseInt(req.query.page) || 1;
-    const limitNum = parseInt(req.query.limit) || 50;
-    const skip = (pageNum - 1) * limitNum;
-    
-    const [categoryDocs, totalItems] = await Promise.all([
-      Category.find({}, { name: 1, image: 1, _id: 0 }).sort({ name: 1 }).skip(skip).limit(limitNum).lean(),
-      Category.countDocuments({})
-    ]);
-    
-    res.status(200).json({
-      data: pageNum === 1 ? [{ name: CATEGORY_ALL, image: "" }, ...categoryDocs] : categoryDocs,
-      page: pageNum,
-      limit: limitNum,
-      total: totalItems + (pageNum === 1 ? 1 : 0),
-      total_pages: Math.ceil((totalItems + (pageNum === 1 ? 1 : 0)) / limitNum)
+    const categoryDocs = await Category.find({}, { name: 1, _id: 0 }).sort({
+      name: 1,
     });
+    const categories = categoryDocs.map((item) => item.name);
+
+    res.status(200).json([CATEGORY_ALL, ...categories]);
   } catch (error) {
     console.log("error " + error.message);
     res.status(500).json({ error: "Failed to fetch categories" });
@@ -829,7 +798,7 @@ router.get("/categories", async (req, res) => {
 
 router.post("/categories", async (req, res) => {
   try {
-    const result = await createCategoryRecord(req.body?.name, req.body?.image);
+    const result = await createCategoryRecord(req.body?.name);
     return res.status(result.status).json(result.body);
   } catch (error) {
     console.log("error " + error.message);
@@ -839,7 +808,7 @@ router.post("/categories", async (req, res) => {
 
 router.put("/categories/:id", async (req, res) => {
   try {
-    const result = await updateCategoryRecord(req.params.id, req.body?.name, req.body?.image);
+    const result = await updateCategoryRecord(req.params.id, req.body?.name);
     return res.status(result.status).json(result.body);
   } catch (error) {
     console.log("error " + error.message);
@@ -896,7 +865,7 @@ router.post(
   requireAdmin,
   async (req, res) => {
     try {
-      const result = await createCategoryRecord(req.body?.name, req.body?.image);
+      const result = await createCategoryRecord(req.body?.name);
       return res.status(result.status).json(result.body);
     } catch (error) {
       console.log("error " + error.message);
@@ -911,7 +880,7 @@ router.put(
   requireAdmin,
   async (req, res) => {
     try {
-      const result = await updateCategoryRecord(req.params.id, req.body?.name, req.body?.image);
+      const result = await updateCategoryRecord(req.params.id, req.body?.name);
       return res.status(result.status).json(result.body);
     } catch (error) {
       console.log("error " + error.message);
@@ -1327,21 +1296,10 @@ router.put("/profile", authenicate, async (req, res) => {
 
 router.get("/profile/products", authenicate, async (req, res) => {
   try {
-    const pageNum = parseInt(req.query.page) || 1;
-    const limitNum = parseInt(req.query.limit) || 10;
-    const skip = (pageNum - 1) * limitNum;
-
-    const [productDocs, totalItems] = await Promise.all([
-      products.find({ createdBy: req.userID }).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
-      products.countDocuments({ createdBy: req.userID })
-    ]);
-    res.status(200).json({
-      data: productDocs.map(toPublicProduct),
-      page: pageNum,
-      limit: limitNum,
-      total: totalItems,
-      total_pages: Math.ceil(totalItems / limitNum)
-    });
+    const productDocs = await products
+      .find({ createdBy: req.userID })
+      .sort({ createdAt: -1 });
+    res.status(200).json(productDocs.map(toPublicProduct));
   } catch (error) {
     console.log("error " + error.message);
     res.status(500).json({ error: "Failed to fetch profile products" });
@@ -1378,21 +1336,10 @@ router.post("/products", authenicate, async (req, res) => {
 
 router.get("/products/mine", authenicate, async (req, res) => {
   try {
-    const pageNum = parseInt(req.query.page) || 1;
-    const limitNum = parseInt(req.query.limit) || 10;
-    const skip = (pageNum - 1) * limitNum;
-
-    const [productDocs, totalItems] = await Promise.all([
-      products.find({ createdBy: req.userID }).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
-      products.countDocuments({ createdBy: req.userID })
-    ]);
-    res.status(200).json({
-      data: productDocs.map(toPublicProduct),
-      page: pageNum,
-      limit: limitNum,
-      total: totalItems,
-      total_pages: Math.ceil(totalItems / limitNum)
-    });
+    const productDocs = await products
+      .find({ createdBy: req.userID })
+      .sort({ createdAt: -1 });
+    res.status(200).json(productDocs.map(toPublicProduct));
   } catch (error) {
     console.log("error " + error.message);
     res.status(500).json({ error: "Failed to fetch your products" });
@@ -1813,16 +1760,18 @@ router.get("/reviews/:targetType/:targetId", async (req, res) => {
     });
 
     res.status(200).json({
-      data: reviews,
+      reviews,
       summary: {
         totalReviews,
         averageRating: Math.round(averageRating * 10) / 10,
         ratingDistribution,
       },
-      page,
-      limit,
-      total,
-      total_pages: Math.ceil(total / limit)
+      pagination: {
+        page,
+        limit,
+        total,
+        hasMore: skip + reviews.length < total,
+      },
     });
   } catch (error) {
     console.log("Fetch reviews error:", error.message);
@@ -2004,22 +1953,13 @@ router.post("/products/:id/like", authenicate, async (req, res) => {
 // Get trending products
 router.get("/products/trending", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    
-    const [trending, total] = await Promise.all([
-      products.find().sort({ views: -1, createdAt: -1 }).skip(skip).limit(limit),
-      products.countDocuments()
-    ]);
+    const trending = await products
+      .find()
+      .sort({ views: -1, createdAt: -1 })
+      .limit(limit);
 
-    res.status(200).json({
-      data: trending.map(resolveProductCategory),
-      page,
-      limit,
-      total,
-      total_pages: Math.ceil(total / limit)
-    });
+    res.status(200).json(trending.map(resolveProductCategory));
   } catch (error) {
     console.log("Trending products error:", error.message);
     res.status(500).json({ error: "Failed to fetch trending products" });
@@ -2029,22 +1969,13 @@ router.get("/products/trending", async (req, res) => {
 // Get top-rated products
 router.get("/products/top-rated", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const topRated = await products
+      .find({ totalReviews: { $gt: 0 } })
+      .sort({ averageRating: -1, totalReviews: -1 })
+      .limit(limit);
 
-    const [topRated, total] = await Promise.all([
-      products.find({ totalReviews: { $gt: 0 } }).sort({ averageRating: -1, totalReviews: -1 }).skip(skip).limit(limit),
-      products.countDocuments({ totalReviews: { $gt: 0 } })
-    ]);
-
-    res.status(200).json({
-      data: topRated.map(resolveProductCategory),
-      page,
-      limit,
-      total,
-      total_pages: Math.ceil(total / limit)
-    });
+    res.status(200).json(topRated.map(resolveProductCategory));
   } catch (error) {
     console.log("Top-rated products error:", error.message);
     res.status(500).json({ error: "Failed to fetch top-rated products" });
@@ -2516,26 +2447,13 @@ router.post("/conversations", authenicate, async (req, res) => {
 // Get user's conversations
 router.get("/conversations", authenicate, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const conversations = await Conversation.find({
+      participants: req.userID,
+    })
+      .populate("participants", "fname email")
+      .sort({ updatedAt: -1 });
 
-    const [conversations, total] = await Promise.all([
-      Conversation.find({ participants: req.userID })
-        .populate("participants", "fname email")
-        .sort({ updatedAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Conversation.countDocuments({ participants: req.userID })
-    ]);
-
-    res.status(200).json({
-      data: conversations,
-      page,
-      limit,
-      total,
-      total_pages: Math.ceil(total / limit)
-    });
+    res.status(200).json(conversations);
   } catch (error) {
     console.log("Fetch conversations error:", error.message);
     res.status(500).json({ error: "Failed to fetch conversations" });
@@ -2772,10 +2690,12 @@ router.get("/admin/reports", authenicate, requireAdmin, async (req, res) => {
 
     res.status(200).json({
       data: enriched,
-      page: pageNum,
-      limit: limitNum,
-      total: totalItems,
-      total_pages: Math.ceil(totalItems / limitNum)
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limitNum),
+        currentPage: pageNum,
+        limit: limitNum,
+      },
     });
   } catch (error) {
     console.log("Admin reports error:", error.message);

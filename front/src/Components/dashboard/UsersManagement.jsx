@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import DynamicTable from "./DynamicTable";
-import DialogComponent from "./DialogComponent";
+import ConfirmDialog from "../common/ConfirmDialog";
 import { Pencil, Trash2, Ban, ShieldCheck, ShieldOff } from "lucide-react";
 import { useUsersManagement } from "./users/useUsersManagement";
 import UserForm from "./users/UserForm";
@@ -274,21 +274,21 @@ const UsersManagement = () => {
         )}
       </div>
 
-      <DialogComponent
+      <ConfirmDialog
         open={confirmOpen}
         title={deleteTarget ? `${t("admin.deleteUserTitle")} ${deleteTarget.fname || "this user"}?` : t("admin.deleteUserTitle")}
-        description={t("admin.deleteUserConfirm")}
-        confirmLabel={deleting ? t("admin.deleting") : t("dialog.delete")}
-        cancelLabel={t("dialog.cancel")}
-        tone="danger"
-        placement="center"
+        message={t("admin.deleteUserConfirm") || "Are you sure you want to delete this user? This action cannot be undone."}
+        confirmText={deleting ? t("admin.deleting") : t("dialog.delete")}
+        cancelText={t("dialog.cancel")}
         onConfirm={handleDeleteUser}
-        onClose={() => {
+        onCancel={() => {
           if (!deleting) {
             setConfirmOpen(false);
             setDeleteTarget(null);
           }
         }}
+        loading={deleting}
+        type="danger"
       />
 
       <UserBanDialog
@@ -301,21 +301,21 @@ const UsersManagement = () => {
         banning={banning}
       />
 
-      <DialogComponent
+      <ConfirmDialog
         open={unbanDialogOpen}
         title="إلغاء حظر المستخدم"
-        description={`هل تريد إلغاء حظر ${unbanTarget?.fname || "هذا المستخدم"}؟ سيتمكن من تسجيل الدخول مجدداً.`}
-        confirmLabel={banning ? "جاري الإلغاء..." : "إلغاء الحظر"}
-        cancelLabel="إلغاء"
-        tone="success"
-        placement="center"
+        message={`هل تريد إلغاء حظر ${unbanTarget?.fname || "هذا المستخدم"}؟ سيتمكن من تسجيل الدخول مجدداً.`}
+        confirmText={banning ? "جاري الإلغاء..." : "إلغاء الحظر"}
+        cancelText="إلغاء"
         onConfirm={handleUnbanUser}
-        onClose={() => {
+        onCancel={() => {
           if (!banning) {
             setUnbanDialogOpen(false);
             setUnbanTarget(null);
           }
         }}
+        loading={banning}
+        type="info"
       />
     </div>
   );

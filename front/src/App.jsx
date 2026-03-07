@@ -39,7 +39,7 @@ function App() {
   const { account, setAccount } = useContext(Logincontext);
   const [data, setData] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
-  const [categories, setCategories] = useState([CATEGORY_ALL]);
+  const [categories, setCategories] = useState([{ name: CATEGORY_ALL }]);
   const [appliedFilters, setAppliedFilters] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
@@ -62,8 +62,9 @@ function App() {
       }
 
       const payload = await response.json();
-      if (Array.isArray(payload) && payload.length) {
-        setCategories(payload);
+      const categoriesArray = payload.data || payload;
+      if (Array.isArray(categoriesArray) && categoriesArray.length) {
+        setCategories(categoriesArray);
       }
     } catch (error) {
       console.log("Category list refresh failed:", error.message);
@@ -107,7 +108,8 @@ function App() {
   }, [fetchCategories]);
 
   useEffect(() => {
-    if (!categories.includes(selectedCategory)) {
+    const categoryNames = categories.map(c => c.name);
+    if (!categoryNames.includes(selectedCategory)) {
       setSelectedCategory(CATEGORY_ALL);
     }
   }, [categories, selectedCategory]);

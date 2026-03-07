@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Slider, Tooltip, Skeleton } from "@mui/material";
 import {
     Search,
     FilterList,
@@ -11,7 +13,9 @@ import {
     Star,
     Visibility,
     ShoppingBag,
-    Inventory2
+    Inventory2,
+    FavoriteBorder,
+    AddShoppingCart
 } from "@mui/icons-material";
 import { apiUrl } from "../../api";
 import "./AllProducts.css";
@@ -22,12 +26,23 @@ const AllProducts = () => {
     const { t } = useTranslation();
     const { category: categorySlug } = useParams();
     const navigate = useNavigate();
+    
+    // Core State
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // Filter State
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    
     const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid");
-    const [priceRange, setPriceRange] = useState({ min: 0, max: 20000 });
+    
+    // Using array for min & max price
+    const [priceRange, setPriceRange] = useState([0, 30000]);
+    const [debouncedPrice, setDebouncedPrice] = useState([0, 30000]);
+    
+    // Pagination State
     const [pagination, setPagination] = useState({
         totalItems: 0,
         totalPages: 0,
@@ -35,20 +50,29 @@ const AllProducts = () => {
         limit: 12
     });
 
-    // Determine the actual category name from the slug
     const displayCategoryName = useMemo(() => {
-        if (!categorySlug || categorySlug === "all") return t('allProducts.allCategories');
+        if (!categorySlug || categorySlug === "all") return t('allProducts.allCategories', 'All Categories');
         return categorySlug
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
     }, [categorySlug, t]);
 
+    // Handle debouncing
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedSearch(searchTerm), 500);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedPrice(priceRange), 500);
+        return () => clearTimeout(handler);
+    }, [priceRange]);
+
+    // Fetch Products
     const fetchProducts = useCallback(async (page = 1) => {
         setLoading(true);
         try {
-            // If the category slug is a translated title, it might not match backend categories
-            // We'll try to send it, but if it's "all", we send undefined
             const backendCategory = (categorySlug && categorySlug !== "all")
                 ? displayCategoryName
                 : undefined;
@@ -56,35 +80,37 @@ const AllProducts = () => {
             const payload = {
                 category: backendCategory,
                 selections: {},
-                price: priceRange.max < 20000 ? priceRange.max : null,
-                search: searchTerm,
+                price: debouncedPrice[1] < 30000 ? debouncedPrice[1] : null,
+                search: debouncedSearch,
                 page: page,
                 limit: 12
             };
 
             const response = await fetch(apiUrl("/products/filter"), {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
             if (!response.ok) throw new Error("Network response was not ok");
-
             const resData = await response.json();
 
-            if (resData.products) {
-                setProducts(resData.products);
-                setPagination(resData.pagination || {
-                    totalItems: resData.products.length,
-                    totalPages: 1,
-                    currentPage: 1,
-                    limit: 12
+            if (resData.data) {
+                setProducts(resData.data);
+                setPagination({
+                    totalItems: resData.total || resData.data.length,
+                    totalPages: resData.total_pages || 1,
+                    currentPage: resData.page || page,
+                    limit: resData.limit || 12
                 });
             } else {
                 setProducts(Array.isArray(resData) ? resData : []);
-                setPagination(prev => ({ ...prev, totalItems: resData.length || 0 }));
+                setPagination(prev => ({ 
+                    ...prev, 
+                    totalItems: resData.length || 0,
+                    totalPages: 1,
+                    currentPage: 1 
+                }));
             }
         } catch (error) {
             console.error("Products fetch failed:", error.message);
@@ -92,23 +118,23 @@ const AllProducts = () => {
         } finally {
             setLoading(false);
         }
-    }, [categorySlug, displayCategoryName, searchTerm, priceRange.max]);
+    }, [categorySlug, displayCategoryName, debouncedSearch, debouncedPrice]);
 
+    // Trigger fetch on filter changes
     useEffect(() => {
-        const delaySearch = setTimeout(() => {
-            fetchProducts(1);
-        }, 500);
-
-        return () => clearTimeout(delaySearch);
+        fetchProducts(1);
     }, [fetchProducts]);
 
     const handlePageChange = (newPage) => {
+        if(newPage === pagination.currentPage) return;
         fetchProducts(newPage);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const sortedProducts = useMemo(() => {
-        return [...products].sort((a, b) => {
+        let filtered = products.filter(p => p.price.cost >= debouncedPrice[0]);
+
+        return filtered.sort((a, b) => {
             switch (sortBy) {
                 case "price-low":
                     return a.price.cost - b.price.cost;
@@ -120,14 +146,43 @@ const AllProducts = () => {
                     return a.title.shortTitle.localeCompare(b.title.shortTitle);
                 case "newest":
                 default:
-                    // Assuming id or createdAt could be used
-                    return 0;
+                    const dateA = new Date(a.createdAt || 0).getTime();
+                    const dateB = new Date(b.createdAt || 0).getTime();
+                    return dateB - dateA;
             }
         });
-    }, [products, sortBy]);
+    }, [products, sortBy, debouncedPrice]);
 
     const handleProductClick = (productId) => {
         navigate(`/getproductsone/${productId}`);
+    };
+
+    const handlePriceChange = (event, newValue) => {
+        setPriceRange(newValue);
+    };
+
+    const renderSkeletons = () => {
+        return Array.from({ length: viewMode === "grid" ? 12 : 6 }).map((_, idx) => (
+            <div key={idx} className={`premium_product_card skeleton ${viewMode}`} style={{ cursor: "default" }}>
+                <div className="card_image_wrapper" style={{background: 'transparent'}}>
+                    <Skeleton 
+                        variant="rectangular" 
+                        width="100%" 
+                        height="100%" 
+                        sx={{ position: 'absolute', top: 0, left: 0, bgcolor: 'var(--surface-2)' }} 
+                    />
+                </div>
+                <div className="card_details" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Skeleton width="40%" height={24} sx={{ bgcolor: 'var(--surface-2)' }} />
+                    <Skeleton width="90%" height={32} sx={{ bgcolor: 'var(--surface-2)' }} />
+                    <Skeleton width="70%" height={24} sx={{ bgcolor: 'var(--surface-2)' }} />
+                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
+                        <Skeleton width="50%" height={35} sx={{ bgcolor: 'var(--surface-2)' }} />
+                        <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'var(--surface-2)' }} />
+                    </div>
+                </div>
+            </div>
+        ));
     };
 
     return (
@@ -137,14 +192,19 @@ const AllProducts = () => {
                 <div className="hero_glass">
                     <div className="hero_content">
                         <BackButton className="glass_back_btn" />
-                        <div className="title_area">
-                            <span className="category_tag">{t('allProducts.exploring')}</span>
+                        <motion.div 
+                            initial={{ opacity: 0, y: 30 }} 
+                            animate={{ opacity: 1, y: 0 }} 
+                            transition={{ duration: 0.6 }}
+                            className="title_area"
+                        >
+                            <span className="category_tag">{t('allProducts.exploring', 'Exploring Category')}</span>
                             <h1>{displayCategoryName}</h1>
                             <div className="stats_row">
                                 <Inventory2 className="stat_icon" />
-                                <span>{pagination.totalItems} {t('allProducts.productsFound')}</span>
+                                <span>{pagination.totalItems} {t('allProducts.productsFound', 'Products Found')}</span>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </header>
@@ -155,16 +215,16 @@ const AllProducts = () => {
                     <div className="filter_card">
                         <div className="filter_header">
                             <FilterList />
-                            <h3>{t('allProducts.filters')}</h3>
+                            <h3>{t('allProducts.filters', 'Filters')}</h3>
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.search')}</label>
+                            <label>{t('allProducts.search', 'Search Products')}</label>
                             <div className="search_input_wrapper">
                                 <Search className="search_icon" />
                                 <input
                                     type="text"
-                                    placeholder={t('allProducts.searchPlaceholder')}
+                                    placeholder={t('allProducts.searchPlaceholder', 'Type product name...')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -172,135 +232,179 @@ const AllProducts = () => {
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.sortBy')}</label>
+                            <label>{t('allProducts.sortBy', 'Sort By')}</label>
                             <div className="select_wrapper">
                                 <Sort className="select_icon" />
                                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                                    <option value="newest">{t('allProducts.newest')}</option>
-                                    <option value="price-low">{t('allProducts.priceLow')}</option>
-                                    <option value="price-high">{t('allProducts.priceHigh')}</option>
-                                    <option value="rating">{t('allProducts.highestRated')}</option>
-                                    <option value="name">{t('allProducts.nameAZ')}</option>
+                                    <option value="newest">{t('allProducts.newest', 'Newest First')}</option>
+                                    <option value="price-low">{t('allProducts.priceLow', 'Price: Low to High')}</option>
+                                    <option value="price-high">{t('allProducts.priceHigh', 'Price: High to Low')}</option>
+                                    <option value="rating">{t('allProducts.highestRated', 'Highest Rated')}</option>
+                                    <option value="name">{t('allProducts.nameAZ', 'Name: A-Z')}</option>
                                 </select>
                             </div>
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.priceRange')}</label>
+                            <label>{t('allProducts.priceRange', 'Price Range')}</label>
                             <div className="price_inputs_grid">
                                 <div className="price_box">
-                                    <span>{t('allProducts.min')}</span>
-                                    <input
-                                        type="number"
-                                        value={priceRange.min}
-                                        onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                                    />
+                                    <span>{t('allProducts.min', 'Min')}</span>
+                                    <div className="price_value_display">Rs. {priceRange[0]}</div>
                                 </div>
-                                <br />
-                                <div className="price_box">
-                                    <span>{t('allProducts.max')}</span>
-                                    <input
-                                        type="number"
-                                        value={priceRange.max}
-                                        onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                                    />
+                                <div className="price_box" style={{ alignItems: 'flex-end', textAlign: 'end' }}>
+                                    <span>{t('allProducts.max', 'Max')}</span>
+                                    <div className="price_value_display">Rs. {priceRange[1]}</div>
                                 </div>
                             </div>
-                            <input
-                                type="range"
-                                min="0"
-                                max="20000"
-                                step="100"
-                                value={priceRange.max}
-                                onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                                className="premium_range"
-                            />
+                            <div style={{ padding: '0 10px' }}>
+                                <Slider
+                                    value={priceRange}
+                                    onChange={handlePriceChange}
+                                    valueLabelDisplay="auto"
+                                    min={0}
+                                    max={30000}
+                                    step={100}
+                                    sx={{
+                                        color: 'var(--gold)',
+                                        '& .MuiSlider-thumb': {
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                            '&:hover, &.Mui-focusVisible': {
+                                                boxShadow: '0px 0px 0px 8px rgba(240, 165, 0, 0.16)',
+                                            },
+                                        },
+                                        '& .MuiSlider-valueLabel': {
+                                            background: 'var(--surface)',
+                                            color: 'var(--text-1)',
+                                            borderRadius: '8px',
+                                            fontFamily: 'var(--font)',
+                                            fontSize: '12px',
+                                            fontWeight: 600,
+                                            border: '1px solid var(--border)'
+                                        }
+                                    }}
+                                />
+                            </div>
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.viewMode')}</label>
+                            <label>{t('allProducts.viewMode', 'View Mode')}</label>
                             <div className="view_mode_toggle">
                                 <button
                                     className={viewMode === "grid" ? "active" : ""}
                                     onClick={() => setViewMode("grid")}
                                 >
                                     <GridView />
-                                    <span>{t('allProducts.grid')}</span>
+                                    <span>{t('allProducts.grid', 'Grid')}</span>
                                 </button>
                                 <button
                                     className={viewMode === "list" ? "active" : ""}
                                     onClick={() => setViewMode("list")}
                                 >
                                     <FormatListBulleted />
-                                    <span>{t('allProducts.list')}</span>
+                                    <span>{t('allProducts.list', 'List')}</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </aside>
 
-                {/* Products Grid Area */}
+                {/* Products Area */}
                 <section className="products_content">
                     {loading ? (
-                        <div className="premium_loader">
-                            <div className="spinner_outer">
-                                <div className="spinner_inner"></div>
-                                <ShoppingBag className="spinner_icon" />
-                            </div>
-                            <h3>{t('allProducts.fetchingProducts')}</h3>
-                            <p>{t('allProducts.pleaseWait')}</p>
+                        <div className={`products_display_container ${viewMode}`}>
+                            {renderSkeletons()}
                         </div>
                     ) : sortedProducts.length > 0 ? (
                         <>
-                            <div className={`products_display_container ${viewMode}`}>
-                                {sortedProducts.map((product) => (
-                                    <div
-                                        key={product.id}
-                                        className={`premium_product_card ${viewMode}`}
-                                        onClick={() => handleProductClick(product.id)}
-                                    >
-                                        <div className="card_image_wrapper">
-                                            <img src={product.url} alt={product.title.shortTitle} loading="lazy" />
-                                            <div className="card_overlay">
-                                                <button className="quick_view_btn">
-                                                    <Visibility />
-                                                </button>
+                            <motion.div layout className={`products_display_container ${viewMode}`}>
+                                <AnimatePresence>
+                                    {sortedProducts.map((product) => (
+                                        <motion.div
+                                            layout
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            transition={{ duration: 0.4 }}
+                                            key={product.id}
+                                            className={`premium_product_card ${viewMode}`}
+                                            onClick={() => handleProductClick(product.id)}
+                                        >
+                                            <div className="card_image_wrapper">
+                                                <img src={product.url} alt={product.title.shortTitle} loading="lazy" />
+                                                <div className="card_overlay">
+                                                    <div className="overlay_actions">
+                                                        <Tooltip title="Add to Cart" placement="top">
+                                                            <button 
+                                                                className="icon_action_btn" 
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation(); 
+                                                                    handleProductClick(product.id);
+                                                                }}
+                                                            >
+                                                                <AddShoppingCart />
+                                                            </button>
+                                                        </Tooltip>
+                                                        <Tooltip title={t('allProducts.quickView', 'Quick View')} placement="top">
+                                                            <button 
+                                                                className="icon_action_btn primary" 
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation(); 
+                                                                    handleProductClick(product.id); 
+                                                                }}
+                                                            >
+                                                                <Visibility />
+                                                            </button>
+                                                        </Tooltip>
+                                                        <Tooltip title="Add to Wishlist" placement="top">
+                                                            <button 
+                                                                className="icon_action_btn" 
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation(); 
+                                                                    handleProductClick(product.id);
+                                                                }}
+                                                            >
+                                                                <FavoriteBorder />
+                                                            </button>
+                                                        </Tooltip>
+                                                    </div>
+                                                </div>
+                                                {product.discount && (
+                                                    <div className="discount_tag">
+                                                        <LocalOffer className="tag_icon" />
+                                                        {product.discount}
+                                                    </div>
+                                                )}
                                             </div>
-                                            {product.discount && (
-                                                <div className="discount_tag">
-                                                    <LocalOffer className="tag_icon" />
-                                                    {product.discount}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="card_details">
-                                            <span className="product_category">{product.category}</span>
-                                            <h3 className="product_title">{product.title.shortTitle}</h3>
-                                            <p className="product_tagline">{product.tagline}</p>
+                                            <div className="card_details">
+                                                <span className="product_category">{product.category}</span>
+                                                <h3 className="product_title">{product.title.shortTitle}</h3>
+                                                <p className="product_tagline">{product.tagline}</p>
 
-                                            <div className="product_meta">
-                                                <div className="rating_badge">
-                                                    <Star className="star_icon" />
-                                                    <span>{Number(product.rating || 0).toFixed(1)}</span>
+                                                <div className="product_meta">
+                                                    <div className="rating_badge">
+                                                        <Star className="star_icon" />
+                                                        <span>{Number(product.rating || 0).toFixed(1)}</span>
+                                                    </div>
+                                                    <div className="views_count">
+                                                        <Visibility className="meta_icon" />
+                                                        <span>{product.views || 0}</span>
+                                                    </div>
                                                 </div>
-                                                <div className="views_count">
-                                                    <Visibility className="meta_icon" />
-                                                    <span>{product.views || 0}</span>
+
+                                                <div className="price_footer">
+                                                    <div className="price_info">
+                                                        <span className="cost">Rs. {product.price.cost}</span>
+                                                        <span className="mrp">Rs. {product.price.mrp}</span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </motion.div>
 
-                                            <div className="price_footer">
-                                                <div className="price_info">
-                                                    <span className="cost">Rs. {product.price.cost}</span>
-                                                    <span className="mrp">Rs. {product.price.mrp}</span>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
+                            {/* Show pagination if we have more than 1 page */}
                             <div className="pagination_wrapper">
                                 <Pagination
                                     currentPage={pagination.currentPage}
@@ -310,20 +414,26 @@ const AllProducts = () => {
                             </div>
                         </>
                     ) : (
-                        <div className="premium_empty_state">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="premium_empty_state"
+                        >
                             <div className="empty_illustration">
                                 <Search className="bg_icon" />
                                 <ShoppingBag className="main_icon" />
                             </div>
-                            <h2>{t('allProducts.noResults')}</h2>
-                            <p>{t('allProducts.noResultsDesc')}</p>
+                            <h2>{t('allProducts.noResults', 'No Results Found')}</h2>
+                            <p>{t('allProducts.noResultsDesc', 'We could not find any products matching your current filters.')}</p>
                             <button className="reset_btn" onClick={() => {
                                 setSearchTerm("");
-                                setPriceRange({ min: 0, max: 20000 });
+                                setPriceRange([0, 30000]);
+                                setDebouncedSearch("");
+                                setDebouncedPrice([0, 30000]);
                             }}>
-                                {t('allProducts.clearFilters')}
+                                {t('allProducts.clearFilters', 'Clear Filters')}
                             </button>
-                        </div>
+                        </motion.div>
                     )}
                 </section>
             </div>

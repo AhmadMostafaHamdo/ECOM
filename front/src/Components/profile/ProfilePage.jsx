@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
 import "./profile.css";
 import BackButton from "../common/BackButton";
+import Pagination from "../common/Pagination";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 // Icons (Using standard MUI or Heroicons style)
 import PersonIcon from "@mui/icons-material/Person";
@@ -19,11 +21,15 @@ const ProfilePage = () => {
   const { account, setAccount } = useContext(Logincontext);
   const [form, setForm] = useState({ fname: "", email: "", mobile: "" });
   const [myProducts, setMyProducts] = useState([]);
+  const [prodPage, setProdPage] = useState(1);
+  const [prodTotalPages, setProdTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -47,6 +53,7 @@ const ProfilePage = () => {
         if (productsResponse.ok) {
           const productsData = await productsResponse.json();
           setMyProducts(Array.isArray(productsData) ? productsData : []);
+          setProdTotalPages(productsData.total_pages || 1);
         }
       } catch (err) {
         setError(err.message);
@@ -55,8 +62,20 @@ const ProfilePage = () => {
       }
     };
     loadProfile();
-  }, [history, setAccount]);
+  }, [setAccount, navigate]);
 
+  const handlePageChange = async (newPage) => {
+    setProdPage(newPage);
+    try {
+      const productsResponse = await fetch(apiUrl("/profile/products?page=" + newPage), { credentials: "include" });
+      if (productsResponse.ok) {
+        const resData = await productsResponse.json();
+        setMyProducts(resData.data || []);
+        setProdTotalPages(resData.total_pages || 1);
+      }
+    } catch(e){}
+  };
+    
   const updateField = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -83,25 +102,33 @@ const ProfilePage = () => {
     }
   };
 
-  const deleteProduct = async (productId) => {
-    if (!window.confirm(t("profile.confirmDelete", { defaultValue: "Delete this product?" }))) return;
-    setDeletingId(productId);
+  const deleteProduct = (productId) => {
+    setProductToDelete(productId);
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    
+    setDeletingId(productToDelete);
     setError("");
     setMessage("");
     try {
-      const response = await fetch(apiUrl(`/products/${productId}`), {
+      const response = await fetch(apiUrl(`/products/${productToDelete}`), {
         method: "DELETE",
         credentials: "include",
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || "Failed to delete product");
 
-      setMyProducts((prev) => prev.filter((product) => product.id !== productId));
+      setMyProducts((prev) => prev.filter((product) => (product.id || product._id) !== productToDelete));
       setMessage(t("profile.deleteSuccess", { defaultValue: "Product deleted." }));
+      setIsConfirmOpen(false);
     } catch (err) {
       setError(err.message);
     } finally {
       setDeletingId(null);
+      setProductToDelete(null);
     }
   };
 
@@ -214,13 +241,13 @@ const ProfilePage = () => {
                     </div>
                     <div className="product_actions">
                       <NavLink
-                        to={`/getproductsone/${product.id}`}
+                        to={`/getproductsone/${product.id || product._id}`}
                         className="view_link"
                       >
                         View
                       </NavLink>
                       <NavLink
-                        to={`/products/edit/${product.id}`}
+                        to={`/products/edit/${product.id || product._id}`}
                         className="view_link"
                       >
                         Edit
@@ -228,10 +255,10 @@ const ProfilePage = () => {
                       <button
                         type="button"
                         className="delete_btn"
-                        onClick={() => deleteProduct(product.id)}
-                        disabled={deletingId === product.id}
+                        onClick={() => deleteProduct(product.id || product._id)}
+                        disabled={deletingId === (product.id || product._id)}
                       >
-                        {deletingId === product.id ? "Removing..." : t("profile.delete", { defaultValue: "Delete" })}
+                        {deletingId === (product.id || product._id) ? "Removing..." : t("profile.delete", { defaultValue: "Delete" })}
                       </button>
                     </div>
                   </div>
@@ -240,9 +267,34 @@ const ProfilePage = () => {
                 <p className="empty_state">{t("profile.noProducts")}</p>
               )}
             </div>
+            
+            {prodTotalPages > 1 && (
+                <div style={{ marginTop: '20px' }}>
+                    <Pagination 
+                        currentPage={prodPage} 
+                        totalPages={prodTotalPages} 
+                        onPageChange={handlePageChange} 
+                    />
+                </div>
+            )}
           </div>
         </section>
       </div>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title={t("profile.deleteProductTitle") || "Delete Product"}
+        message={t("profile.confirmDelete") || "Are you sure you want to delete this product? This action cannot be undone."}
+        confirmText={t("common.delete") || "Delete"}
+        cancelText={t("common.cancel") || "Cancel"}
+        onConfirm={confirmDeleteProduct}
+        onCancel={() => {
+          setIsConfirmOpen(false);
+          setProductToDelete(null);
+        }}
+        loading={!!deletingId}
+        type="danger"
+      />
     </main>
   );
 };

@@ -30,9 +30,9 @@ const SpecialProductSections = () => {
                     fetchSafe("/products/discounted?limit=8")
                 ]);
 
-                setTopRated(Array.isArray(topRatedData) ? topRatedData : []);
-                setTrending(Array.isArray(trendingData) ? trendingData : []);
-                setDealOfTheDay(Array.isArray(discountedData) ? discountedData : []);
+                setTopRated(topRatedData.data || (Array.isArray(topRatedData) ? topRatedData : []));
+                setTrending(trendingData.data || (Array.isArray(trendingData) ? trendingData : []));
+                setDealOfTheDay(discountedData.data || (Array.isArray(discountedData) ? discountedData : []));
             } catch (error) {
                 console.log("Failed to fetch special products:", error.message);
             } finally {

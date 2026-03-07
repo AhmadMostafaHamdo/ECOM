@@ -9,6 +9,11 @@ const categorySchema = new mongoose.Schema(
             minlength: 2,
             maxlength: 50
         },
+        image: {
+            type: String,
+            required: false,
+            default: ""
+        },
         normalizedName: {
             type: String,
             required: true,

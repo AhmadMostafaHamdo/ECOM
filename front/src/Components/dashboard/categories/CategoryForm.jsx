@@ -4,8 +4,12 @@ const CategoryForm = ({
     editingId,
     editName,
     categoryName,
+    editImage,
+    categoryImage,
     setEditName,
     setCategoryName,
+    setEditImage,
+    setCategoryImage,
     updateCategory,
     addCategory,
     setShowForm,
@@ -43,6 +47,7 @@ const CategoryForm = ({
                         setShowForm(false);
                         setEditingId("");
                         setCategoryName("");
+                        setCategoryImage("");
                     }}
                     style={{
                         border: "1.5px solid #e2e8f0",
@@ -78,6 +83,19 @@ const CategoryForm = ({
                         }
                         required
                         placeholder="e.g. Next-Gen Tech"
+                    />
+                </div>
+                <div>
+                    <label>Image URL</label>
+                    <input
+                        type="url"
+                        value={editingId ? editImage : categoryImage}
+                        onChange={(e) =>
+                            editingId
+                                ? setEditImage(e.target.value)
+                                : setCategoryImage(e.target.value)
+                        }
+                        placeholder="https://example.com/image.png"
                     />
                 </div>
                 <div style={{ marginTop: "20px" }}>

@@ -65,7 +65,12 @@ const ReportsManagement = () => {
             if (!res.ok) throw new Error("Failed to load reports");
             const data = await res.json();
             setReports(data.data || []);
-            setPagination(data.pagination);
+            setPagination({
+                totalItems: data.total || 0,
+                totalPages: data.total_pages || 1,
+                currentPage: data.page || 1,
+                limit: data.limit || 10
+            });
         } catch (e) {
             console.error(e);
         } finally {

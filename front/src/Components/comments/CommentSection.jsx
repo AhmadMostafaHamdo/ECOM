@@ -8,6 +8,7 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import SendIcon from '@mui/icons-material/Send';
 import './CommentSection.css';
+import ConfirmDialog from '../common/ConfirmDialog';
 
 const CommentSection = ({ productId }) => {
     const { account } = useContext(Logincontext);
@@ -17,13 +18,17 @@ const CommentSection = ({ productId }) => {
     const [submitting, setSubmitting] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState('');
+    const [liking, setLiking] = useState({});
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [commentToDelete, setCommentToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchComments = useCallback(async () => {
         try {
             const res = await fetch(apiUrl(`/comments/${productId}`));
             if (res.ok) {
                 const data = await res.json();
-                setComments(data.comments || []);
+                setComments(data.data || []);
             }
         } catch (err) {
             console.error('Failed to fetch comments:', err);
@@ -87,31 +92,46 @@ const CommentSection = ({ productId }) => {
 
     const handleLike = async (commentId) => {
         if (!account) { toast.error('Please login to like'); return; }
+        setLiking(prev => ({ ...prev, [commentId]: true }));
         try {
             const res = await fetch(apiUrl(`/comments/${commentId}/like`), {
                 method: 'POST',
                 credentials: 'include',
             });
             if (res.ok) {
-                fetchComments();
+                await fetchComments();
             }
         } catch (err) {
             console.error('Failed to like:', err);
+        } finally {
+            setLiking(prev => ({ ...prev, [commentId]: false }));
         }
     };
 
-    const handleDelete = async (commentId) => {
+    const handleDelete = (commentId) => {
+        setCommentToDelete(commentId);
+        setIsConfirmOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!commentToDelete) return;
+        
+        setIsDeleting(true);
         try {
-            const res = await fetch(apiUrl(`/comments/${commentId}`), {
+            const res = await fetch(apiUrl(`/comments/${commentToDelete}`), {
                 method: 'DELETE',
                 credentials: 'include',
             });
             if (res.ok) {
-                fetchComments();
+                await fetchComments();
                 toast.success('Comment deleted');
+                setIsConfirmOpen(false);
             }
         } catch (err) {
             toast.error('Failed to delete comment');
+        } finally {
+            setIsDeleting(false);
+            setCommentToDelete(null);
         }
     };
 
@@ -177,8 +197,12 @@ const CommentSection = ({ productId }) => {
                     </div>
                 ) : (
                     comments.map((comment) => {
-                        const isLiked = account && comment.likedBy?.includes(account._id);
-                        const isOwner = account && comment.userId?._id === account._id;
+                        const isLiked = account && comment.likedBy?.some(id => 
+                            (id._id || id).toString() === account._id.toString()
+                        );
+                        const commentUserId = comment.userId?._id || comment.userId;
+                        const isOwner = account && commentUserId && 
+                                       commentUserId.toString() === account._id.toString();
                         return (
                             <div key={comment._id} className="comment-item">
                                 <div className="comment-main">
@@ -195,8 +219,13 @@ const CommentSection = ({ productId }) => {
                                             <button
                                                 className={`comment-action-btn like-btn ${isLiked ? 'liked' : ''}`}
                                                 onClick={() => handleLike(comment._id)}
+                                                disabled={liking[comment._id]}
                                             >
-                                                {isLiked ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+                                                {liking[comment._id] ? (
+                                                    <div className="mini-spinner" />
+                                                ) : (
+                                                    isLiked ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />
+                                                )}
                                                 <span>{comment.likeCount || 0}</span>
                                             </button>
                                             <button
@@ -211,7 +240,7 @@ const CommentSection = ({ productId }) => {
                                                     className="comment-action-btn delete-btn"
                                                     onClick={() => handleDelete(comment._id)}
                                                 >
-                                                    <DeleteOutlineIcon fontSize="small" />
+                                                    <DeleteOutlineIcon fontSize="small" style={{ color: "red" }} />
                                                 </button>
                                             )}
                                         </div>
@@ -237,7 +266,9 @@ const CommentSection = ({ productId }) => {
                                         {comment.replies?.length > 0 && (
                                             <div className="comment-replies">
                                                 {comment.replies.map((reply) => {
-                                                    const isReplyOwner = account && reply.userId?._id === account._id;
+                                                    const replyUserId = reply.userId?._id || reply.userId;
+                                                    const isReplyOwner = account && replyUserId && 
+                                                                       replyUserId.toString() === account._id.toString();
                                                     return (
                                                         <div key={reply._id} className="reply-item">
                                                             <div className="comment-avatar reply-avatar">
@@ -270,6 +301,21 @@ const CommentSection = ({ productId }) => {
                     })
                 )}
             </div>
+            
+            <ConfirmDialog 
+                open={isConfirmOpen}
+                title="Delete Comment"
+                message="Are you sure you want to delete this comment? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                onConfirm={confirmDelete}
+                onCancel={() => {
+                    setIsConfirmOpen(false);
+                    setCommentToDelete(null);
+                }}
+                loading={isDeleting}
+                type="danger"
+            />
         </div>
     );
 };

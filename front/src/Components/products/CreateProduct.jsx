@@ -61,8 +61,9 @@ const CreateProduct = ({ mode = "create" }) => {
 
         if (categoryRes.ok) {
           const payload = await categoryRes.json();
-          const list = Array.isArray(payload)
-            ? payload.filter((item) => item !== CATEGORY_ALL)
+          const categoriesArray = payload.data || payload;
+          const list = Array.isArray(categoriesArray)
+            ? categoriesArray.filter((item) => item !== CATEGORY_ALL)
             : [];
           categoryList = list;
           setCategories(list);

@@ -37,6 +37,8 @@ const Cart = () => {
   const [reportOpen, setReportOpen] = useState(false);
   const [initialSaved, setInitialSaved] = useState(false);
   const [productMongoId, setProductMongoId] = useState(null);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
 
   useEffect(() => {
     const getinddata = async () => {
@@ -67,7 +69,7 @@ const Cart = () => {
               const wRes = await fetch(apiUrl("/wishlist"), { credentials: "include" });
               if (wRes.ok) {
                 const wData = await wRes.json();
-                const isInWishlist = (wData.wishlist || []).some(
+                const isInWishlist = (wData.data || []).some(
                   (p) => (p._id || p.id)?.toString() === data._id?.toString()
                 );
                 setInitialSaved(isInWishlist);
@@ -126,6 +128,7 @@ const Cart = () => {
       toast.error('Please login to like this product');
       return;
     }
+    setLikeLoading(true);
     try {
       const res = await fetch(apiUrl(`/products/${id}/like`), {
         method: 'POST',
@@ -138,6 +141,8 @@ const Cart = () => {
       }
     } catch (err) {
       console.error('Like error:', err);
+    } finally {
+      setLikeLoading(false);
     }
   };
 
@@ -181,6 +186,7 @@ const Cart = () => {
     }
 
     try {
+      setChatLoading(true);
       toast.info('جاري فتح المحادثة...', { autoClose: 1200 });
 
       const res = await fetch(apiUrl('/conversations'), {
@@ -204,6 +210,8 @@ const Cart = () => {
     } catch (err) {
       toast.error('خطأ في الاتصال بالخادم');
       console.error('Chat error:', err);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -249,7 +257,9 @@ const Cart = () => {
             liked={liked}
             handleLike={handleLike}
             likeCount={likeCount}
+            likeLoading={likeLoading}
             handleChatWithSeller={handleChatWithSeller}
+            chatLoading={chatLoading}
             wishSaved={wishSaved}
             toggleWishlist={toggleWishlist}
             wishLoading={wishLoading}

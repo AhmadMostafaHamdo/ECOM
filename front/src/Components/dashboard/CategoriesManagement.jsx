@@ -4,6 +4,8 @@ import { apiUrl } from "../../api";
 import DynamicTable from "./DynamicTable";
 import { Pencil, Trash2 } from "lucide-react";
 import CategoryForm from "./categories/CategoryForm";
+import "../../styles/admin-dashboard.css";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const UNCATEGORIZED = "uncategorized";
 
@@ -11,8 +13,10 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");
+  const [categoryImage, setCategoryImage] = useState("");
   const [editingId, setEditingId] = useState("");
   const [editName, setEditName] = useState("");
+  const [editImage, setEditImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     totalItems: 0,
@@ -43,14 +47,12 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
         if (response.ok) {
           const payload = await response.json();
           setCategories(payload.data || []);
-          setPagination(
-            payload.pagination || {
-              totalItems: 0,
-              totalPages: 0,
-              currentPage: 1,
-              limit: 10,
-            },
-          );
+          setPagination({
+            totalItems: payload.total || 0,
+            totalPages: payload.total_pages || 1,
+            currentPage: payload.page || 1,
+            limit: payload.limit || 10,
+          });
         }
       } catch (err) {
         console.error(err);
@@ -90,10 +92,11 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name: categoryName.trim() }),
+        body: JSON.stringify({ name: categoryName.trim(), image: categoryImage.trim() }),
       });
       if (response.ok) {
         setCategoryName("");
+        setCategoryImage("");
         setShowForm(false);
         loadCategories();
         onCategoriesChanged();
@@ -114,12 +117,13 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name: editName.trim() }),
+        body: JSON.stringify({ name: editName.trim(), image: editImage.trim() }),
       });
       if (response.ok) {
         setShowForm(false);
         setEditingId("");
         setEditName("");
+        setEditImage("");
         loadCategories();
         onCategoriesChanged();
       }
@@ -130,15 +134,17 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     }
   };
 
-  const deleteCategory = async (category) => {
-    if (
-      !window.confirm(`${t("admin.deleteCategoryConfirm")} "${category.name}"?`)
-    )
-      return;
-    setSaving(true);
+  const deleteCategory = (category) => {
+    setCategoryToDelete(category);
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!categoryToDelete) return;
+    setIsDeleting(true);
     try {
       const response = await fetch(
-        apiUrl(`/admin/categories/${category._id}`),
+        apiUrl(`/admin/categories/${categoryToDelete._id}`),
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -148,11 +154,13 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
       if (response.ok) {
         loadCategories();
         onCategoriesChanged();
+        setIsConfirmOpen(false);
       }
     } catch (err) {
       console.error(err);
     } finally {
-      setSaving(false);
+      setIsDeleting(false);
+      setCategoryToDelete(null);
     }
   };
 
@@ -181,6 +189,7 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
                 setShowForm(true);
                 setEditingId("");
                 setCategoryName("");
+                setCategoryImage("");
               }}
             >
               + {t("admin.createCategory")}
@@ -253,6 +262,7 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
                 onClick: (cat) => {
                   setEditingId(cat._id);
                   setEditName(cat.name);
+                  setEditImage(cat.image || "");
                   setShowForm(true);
                 },
               },
@@ -274,8 +284,12 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
             editingId={editingId}
             editName={editName}
             categoryName={categoryName}
+            editImage={editImage}
+            categoryImage={categoryImage}
             setEditName={setEditName}
             setCategoryName={setCategoryName}
+            setEditImage={setEditImage}
+            setCategoryImage={setCategoryImage}
             updateCategory={updateCategory}
             addCategory={addCategory}
             setShowForm={setShowForm}
@@ -285,6 +299,21 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
           />
         )}
       </div>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title={t("admin.deleteCategoryTitle") || "Delete Category"}
+        message={`${t("admin.deleteCategoryConfirm")} "${categoryToDelete?.name}"? ${t("admin.thisActionCannotBeUndone") || "This action cannot be undone."}`}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setIsConfirmOpen(false);
+          setCategoryToDelete(null);
+        }}
+        loading={isDeleting}
+        type="danger"
+      />
     </div>
   );
 };

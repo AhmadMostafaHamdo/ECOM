@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import DynamicTable from "./DynamicTable";
-import DialogComponent from "./DialogComponent";
+import ConfirmDialog from "../common/ConfirmDialog";
 import { Button } from "./Button";
 import { Pencil, Trash2 } from "lucide-react";
 import ProductForm from "./products/ProductForm";
@@ -69,14 +69,12 @@ const ProductsManagement = () => {
         if (response.ok) {
           const payload = await response.json();
           setProducts(payload.data || []);
-          setPagination(
-            payload.pagination || {
-              totalItems: 0,
-              totalPages: 0,
-              currentPage: 1,
-              limit: 10,
-            },
-          );
+          setPagination({
+              totalItems: payload.total || 0,
+              totalPages: payload.total_pages || 1,
+              currentPage: payload.page || 1,
+              limit: payload.limit || 10,
+            });
         }
       } catch (error) {
         console.error(error);
@@ -422,25 +420,25 @@ const ProductsManagement = () => {
         )}
       </div>
 
-      <DialogComponent
+      <ConfirmDialog
         open={confirmOpen}
         title={
           deleteTarget
             ? `Delete ${deleteTarget?.title?.shortTitle || "this product"}?`
             : "Delete product?"
         }
-        description="Deleting this product will remove it from listings and purchase flows. Continue?"
-        confirmLabel={deleting ? "Deleting..." : "Delete"}
-        cancelLabel="Cancel"
-        tone="danger"
-        placement="center"
+        message="Deleting this product will remove it from listings and purchase flows. This action cannot be undone. Continue?"
+        confirmText={deleting ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
         onConfirm={handleDeleteProduct}
-        onClose={() => {
+        onCancel={() => {
           if (!deleting) {
             setConfirmOpen(false);
             setDeleteTarget(null);
           }
         }}
+        loading={deleting}
+        type="danger"
       />
     </div>
   );

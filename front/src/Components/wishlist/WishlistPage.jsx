@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux";
 import { removeFromWishlistLocal, clearWishlistLocal } from "../redux/features/wishlistSlice";
 import "./wishlist.css";
 import BackButton from "../common/BackButton";
+import Pagination from "../common/Pagination";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 // Icons
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -22,9 +24,12 @@ const WishlistPage = () => {
     const { account } = useContext(Logincontext);
     const navigate = useNavigate();
     const [wishlist, setWishlist] = useState([]);
+    const [wlPage, setWlPage] = useState(1);
+    const [wlTotalPages, setWlTotalPages] = useState(1);
     const [loading, setLoading] = useState(true);
     const [removingId, setRemovingId] = useState(null);
     const [clearing, setClearing] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const dispatch = useDispatch();
 
     const loadWishlist = useCallback(async () => {
@@ -71,8 +76,12 @@ const WishlistPage = () => {
         }
     };
 
-    const handleClearAll = async () => {
-        if (!window.confirm("هل تريد مسح جميع المحفوظات؟")) return;
+    const handleClearAll = () => {
+        setIsConfirmOpen(true);
+    };
+
+    const confirmClearAll = async () => {
+        setIsConfirmOpen(false);
         setClearing(true);
         try {
             const res = await fetch(apiUrl("/wishlist"), {
@@ -244,6 +253,18 @@ const WishlistPage = () => {
                     </div>
                 )}
             </div>
+
+            <ConfirmDialog
+                open={isConfirmOpen}
+                title="مسح جميع المحفوظات"
+                message="هل أنت متأكد من رغبتك في مسح كافة المنتجات من المحفوظات؟ لا يمكن التراجع عن هذا الإجراء."
+                confirmText="مسح الكل"
+                cancelText="إلغاء"
+                onConfirm={confirmClearAll}
+                onCancel={() => setIsConfirmOpen(false)}
+                loading={clearing}
+                type="danger"
+            />
         </div>
     );
 };

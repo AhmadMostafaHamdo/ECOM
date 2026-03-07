@@ -33,8 +33,9 @@ const ReviewList = ({ targetType, targetId, onReviewsUpdate }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                setReviews(prev => page === 1 ? data.reviews : [...prev, ...data.reviews]);
-                setHasMore(data.hasMore);
+                const newReviews = data.data || data.reviews || [];
+                setReviews(prev => page === 1 ? newReviews : [...prev, ...newReviews]);
+                setHasMore(data.page < data.total_pages);
                 if (onReviewsUpdate) {
                     onReviewsUpdate(data.summary);
                 }

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { CircularProgress } from '@mui/material';
 import { Favorite, FavoriteBorder, ChatBubbleOutline, LocalOffer } from '@mui/icons-material';
+import { AlertCircle } from 'lucide-react';
 
 const ProductGallery = ({
     images,
@@ -7,7 +9,9 @@ const ProductGallery = ({
     liked,
     handleLike,
     likeCount,
+    likeLoading,
     handleChatWithSeller,
+    chatLoading,
     wishSaved,
     toggleWishlist,
     wishLoading,
@@ -29,8 +33,8 @@ const ProductGallery = ({
                         {product.discount}
                     </div>
                 )}
-                <button className={`product-like-overlay ${liked ? 'liked' : ''}`} onClick={handleLike}>
-                    {liked ? <Favorite /> : <FavoriteBorder />}
+                <button className={`product-like-overlay ${liked ? 'liked' : ''}`} onClick={handleLike} disabled={likeLoading}>
+                    {likeLoading ? <CircularProgress size={16} color="inherit" /> : (liked ? <Favorite /> : <FavoriteBorder />)}
                     <span>{likeCount}</span>
                 </button>
             </div>
@@ -50,8 +54,8 @@ const ProductGallery = ({
             )}
 
             <div className="cart_btn">
-                <button className="cart_btn_chat" onClick={handleChatWithSeller}>
-                    <ChatBubbleOutline className="btn_icon" />
+                <button className="cart_btn_chat" onClick={handleChatWithSeller} disabled={chatLoading}>
+                    {chatLoading ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : <ChatBubbleOutline className="btn_icon" />}
                     <span>تواصل مع البائع</span>
                 </button>
 
@@ -61,7 +65,7 @@ const ProductGallery = ({
                     disabled={wishLoading}
                     title={wishSaved ? 'إزالة من المحفوظات' : 'حفظ في المحفوظات'}
                 >
-                    {wishSaved ? <Favorite className="btn_icon" /> : <FavoriteBorder className="btn_icon" />}
+                    {wishLoading ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : (wishSaved ? <Favorite className="btn_icon" />  : <FavoriteBorder className="btn_icon" />)}
                     <span>{wishSaved ? 'تم الحفظ' : 'حفظ في المحفوظات'}</span>
                 </button>
 
@@ -81,7 +85,7 @@ const ProductGallery = ({
                         onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = '#fff5f5'; }}
                     >
-                        ⚠️ الإبلاغ عن المنتج
+                        <AlertCircle/> الإبلاغ عن المنتج
                     </button>
                 )}
             </div>

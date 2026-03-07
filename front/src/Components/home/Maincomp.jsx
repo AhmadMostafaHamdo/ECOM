@@ -51,7 +51,7 @@ const Maincomp = React.memo(
           const resData = await response.json();
           if (isMounted) {
             setProducts(
-              resData.products || (Array.isArray(resData) ? resData : []),
+              resData.data || (Array.isArray(resData.data) ? resData.data : []),
             );
           }
         } catch (error) {

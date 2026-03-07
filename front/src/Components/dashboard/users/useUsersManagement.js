@@ -26,7 +26,12 @@ export const useUsersManagement = () => {
             if (!response.ok) throw new Error("Failed to load users");
             const resData = await response.json();
             setUsers(resData.data || []);
-            setPagination(resData.pagination);
+            setPagination({
+                totalItems: resData.total || resData.data.length,
+                totalPages: resData.total_pages || 1,
+                currentPage: resData.page || 1,
+                limit: resData.limit || 10
+            });
         } catch (loadError) {
             setError(loadError.message);
         } finally {

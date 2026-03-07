@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import "./category-dashboard.css";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const UNCATEGORIZED = "Uncategorized";
 
@@ -14,6 +15,8 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
 
     const loadCategories = useCallback(async () => {
         setLoading(true);
@@ -81,18 +84,21 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
         }
     };
 
-    const handleDeleteCategory = async (category) => {
-        const confirmed = window.confirm(`Delete "${category.name}"?`);
-        if (!confirmed) {
-            return;
-        }
+    const handleDeleteCategory = (category) => {
+        setCategoryToDelete(category);
+        setIsConfirmOpen(true);
+    };
 
+    const confirmDeleteCategory = async () => {
+        if (!categoryToDelete) return;
+
+        setIsConfirmOpen(false);
         setSubmitting(true);
         setError("");
         setMessage("");
 
         try {
-            const response = await fetch(apiUrl(`/categories/${category._id}`), {
+            const response = await fetch(apiUrl(`/categories/${categoryToDelete._id}`), {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json"
@@ -104,13 +110,14 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
                 throw new Error(payload.error || "Could not delete category");
             }
 
-            setMessage(`Deleted "${category.name}". Reassigned ${payload.movedProducts || 0} product(s).`);
+            setMessage(`Deleted "${categoryToDelete.name}". Reassigned ${payload.movedProducts || 0} product(s).`);
             await loadCategories();
             await onCategoriesChanged();
         } catch (deleteError) {
             setError(deleteError.message);
         } finally {
             setSubmitting(false);
+            setCategoryToDelete(null);
         }
     };
 
@@ -172,6 +179,21 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
                     )}
                 </div>
             </div>
+            
+            <ConfirmDialog 
+                open={isConfirmOpen}
+                title={t('admin.deleteCategory') || "Delete Category"}
+                message={`Are you sure you want to delete "${categoryToDelete?.name}"? All products in this category will be reassigned to Uncategorized.`}
+                confirmText={t('common.delete')}
+                cancelText={t('common.cancel')}
+                onConfirm={confirmDeleteCategory}
+                onCancel={() => {
+                    setIsConfirmOpen(false);
+                    setCategoryToDelete(null);
+                }}
+                loading={submitting}
+                type="danger"
+            />
         </section>
     );
 };

@@ -9,7 +9,9 @@ const ProductLayout = ({
     liked,
     handleLike,
     likeCount,
+    likeLoading,
     handleChatWithSeller,
+    chatLoading,
     wishSaved,
     toggleWishlist,
     wishLoading,
@@ -27,7 +29,9 @@ const ProductLayout = ({
                     liked={liked}
                     handleLike={handleLike}
                     likeCount={likeCount}
+                    likeLoading={likeLoading}
                     handleChatWithSeller={handleChatWithSeller}
+                    chatLoading={chatLoading}
                     wishSaved={wishSaved}
                     toggleWishlist={toggleWishlist}
                     wishLoading={wishLoading}
