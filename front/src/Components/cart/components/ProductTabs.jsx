@@ -21,19 +21,19 @@ const ProductTabs = ({ product, reviewSummary, setReviewSummary }) => {
                     className={`tab-btn ${activeTab === 'description' ? 'active' : ''}`}
                     onClick={() => setActiveTab('description')}
                 >
-                    About
+                    {t('product.about', 'About')}
                 </button>
                 <button
                     className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
                     onClick={() => setActiveTab('reviews')}
                 >
-                    Reviews {reviewSummary?.totalReviews ? `(${reviewSummary.totalReviews})` : ''}
+                    {t('product.reviews', 'Reviews')} {reviewSummary?.totalReviews ? `(${reviewSummary.totalReviews})` : ''}
                 </button>
                 <button
                     className={`tab-btn ${activeTab === 'comments' ? 'active' : ''}`}
                     onClick={() => setActiveTab('comments')}
                 >
-                    Comments
+                    {t('product.comments', 'Comments')}
                 </button>
             </div>
 
@@ -41,7 +41,7 @@ const ProductTabs = ({ product, reviewSummary, setReviewSummary }) => {
                 {activeTab === 'description' && (
                     <div className="description_box">
                         <h5>{t("cart.aboutItem")}</h5>
-                        <p>{product.description || 'No description available.'}</p>
+                        <p>{product.description || t('product.noDescription', 'No description available.')}</p>
                         {product.tagline && (
                             <div className="product-tagline">
                                 <span>"{product.tagline}"</span>
@@ -66,7 +66,7 @@ const ProductTabs = ({ product, reviewSummary, setReviewSummary }) => {
                                     onClick={() => setShowReviewForm(true)}
                                 >
                                     <StarRate />
-                                    Write a Review
+                                    {t('product.writeReview', 'Write a Review')}
                                 </button>
                             )}
                         </div>

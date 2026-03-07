@@ -10,6 +10,7 @@ const data = [
 ];
 
 const Banner = React.memo(() => {
+    const { t } = useTranslation();
     return (
         <div className="banner_wrapper" style={{ marginTop: "var(--header-height)" }}>
             <Carousel
@@ -45,8 +46,8 @@ const Banner = React.memo(() => {
                     <div key={i} className="banner_slide">
                         <img src={imag} alt={`Banner ${i + 1}`} className="banner_img" />
                         <div className="banner_overlay">
-                            <p>Premium Shopping Experience</p>
-                            <h2>Wherxe great products meet exceptional design</h2>
+                            <p>{t('home.premiumExperience')}</p>
+                            <h2>{t('home.heroDesignTitle')}</h2>
                         </div>
                     </div>
                 ))}

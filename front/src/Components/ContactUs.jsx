@@ -19,31 +19,31 @@ const ContactUs = () => {
 
     // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = t('contact.nameRequired');
     } else if (formData.name.trim().length < 2 || formData.name.trim().length > 100) {
-      newErrors.name = 'Name must be between 2 and 100 characters';
+      newErrors.name = t('contact.nameRange');
     }
 
     // Email validation
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('contact.emailRequired');
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = t('contact.invalidEmail');
     }
 
     // Subject validation
     if (!formData.subject.trim()) {
-      newErrors.subject = 'Subject is required';
+      newErrors.subject = t('contact.subjectRequired');
     } else if (formData.subject.trim().length < 3 || formData.subject.trim().length > 200) {
-      newErrors.subject = 'Subject must be between 3 and 200 characters';
+      newErrors.subject = t('contact.subjectRange');
     }
 
     // Message validation
     if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
+      newErrors.message = t('contact.messageRequired');
     } else if (formData.message.trim().length < 10 || formData.message.trim().length > 1000) {
-      newErrors.message = 'Message must be between 10 and 1000 characters';
+      newErrors.message = t('contact.messageRange');
     }
 
     return newErrors;
@@ -102,12 +102,12 @@ const ContactUs = () => {
         if (data.details) {
           setErrors(data.details);
         } else {
-          setErrors({ general: data.error || 'Failed to send message' });
+          setErrors({ general: data.error || t('contact.error') });
         }
       }
     } catch (error) {
       setSubmitStatus('error');
-      setErrors({ general: 'Network error. Please try again later.' });
+      setErrors({ general: t('errors.serverError') });
     } finally {
       setIsSubmitting(false);
     }
@@ -116,9 +116,9 @@ const ContactUs = () => {
   return (
     <div className="contact-us-container">
       <div className="contact-us-header">
-        <h1 className="contact-us-title">Contact Us</h1>
+        <h1 className="contact-us-title">{t('contact.title')}</h1>
         <p className="contact-us-subtitle">
-          We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+          {t('contact.subtitle')}
         </p>
       </div>
 
@@ -130,7 +130,7 @@ const ContactUs = () => {
                 <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                Your message has been sent successfully! We'll get back to you soon.
+                {t('contact.success')}
               </div>
             )}
 
@@ -139,7 +139,7 @@ const ContactUs = () => {
                 <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
-                Failed to send message. Please try again.
+                {t('contact.error')}
               </div>
             )}
 
@@ -153,7 +153,10 @@ const ContactUs = () => {
             )}
 
             <div className="form-group">
-              <label htmlFor="name" className="form-label">Name *</label>
+              <label htmlFor="name" className="form-label">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                {t('contact.nameLabel')}
+              </label>
               <input
                 type="text"
                 id="name"
@@ -161,14 +164,17 @@ const ContactUs = () => {
                 value={formData.name}
                 onChange={handleChange}
                 className={`form-input ${errors.name ? 'error' : ''}`}
-                placeholder="Enter your full name"
+                placeholder={t('contact.namePlaceholder')}
                 disabled={isSubmitting}
               />
               {errors.name && <span className="error-message">{errors.name}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="email" className="form-label">Email *</label>
+              <label htmlFor="email" className="form-label">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                {t('contact.emailLabel')}
+              </label>
               <input
                 type="email"
                 id="email"
@@ -176,14 +182,17 @@ const ContactUs = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={`form-input ${errors.email ? 'error' : ''}`}
-                placeholder="Enter your email address"
+                placeholder={t('contact.emailPlaceholder')}
                 disabled={isSubmitting}
               />
               {errors.email && <span className="error-message">{errors.email}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="subject" className="form-label">Subject *</label>
+              <label htmlFor="subject" className="form-label">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                {t('contact.subjectLabel')}
+              </label>
               <input
                 type="text"
                 id="subject"
@@ -191,27 +200,30 @@ const ContactUs = () => {
                 value={formData.subject}
                 onChange={handleChange}
                 className={`form-input ${errors.subject ? 'error' : ''}`}
-                placeholder="Enter the subject of your message"
+                placeholder={t('contact.subjectPlaceholder')}
                 disabled={isSubmitting}
               />
               {errors.subject && <span className="error-message">{errors.subject}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="message" className="form-label">Message *</label>
+              <label htmlFor="message" className="form-label">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                {t('contact.messageLabel')}
+              </label>
               <textarea
                 id="message"
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 className={`form-textarea ${errors.message ? 'error' : ''}`}
-                placeholder="Enter your message (minimum 10 characters)"
+                placeholder={t('contact.messagePlaceholder')}
                 rows="6"
                 maxLength="1000"
                 disabled={isSubmitting}
               />
               <div className="character-count">
-                {formData.message.length}/1000 characters
+                {formData.message.length}/1000
               </div>
               {errors.message && <span className="error-message">{errors.message}</span>}
             </div>
@@ -226,10 +238,10 @@ const ContactUs = () => {
                   <svg className="spinner" viewBox="0 0 24 24">
                     <circle className="spinner-circle" cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="4" />
                   </svg>
-                  Sending...
+                  {t('contact.sending')}
                 </>
               ) : (
-                'Send Message'
+                t('contact.send')
               )}
             </button>
           </form>
@@ -242,9 +254,9 @@ const ContactUs = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3>Email Us</h3>
+            <h3>{t('contact.emailUs')}</h3>
             <p>support@ecommerce.com</p>
-            <p className="info-description">We'll respond within 24 hours</p>
+            <p className="info-description">{t('contact.respond')}</p>
           </div>
 
           <div className="info-card">
@@ -253,9 +265,9 @@ const ContactUs = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
-            <h3>Call Us</h3>
+            <h3>{t('contact.callUs')}</h3>
             <p>+1 (555) 123-4567</p>
-            <p className="info-description">Mon-Fri: 9am-6pm EST</p>
+            <p className="info-description">{t('contact.hours')}</p>
           </div>
 
           <div className="info-card">
@@ -265,7 +277,7 @@ const ContactUs = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <h3>Visit Us</h3>
+            <h3>{t('contact.visitUs')}</h3>
             <p>123 Commerce Street</p>
             <p>New York, NY 10001</p>
           </div>

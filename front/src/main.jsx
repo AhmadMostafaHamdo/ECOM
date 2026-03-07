@@ -9,6 +9,7 @@ import store from "./store";
 import { BrowserRouter } from "react-router-dom";
 import Contextprovider from "./Components/context/Contextprovider";
 import { ThemeProvider } from "./Components/context/ThemeContext";
+import LocalizeProvider from "./Components/context/LocalizeContext";
 import ChatProvider from "./Components/context/ChatContext";
 import GlobalLoader from "./Components/common/GlobalLoader";
 
@@ -16,15 +17,17 @@ const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
     <ThemeProvider>
-        <Contextprovider>
-            <ChatProvider>
-                <Provider store={store}>
-                    <BrowserRouter>
-                        <GlobalLoader />
-                        <App />
-                    </BrowserRouter>
-                </Provider>
-            </ChatProvider>
-        </Contextprovider>
+        <LocalizeProvider>
+            <Contextprovider>
+                <ChatProvider>
+                    <Provider store={store}>
+                        <BrowserRouter>
+                            <GlobalLoader />
+                            <App />
+                        </BrowserRouter>
+                    </Provider>
+                </ChatProvider>
+            </Contextprovider>
+        </LocalizeProvider>
     </ThemeProvider>
 );

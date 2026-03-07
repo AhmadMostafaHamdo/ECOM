@@ -10,6 +10,7 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import StarIcon from "@mui/icons-material/Star";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { apiUrl } from "../../api";
+import { useLocalize } from "../context/LocalizeContext";
 
 const CATEGORY_ALL = "All Categories";
 
@@ -21,6 +22,7 @@ const Maincomp = React.memo(
     searchTerm = "",
   }) => {
     const { t } = useTranslation();
+    const { activeCountry } = useLocalize();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -92,6 +94,26 @@ const Maincomp = React.memo(
     return (
       <>
         <div className="home_section">
+          {/* Localized Territory Banner */}
+          <div className="territory_banner">
+            <div className="territory_info">
+              <h3>
+                {t(`localization.countries.${activeCountry.id}.welcome`)}
+              </h3>
+              <p>
+                {t(`localization.countries.${activeCountry.id}.delivery`)}
+              </p>
+            </div>
+            <div className="territory_market">
+              <span className="market_tag">
+                {activeCountry.currency} Market
+              </span>
+              <div className="tax_note">
+                {t(`localization.countries.${activeCountry.id}.tax_note`)}
+              </div>
+            </div>
+          </div>
+
           <section className="hero_grid">
             <div className="banner_part">
               <Banner />
@@ -128,7 +150,6 @@ const Maincomp = React.memo(
           </section>
 
           <section className="trust_strip">
-
             <article>
               <StarIcon />
               <div>
@@ -136,7 +157,20 @@ const Maincomp = React.memo(
                 <p>{t("home.verifiedQualityDesc")}</p>
               </div>
             </article>
-
+            <article>
+              <LocalShippingIcon />
+              <div>
+                <h5>{t("home.expressDelivery")}</h5>
+                <p>{t("home.expressDeliveryDesc")}</p>
+              </div>
+            </article>
+            <article>
+              <TrendingUpIcon />
+              <div>
+                <h5>{t("home.trendingNow")}</h5>
+                <p>{t("home.trendingNowDesc")}</p>
+              </div>
+            </article>
           </section>
 
           {products.length > 0 ? (

@@ -12,6 +12,7 @@ import { apiUrl } from "./api";
 import { Logincontext } from "./Components/context/Contextprovider";
 import "./App.css";
 import "./i18n/i18n";
+import { useTranslation } from "react-i18next";
 
 // Lazy Load Components
 const Navbaar = lazy(() => import("./Components/header/Navbaar"));
@@ -37,12 +38,20 @@ const CATEGORY_ALL = "All Categories";
 function App() {
   const location = useLocation();
   const { account, setAccount } = useContext(Logincontext);
+  const { i18n } = useTranslation();
   const [data, setData] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
   const [categories, setCategories] = useState([{ name: CATEGORY_ALL }]);
   const [appliedFilters, setAppliedFilters] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
+
+  // Global directionality handler
+  useEffect(() => {
+    const lng = i18n.language || 'en';
+    document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lng;
+  }, [i18n.language]);
   const isDashboardRoute = location.pathname.startsWith("/dashboard");
   const isHomeRoute = location.pathname === "/";
   const isAuthRoute =
@@ -113,6 +122,13 @@ function App() {
       setSelectedCategory(CATEGORY_ALL);
     }
   }, [categories, selectedCategory]);
+
+  useEffect(() => {
+    if (searchTerm.trim().length > 0) {
+      setSelectedCategory(CATEGORY_ALL);
+      setAppliedFilters(null);
+    }
+  }, [searchTerm]);
 
   useEffect(() => {
     setAppliedFilters(null);

@@ -29,6 +29,7 @@ import LanguageSwitcher from "../common/LanguageSwitcher";
 import { useTheme } from "../context/ThemeContext";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import CountrySelector from "../common/CountrySelector";
 
 const Navbaar = React.memo(({ onSearch }) => {
   const { t } = useTranslation();
@@ -49,14 +50,19 @@ const Navbaar = React.memo(({ onSearch }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const fetchSuggestions = useCallback(async (query) => {
-    if (!query.trim()) return setSuggestions([]);
+    if (!query.trim()) {
+      setSuggestions([]);
+      return;
+    }
     setIsSearching(true);
     try {
       const res = await fetch(
         apiUrl(`/getproducts?search=${encodeURIComponent(query)}&limit=6`),
       );
-      const data = await res.json();
-      setSuggestions(data.products || data || []);
+      const resData = await res.json();
+      // The backend returns { data: [...], total: ... }
+      const items = resData.data || resData.products || (Array.isArray(resData) ? resData : []);
+      setSuggestions(items);
     } catch {
       setSuggestions([]);
     } finally {
@@ -114,14 +120,23 @@ const Navbaar = React.memo(({ onSearch }) => {
         <div
           className={`search_section ${showMobileSearch ? "mobile_visible" : ""}`}
         >
-          <div className="nav_searchbaar">
+          <form 
+            className="nav_searchbaar" 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (text.trim()) {
+                navigate(`/products/all?search=${encodeURIComponent(text.trim())}`);
+                setText("");
+              }
+            }}
+          >
             <SearchIcon className="search_leading_icon" />
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={t("allProducts.searchPlaceholder")}
             />
-            <button className="search_icon_btn">
+            <button type="submit" className="search_icon_btn">
               <SearchIcon style={{ fontSize: 20 }} />
             </button>
 
@@ -147,7 +162,7 @@ const Navbaar = React.memo(({ onSearch }) => {
                 )}
               </List>
             )}
-          </div>
+          </form>
         </div>
 
         {/* RIGHT SECTION */}
@@ -161,6 +176,7 @@ const Navbaar = React.memo(({ onSearch }) => {
           </IconButton>
 
           <div className="desktop_items">
+            <CountrySelector />
             <LanguageSwitcher />
             <NavLink to="/contact" className="nav_pill_btn">
               {t("navigation.contact")}
@@ -178,7 +194,7 @@ const Navbaar = React.memo(({ onSearch }) => {
           </div>
 
           {account && (
-            <NavLink to="/wishlist" className="nav_wishlist_btn" title="محفوظاتي">
+            <NavLink to="/wishlist" className="nav_wishlist_btn" title={t('product.removeFromWishlist', 'My Wishlist')}>
               <Badge badgeContent={wishlistItems.length} color="secondary" className="wishlist_badge">
                 <FavoriteIcon
                   style={{

@@ -4,15 +4,18 @@ import { Divider } from '@mui/material';
 import { StarRate, Visibility, Favorite, LocalOffer } from '@mui/icons-material';
 import RatingDistribution from '../../reviews/RatingDistribution';
 import StarRating from '../../reviews/StarRating';
+import { useLocalize } from '../../context/LocalizeContext';
+import { formatCurrency } from '../../../utils/localizeUtils';
 
 const ProductInfo = ({ product, likeCount, reviewSummary }) => {
     const { t } = useTranslation();
+    const { activeCountry } = useLocalize();
 
     return (
         <div className="right_cart">
             <div className="product_header">
                 <div className="product-category-tag">
-                    {product.category || 'Product'}
+                    {product.category || t('admin.productCategory')}
                 </div>
                 <h3>{product.title?.shortTitle}</h3>
                 <h4>{product.title?.longTitle}</h4>
@@ -39,16 +42,16 @@ const ProductInfo = ({ product, likeCount, reviewSummary }) => {
 
             <div className="price_section_cart">
                 <p className="mrp">
-                    MRP: <del>Rs. {product.price?.mrp}</del>
+                    {t('product.mrp', 'MRP')}: <del>{formatCurrency(product.price?.mrp, activeCountry.locale, activeCountry.currency)}</del>
                 </p>
                 <div className="deal_price">
                     <span className="deal_label">{t("cart.todayPrice")}:</span>
-                    <span className="price_value">Rs. {product.price?.cost}</span>
+                    <span className="price_value">{formatCurrency(product.price?.cost, activeCountry.locale, activeCountry.currency)}</span>
                 </div>
                 <div className="savings">
                     <span>{t("cart.youSave")}:</span>
                     <span className="save_value">
-                        Rs. {product.price?.mrp - product.price?.cost} (
+                        {formatCurrency(product.price?.mrp - product.price?.cost, activeCountry.locale, activeCountry.currency)} (
                         {product.price?.discount})
                     </span>
                 </div>
@@ -59,7 +62,7 @@ const ProductInfo = ({ product, likeCount, reviewSummary }) => {
                     <LocalOffer className="discount_icon" />
                     <div>
                         <h5>
-                            {t("cart.discount")}: <span>{product.discount}</span>
+                            {t("product.discount")}: <span>{product.discount}</span>
                         </h5>
                     </div>
                 </div>
@@ -70,7 +73,7 @@ const ProductInfo = ({ product, likeCount, reviewSummary }) => {
                     <div className="rating-summary-left">
                         <div className="rating-big-number">{reviewSummary.averageRating.toFixed(1)}</div>
                         <StarRating rating={reviewSummary.averageRating} size="md" />
-                        <span className="rating-total">{reviewSummary.totalReviews} reviews</span>
+                        <span className="rating-total">{reviewSummary.totalReviews} {t('product.reviews')}</span>
                     </div>
                     <div className="rating-summary-right">
                         <RatingDistribution

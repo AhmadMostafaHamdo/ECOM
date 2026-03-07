@@ -40,7 +40,9 @@
     "topRatedPicks": "Top Rated Picks",
     "savingsHub": "Exclusive Savings Hub",
     "savingsDescription": "Up to 80% off selected categories this week.",
-    "loadingCurated": "Loading curated collections..."
+    "loadingCurated": "Loading curated collections...",
+    "premiumExperience": "Premium Shopping Experience",
+    "heroDesignTitle": "Where great products meet exceptional design"
   },
   "product": {
     "viewAll": "View all",
@@ -60,9 +62,23 @@
     "similarProducts": "Similar Products",
     "saveForLater": "Save for later",
     "seeSimilar": "See similar items",
-    "delete": "Delete",
     "quantity": "Quantity",
-    "selectQuantity": "Select quantity"
+    "selectQuantity": "Select quantity",
+    "chatWithSeller": "Chat with Seller",
+    "removeFromWishlist": "Remove from Wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "saved": "Saved",
+    "reportProduct": "Report Product",
+    "about": "About",
+    "comments": "Comments",
+    "noDescription": "No description available.",
+    "writeReview": "Write a Review",
+    "ownProduct": "This is your own product",
+    "chatUnavailable": "Cannot start chat right now, please try again",
+    "openingChat": "Opening chat...",
+    "chatSelf": "You cannot chat with yourself",
+    "chatFail": "Failed to open chat",
+    "mrp": "MRP"
   },
   "productCreator": {
     "kicker": "Product Creator",
@@ -179,7 +195,8 @@
     "feat1": "Fast shipping to all countries",
     "feat2": "Money back guarantee",
     "feat3": "Exclusive member offers",
-    "or": "Or"
+    "or": "Or",
+    "loginRequired": "Please login to continue"
   },
   "profile": {
     "title": "My Profile",
@@ -419,5 +436,99 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "close": "Close"
+  },
+  "localization": {
+    "countries": {
+      "sa": {
+        "welcome": "Welcome to our Saudi Store!",
+        "delivery": "Fast delivery across the Kingdom with quality assurance.",
+        "phone_label": "KSA Mobile Number",
+        "tax_note": "Prices include 15% VAT",
+        "cta": "Order Now"
+      },
+      "ae": {
+        "welcome": "Welcome to UAE! Unmatched quality and luxury.",
+        "delivery": "Enjoy fast delivery in Dubai, Abu Dhabi and across UAE.",
+        "phone_label": "UAE Phone Number",
+        "tax_note": "Prices include 5% VAT",
+        "cta": "Shop Now"
+      },
+      "eg": {
+        "welcome": "Welcome to Egypt! Best offers at great prices.",
+        "delivery": "Delivery to your doorstep anywhere in Egypt.",
+        "phone_label": "Egypt Mobile Number",
+        "tax_note": "Offer price includes all fees",
+        "cta": "Buy Now"
+      },
+      "us": {
+        "welcome": "Welcome to our US Store!",
+        "delivery": "Fast 2-day shipping across all states.",
+        "phone_label": "US Phone Number",
+        "tax_note": "Sales tax calculated at checkout",
+        "cta": "Add to Cart"
+      },
+      "gb": {
+        "welcome": "High quality British standards, just for you.",
+        "delivery": "Next day delivery available in the UK.",
+        "phone_label": "UK Contact Number",
+        "tax_note": "Prices include VAT",
+        "cta": "Add to Basket"
+      }
+    }
+  },
+  "report": {
+    "title": "Report",
+    "submit": "Submit Report",
+    "submitting": "Submitting...",
+    "successTitle": "Report sent successfully",
+    "successDesc": "Thank you! Our team will review the report shortly.",
+    "selectReason": "Please select a reason",
+    "additionalDetails": "Additional details (optional)",
+    "placeholder": "Explain the issue in more detail...",
+    "reasonLabel": "Reason for report *",
+    "targetProduct": "🛍️ Product:",
+    "targetUser": "👤 User:",
+    "reportOn": "Report on",
+    "product": "product",
+    "user": "user",
+    "reasons": {
+      "spam": "Spam or ads",
+      "fake": "Fake or misleading content",
+      "inappropriate": "Inappropriate content",
+      "fraud": "Fraud or scam",
+      "violence": "Violence or threat",
+      "harassment": "Harassment or bullying",
+      "misleading": "Misleading information",
+      "other": "Other"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+    "success": "Your message has been sent successfully! We'll get back to you soon.",
+    "error": "Failed to send message. Please try again.",
+    "nameLabel": "Name *",
+    "emailLabel": "Email *",
+    "subjectLabel": "Subject *",
+    "messageLabel": "Message *",
+    "namePlaceholder": "Enter your full name",
+    "emailPlaceholder": "Enter your email address",
+    "subjectPlaceholder": "Enter the subject",
+    "messagePlaceholder": "How can we help you?",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "emailUs": "Email Us",
+    "callUs": "Call Us",
+    "visitUs": "Visit Us",
+    "respond": "We'll respond within 24 hours",
+    "hours": "Mon-Fri: 9am-6pm EST",
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "subjectRequired": "Subject is required",
+    "messageRequired": "Message is required",
+    "invalidEmail": "Please enter a valid email address",
+    "nameRange": "Name must be between 2 and 100 characters",
+    "subjectRange": "Subject must be between 3 and 200 characters",
+    "messageRange": "Message must be between 10 and 1000 characters"
   }
 }

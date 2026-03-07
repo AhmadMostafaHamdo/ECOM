@@ -86,6 +86,10 @@ footer::before {
     background: linear-gradient(90deg, var(--gold), var(--gold-deep));
     border-radius: 1px;
 }
+:dir(rtl) .footer_column h3::after {
+    left: auto;       
+    right: 0;        
+}
 
 .footer_links {
     list-style: none;

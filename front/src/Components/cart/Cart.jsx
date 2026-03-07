@@ -89,7 +89,7 @@ const Cart = () => {
 
   const addtocart = async (itemId) => {
     if (!account) {
-      toast.error('Please login to add items to cart');
+      toast.error(t('auth.loginRequired', 'Please login to add items to cart'));
       navigate('/login');
       return;
     }
@@ -111,7 +111,7 @@ const Cart = () => {
         alert("No data available");
       } else {
         setAccount(data1);
-        toast.success('Added to cart!');
+        toast.success(t('cart.itemAdded', 'Added to cart!'));
         setTimeout(() => {
           setAddingToCart(false);
           navigate("/buynow");
@@ -125,7 +125,7 @@ const Cart = () => {
 
   const handleLike = async () => {
     if (!account) {
-      toast.error('Please login to like this product');
+      toast.error(t('auth.loginRequired', 'Please login to like this product'));
       return;
     }
     setLikeLoading(true);
@@ -148,7 +148,7 @@ const Cart = () => {
 
   const handleChatWithSeller = async () => {
     if (!account) {
-      toast.error('يجب تسجيل الدخول أولاً للتواصل مع البائع');
+      toast.error(t('auth.loginRequired', 'Please login to chat with seller'));
       navigate('/login');
       return;
     }
@@ -165,7 +165,7 @@ const Cart = () => {
     // If no seller or seller is the current user, get the admin
     if (!sellerId || sellerId?.toString() === account._id?.toString()) {
       if (sellerId?.toString() === account._id?.toString()) {
-        toast.info('هذا منتجك الخاص');
+        toast.info(t('product.ownProduct', 'This is your own product'));
         return;
       }
       // Fetch admin as fallback
@@ -181,13 +181,13 @@ const Cart = () => {
     }
 
     if (!sellerId) {
-      toast.error('لا يمكن فتح محادثة الآن، حاول مرة أخرى');
+      toast.error(t('product.chatUnavailable', 'Cannot start chat right now, please try again'));
       return;
     }
 
     try {
       setChatLoading(true);
-      toast.info('جاري فتح المحادثة...', { autoClose: 1200 });
+      toast.info(t('product.openingChat', 'Opening chat...'), { autoClose: 1200 });
 
       const res = await fetch(apiUrl('/conversations'), {
         method: 'POST',
@@ -205,13 +205,13 @@ const Cart = () => {
       } else {
         const errData = await res.json().catch(() => ({}));
         if (errData?.error === 'Cannot chat with yourself') {
-          toast.info('لا يمكنك التواصل مع نفسك');
+          toast.info(t('product.chatSelf', 'You cannot chat with yourself'));
         } else {
-          toast.error('فشل في فتح المحادثة');
+          toast.error(t('product.chatFail', 'Failed to open chat'));
         }
       }
     } catch (err) {
-      toast.error('خطأ في الاتصال بالخادم');
+      toast.error(t('errors.serverError', 'Server connection error'));
       console.error('Chat error:', err);
     } finally {
       setChatLoading(false);

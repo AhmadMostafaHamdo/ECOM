@@ -27,6 +27,8 @@ const AllProducts = () => {
     const { category: categorySlug } = useParams();
     const navigate = useNavigate();
     
+    const location = useLocation();
+
     // Core State
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -35,6 +37,16 @@ const AllProducts = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     
+    // Initial fetch from URL
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const q = params.get("search");
+        if (q) {
+            setSearchTerm(q);
+            setDebouncedSearch(q);
+        }
+    }, [location.search]);
+
     const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid");
     

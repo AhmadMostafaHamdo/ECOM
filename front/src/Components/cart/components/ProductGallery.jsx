@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CircularProgress } from '@mui/material';
 import { Favorite, FavoriteBorder, ChatBubbleOutline, LocalOffer } from '@mui/icons-material';
 import { AlertCircle } from 'lucide-react';
@@ -18,6 +19,7 @@ const ProductGallery = ({
     setReportOpen,
     account
 }) => {
+    const { t } = useTranslation();
     const [selectedImage, setSelectedImage] = useState(0);
 
     return (
@@ -56,24 +58,24 @@ const ProductGallery = ({
             <div className="cart_btn">
                 <button className="cart_btn_chat" onClick={handleChatWithSeller} disabled={chatLoading}>
                     {chatLoading ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : <ChatBubbleOutline className="btn_icon" />}
-                    <span>تواصل مع البائع</span>
+                    <span>{t('product.chatWithSeller', 'Chat with Seller')}</span>
                 </button>
 
                 <button
                     className={`cart_btn_wishlist ${wishSaved ? 'cart_btn_wishlist--saved' : ''}`}
                     onClick={toggleWishlist}
                     disabled={wishLoading}
-                    title={wishSaved ? 'إزالة من المحفوظات' : 'حفظ في المحفوظات'}
+                    title={wishSaved ? t('product.removeFromWishlist', 'Remove from Wishlist') : t('product.addToWishlist', 'Add to Wishlist')}
                 >
                     {wishLoading ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : (wishSaved ? <Favorite className="btn_icon" />  : <FavoriteBorder className="btn_icon" />)}
-                    <span>{wishSaved ? 'تم الحفظ' : 'حفظ في المحفوظات'}</span>
+                    <span>{wishSaved ? t('product.saved', 'Saved') : t('product.saveForLater', 'Save for Later')}</span>
                 </button>
 
                 {account && (
                     <button
                         className="cart_btn_report"
                         onClick={() => setReportOpen(true)}
-                        title="الإبلاغ عن هذا المنتج"
+                        title={t('product.reportProduct', 'Report Product')}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '10px 18px', borderRadius: '10px',
@@ -85,7 +87,7 @@ const ProductGallery = ({
                         onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = '#fff5f5'; }}
                     >
-                        <AlertCircle/> الإبلاغ عن المنتج
+                        <AlertCircle/> {t('product.reportProduct', 'Report Product')}
                     </button>
                 )}
             </div>

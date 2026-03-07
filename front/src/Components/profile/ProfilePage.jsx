@@ -14,9 +14,12 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import AddIcon from "@mui/icons-material/Add";
 import PhoneIcon from "@mui/icons-material/Phone";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import { useLocalize } from "../context/LocalizeContext";
+import { getLocalPhonePlaceholder } from "../../utils/localizeUtils";
 
 const ProfilePage = () => {
   const { t } = useTranslation();
+  const { activeCountry } = useLocalize();
   const navigate = useNavigate();
   const { account, setAccount } = useContext(Logincontext);
   const [form, setForm] = useState({ fname: "", email: "", mobile: "" });
@@ -188,11 +191,14 @@ const ProfilePage = () => {
                   />
                 </div>
                 <div className="input_box">
-                  <label>{t("auth.mobile")}</label>
+                  <label>
+                    {t(`localization.countries.${activeCountry.id}.phone_label`)}
+                  </label>
                   <input
                     name="mobile"
                     value={form.mobile}
                     onChange={updateField}
+                    placeholder={getLocalPhonePlaceholder(activeCountry.id)}
                     required
                   />
                 </div>

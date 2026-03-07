@@ -1,41 +1,34 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../api";
 import { Flag, X, AlertTriangle, CheckCircle } from "lucide-react";
 import "./ReportModal.css";
 
-const REASONS = [
-    { value: "spam", label: "بريد مزعج أو إعلانات" },
-    { value: "fake", label: "محتوى مزيف أو مضلل" },
-    { value: "inappropriate", label: "محتوى غير لائق" },
-    { value: "fraud", label: "احتيال أو نصب" },
-    { value: "violence", label: "عنف أو تهديد" },
-    { value: "harassment", label: "تحرش أو مضايقة" },
-    { value: "misleading", label: "معلومات مضللة" },
-    { value: "other", label: "أخرى" },
-];
-
-/**
- * ReportModal - يمكن استخدامه للإبلاغ عن منتج أو مستخدم
- * Props:
- *   open: boolean
- *   onClose: () => void
- *   targetType: 'product' | 'user'
- *   targetId: string
- *   targetName: string (اسم المنتج أو المستخدم)
- */
 const ReportModal = ({ open, onClose, targetType, targetId, targetName }) => {
+    const { t } = useTranslation();
     const [reason, setReason] = useState("");
     const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
+    const reasons = [
+        { value: "spam", label: t('report.reasons.spam') },
+        { value: "fake", label: t('report.reasons.fake') },
+        { value: "inappropriate", label: t('report.reasons.inappropriate') },
+        { value: "fraud", label: t('report.reasons.fraud') },
+        { value: "violence", label: t('report.reasons.violence') },
+        { value: "harassment", label: t('report.reasons.harassment') },
+        { value: "misleading", label: t('report.reasons.misleading') },
+        { value: "other", label: t('report.reasons.other') },
+    ];
+
     if (!open) return null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!reason) {
-            setError("يرجى اختيار سبب البلاغ");
+            setError(t('report.selectReason'));
             return;
         }
         setLoading(true);
@@ -48,7 +41,7 @@ const ReportModal = ({ open, onClose, targetType, targetId, targetName }) => {
                 body: JSON.stringify({ targetType, targetId, reason, description }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "حدث خطأ");
+            if (!res.ok) throw new Error(data.error || t('errors.somethingWentWrong'));
             setSuccess(true);
         } catch (err) {
             setError(err.message);
@@ -73,7 +66,7 @@ const ReportModal = ({ open, onClose, targetType, targetId, targetName }) => {
                         <span className="report-modal-icon">
                             <Flag size={18} />
                         </span>
-                        <span>الإبلاغ عن {targetType === "product" ? "منتج" : "مستخدم"}</span>
+                        <span>{t('report.reportOn')} {t(`report.${targetType}`)}</span>
                     </div>
                     <button className="report-modal-close" onClick={handleClose}>
                         <X size={18} />
@@ -83,23 +76,23 @@ const ReportModal = ({ open, onClose, targetType, targetId, targetName }) => {
                 {success ? (
                     <div className="report-modal-success">
                         <CheckCircle size={48} color="#22c55e" />
-                        <h3>تم إرسال البلاغ بنجاح</h3>
-                        <p>شكراً لك! سيقوم فريقنا بمراجعة البلاغ في أقرب وقت.</p>
+                        <h3>{t('report.successTitle')}</h3>
+                        <p>{t('report.successDesc')}</p>
                         <button className="report-btn-primary" onClick={handleClose}>
-                            إغلاق
+                            {t('common.close')}
                         </button>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="report-modal-body">
                         <div className="report-target-badge">
-                            <span>{targetType === "product" ? "🛍️ منتج:" : "👤 مستخدم:"}</span>
+                            <span>{targetType === "product" ? t('report.targetProduct') : t('report.targetUser')}</span>
                             <strong>{targetName}</strong>
                         </div>
 
                         <div className="report-form-group">
-                            <label className="report-form-label">سبب البلاغ *</label>
+                            <label className="report-form-label">{t('report.reasonLabel')}</label>
                             <div className="report-reasons-grid">
-                                {REASONS.map((r) => (
+                                {reasons.map((r) => (
                                     <button
                                         key={r.value}
                                         type="button"
@@ -113,12 +106,12 @@ const ReportModal = ({ open, onClose, targetType, targetId, targetName }) => {
                         </div>
 
                         <div className="report-form-group">
-                            <label className="report-form-label">تفاصيل إضافية (اختياري)</label>
+                            <label className="report-form-label">{t('report.additionalDetails')}</label>
                             <textarea
                                 className="report-textarea"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                placeholder="اشرح المشكلة بمزيد من التفصيل..."
+                                placeholder={t('report.placeholder')}
                                 rows={3}
                                 maxLength={1000}
                             />
@@ -134,10 +127,10 @@ const ReportModal = ({ open, onClose, targetType, targetId, targetName }) => {
 
                         <div className="report-modal-footer">
                             <button type="button" className="report-btn-secondary" onClick={handleClose}>
-                                إلغاء
+                                {t('common.cancel')}
                             </button>
                             <button type="submit" className="report-btn-primary" disabled={loading || !reason}>
-                                {loading ? "جاري الإرسال..." : "إرسال البلاغ"}
+                                {loading ? t('report.submitting') : t('report.submit')}
                             </button>
                         </div>
                     </form>

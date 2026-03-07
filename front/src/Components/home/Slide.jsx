@@ -1,5 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useLocalize } from "../context/LocalizeContext";
+import { formatCurrency } from "../../utils/localizeUtils";
 import "../home/slide.css";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
@@ -23,6 +25,7 @@ const responsive = {
 
 const Slide = React.memo(({ title, products, category }) => {
     const { t } = useTranslation();
+    const { activeCountry } = useLocalize();
     const navigate = useNavigate();
     const items = Array.isArray(products) ? products : [];
 
@@ -80,12 +83,16 @@ const Slide = React.memo(({ title, products, category }) => {
                                         </span>
                                         <span className="views_chip">
                                             <Visibility className="views_icon" />
-                                            {e.views || 0} views
+                                            {e.views || 0} {t('product.views')}
                                         </span>
                                     </div>
                                     <div className="price_section">
-                                        <span className="price_value">Rs. {e.price.cost}</span>
-                                        <span className="strike_price">Rs. {e.price.mrp}</span>
+                                        <span className="price_value">
+                                          {formatCurrency(e.price.cost, activeCountry.locale, activeCountry.currency)}
+                                        </span>
+                                        <span className="strike_price">
+                                          {formatCurrency(e.price.mrp, activeCountry.locale, activeCountry.currency)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -93,7 +100,7 @@ const Slide = React.memo(({ title, products, category }) => {
                     ))}
                 </Carousel>
             ) : (
-                <div className="empty_products">Products are loading right now. Please refresh shortly.</div>
+                <div className="empty_products">{t('home.loadingProducts')}</div>
             )}
         </div>
     );
