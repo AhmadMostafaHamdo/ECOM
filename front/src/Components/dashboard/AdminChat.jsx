@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { Logincontext } from '../context/Contextprovider';
-import { apiUrl } from '../../api';
+import { axiosInstance } from '../../api';
 import ChatIcon from '@mui/icons-material/Chat';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -11,7 +11,10 @@ import './admin-chat.css';
 import AdminChatHeader from './components/AdminChatHeader';
 import AdminChatSidebar from './components/AdminChatSidebar';
 import AdminMessagesPanel from './components/AdminMessagesPanel';
+import { useTranslation } from 'react-i18next';
+
 const AdminChat = () => {
+    const { t, i18n } = useTranslation();
     const { account } = useContext(Logincontext);
     const [conversations, setConversations] = useState([]);
     const [activeConversation, setActiveConversation] = useState(null);
@@ -24,7 +27,7 @@ const AdminChat = () => {
 
     // Initialize Global Socket
     useEffect(() => {
-        socketRef.current = io(apiUrl('/').replace(/\/$/, ""), {
+        socketRef.current = io(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5007', {
             withCredentials: true
         });
         if (account) {
@@ -41,12 +44,9 @@ const AdminChat = () => {
 
     const fetchConversations = useCallback(async () => {
         try {
-            const res = await fetch(apiUrl('/conversations'), {
-                credentials: 'include',
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setConversations(data);
+            const res = await axiosInstance.get('/conversations');
+            if (res.status === 200) {
+                setConversations(res.data.data || []);
             }
         } catch (err) {
             console.error('Failed to fetch conversations:', err);
@@ -57,12 +57,9 @@ const AdminChat = () => {
 
     const fetchMessages = useCallback(async (convId) => {
         try {
-            const res = await fetch(apiUrl(`/conversations/${convId}/messages`), {
-                credentials: 'include',
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setMessages((data.messages || []).slice().reverse());
+            const res = await axiosInstance.get(`/conversations/${convId}/messages`);
+            if (res.status === 200) {
+                setMessages((res.data.messages || []).slice().reverse());
                 setTimeout(scrollToBottom, 100);
             }
         } catch (err) {
@@ -113,15 +110,12 @@ const AdminChat = () => {
         setSending(true);
 
         try {
-            const res = await fetch(apiUrl(`/conversations/${activeConversation._id}/messages`), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ text: textToSend }),
+            const res = await axiosInstance.post(`/conversations/${activeConversation._id}/messages`, {
+                text: textToSend
             });
 
-            if (res.ok) {
-                const msg = await res.json();
+            if (res.status === 200 || res.status === 201) {
+                const msg = res.data;
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
                 fetchConversations();
@@ -149,23 +143,28 @@ const AdminChat = () => {
         const d = new Date(dateStr);
         const now = new Date();
         const diff = now - d;
-        if (diff < 60000) return 'الآن';
-        if (diff < 3600000) return `${Math.floor(diff / 60000)} د`;
-        if (diff < 86400000) return d.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' });
-        return d.toLocaleDateString('ar');
+        const locale = i18n.language === "ar" ? "ar" : "en";
+
+        if (diff < 60000) return i18n.language === "ar" ? 'الآن' : 'Now';
+        if (diff < 3600000) {
+            const mins = Math.floor(diff / 60000);
+            return i18n.language === "ar" ? `${mins} د` : `${mins}m`;
+        }
+        if (diff < 86400000) return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        return d.toLocaleDateString(locale);
     };
 
     if (loading) {
         return (
             <div className="admin-chat-loading">
                 <div className="admin-chat-spinner" />
-                <p>جاري تحميل المحادثات...</p>
+                <p>{i18n.language === 'ar' ? 'جاري تحميل المحادثات...' : 'Loading conversations...'}</p>
             </div>
         );
     }
 
     return (
-        <div className="admin-chat-wrapper">
+        <div className="admin-chat-wrapper" style={{ direction: i18n.dir() }}>
             <AdminChatHeader
                 conversations={conversations}
                 account={account}

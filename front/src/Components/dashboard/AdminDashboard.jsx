@@ -32,7 +32,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { useTranslation } from "react-i18next";
 import DialogComponent from "./DialogComponent";
 import Messages from "./Messages";
@@ -55,7 +55,7 @@ const getNavItems = (t) => [
   { key: "categories", label: t("admin.manageCategories"), icon: CategoryIcon, path: "/categories" },
   { key: "messages", label: t("admin.messages"), icon: MailIcon, path: "/messages" },
   { key: "chat", label: "Live Chat", icon: ChatIcon, path: "/chat" },
-  { key: "reports", label: "البلاغات", icon: FlagIcon, path: "/reports" },
+  { key: "reports", label: t("report.title"), icon: FlagIcon, path: "/reports" },
   { key: "stats", label: t("admin.statistics"), icon: QueryStatsIcon, path: "/statistics" },
 ];
 
@@ -77,19 +77,9 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
 
   const logoutuser = useCallback(async () => {
     try {
-      const res = await fetch(apiUrl("/logout"), {
-        method: "GET",
+      const res = await axiosInstance.get("/logout");
 
-        headers: {
-          Accept: "application/json",
-
-          "Content-Type": "application/json",
-        },
-
-        credentials: "include",
-      });
-
-      if (res.ok) {
+      if (res.status === 200) {
         setAccount(false);
 
         navigate("/login");

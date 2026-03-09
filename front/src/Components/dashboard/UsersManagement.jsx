@@ -136,9 +136,9 @@ const UsersManagement = () => {
   const handleToggleAdmin = useCallback(async (user) => {
     const res = await toggleAdmin(user);
     if (!res.success) {
-      alert(res.error || "فشل تحديث دور المستخدم");
+      alert(res.error || t("admin.roleUpdateFailed"));
     }
-  }, [toggleAdmin]);
+  }, [toggleAdmin, t]);
 
   const tableFilters = React.useMemo(() => [
     {
@@ -170,7 +170,7 @@ const UsersManagement = () => {
       title: t("common.status"),
       type: "status",
       getStatusClass: (_, item) => (item?.isBanned ? "banned" : "active"),
-      getStatusText: (_, item) => (item?.isBanned ? "محظور" : t("common.active") || "Active"),
+      getStatusText: (_, item) => (item?.isBanned ? t("admin.banned") : t("common.active") || "Active"),
       align: "center",
     },
     { key: "actions", title: t("common.actions") || "Actions", type: "actions", align: "center" },
@@ -186,22 +186,22 @@ const UsersManagement = () => {
       variant: "delete", onClick: requestDelete,
     },
     {
-      icon: Ban, label: "حظر", tooltipKey: "حظر المستخدم",
+      icon: Ban, label: t("admin.banUser"), tooltipKey: t("admin.banUser"),
       variant: "delete", isVisible: (user) => !user.isBanned && user.role !== "admin",
       onClick: requestBan,
     },
     {
-      icon: ShieldCheck, label: "إلغاء حظر", tooltipKey: "إلغاء الحظر",
+      icon: ShieldCheck, label: t("admin.unbanUser"), tooltipKey: t("admin.unbanUser"),
       variant: "edit", isVisible: (user) => user.isBanned,
       onClick: requestUnban,
     },
     {
-      icon: ShieldCheck, label: "أدمن", tooltipKey: "ترقية كمسؤول",
+      icon: ShieldCheck, label: t("admin.adminRole"), tooltipKey: t("admin.promoteAdmin"),
       variant: "edit", isVisible: (user) => user.role !== "admin" && !user.isBanned,
       onClick: handleToggleAdmin,
     },
     {
-      icon: ShieldOff, label: "سحب أدمن", tooltipKey: "إلغاء المسؤول",
+      icon: ShieldOff, label: t("admin.userRole"), tooltipKey: t("admin.demoteAdmin"),
       variant: "delete", isVisible: (user) => user.role === "admin",
       onClick: handleToggleAdmin,
     },

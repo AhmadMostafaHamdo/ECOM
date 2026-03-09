@@ -194,3 +194,13 @@ a {
     transform: rotate(360deg);
   }
 }
+/* ─── Form Field Stacking Management ─── */
+.field,
+.input-wrapper {
+  position: relative;
+}
+
+.field:focus-within,
+.input-wrapper:focus-within {
+  z-index: 100 !important;
+}

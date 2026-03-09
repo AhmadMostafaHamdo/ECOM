@@ -4,8 +4,10 @@ import { Menu, MenuItem, Button, Tooltip } from '@mui/material';
 import PublicIcon from '@mui/icons-material/Public';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useTranslation } from "react-i18next";
 
 const CountrySelector = () => {
+  const { t, i18n } = useTranslation();
   const { activeCountry, changeCountry, COUNTRIES } = useLocalize();
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -22,9 +24,11 @@ const CountrySelector = () => {
     handleClose();
   };
 
+  const activeCountryName = t(`countries.${activeCountry.id}`) || activeCountry.name;
+
   return (
     <div className="country-selector-wrapper">
-      <Tooltip title="Select Region / العملة والدولة">
+      <Tooltip title={t("common.selectRegion")}>
         <Button
           onClick={handleClick}
           startIcon={<PublicIcon style={{ fontSize: 18 }} />}
@@ -40,8 +44,8 @@ const CountrySelector = () => {
             margin: '0 8px'
           }}
         >
-          {activeCountry.name.length > 15 ? activeCountry.id.toUpperCase() : activeCountry.name}
-          <span style={{ marginLeft: '6px', fontSize: '0.75rem', opacity: 0.7 }}>
+          {activeCountryName.length > 15 ? activeCountry.id.toUpperCase() : activeCountryName}
+          <span style={{ [i18n.dir() === 'rtl' ? 'marginRight' : 'marginLeft']: '6px', fontSize: '0.75rem', opacity: 0.7 }}>
             ({activeCountry.currency})
           </span>
         </Button>
@@ -56,12 +60,13 @@ const CountrySelector = () => {
             marginTop: '8px',
             borderRadius: '12px',
             boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-            minWidth: '220px'
+            minWidth: '220px',
+            direction: i18n.dir()
           }
         }}
       >
         <div style={{ padding: '8px 16px', fontSize: '0.75rem', fontWeight: 700, opacity: 0.5, textTransform: 'uppercase' }}>
-          Select Delivery Region
+          {t("common.selectDeliveryRegion")}
         </div>
         {COUNTRIES.map((country) => (
           <MenuItem
@@ -72,15 +77,16 @@ const CountrySelector = () => {
               padding: '10px 16px',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              direction: i18n.dir()
             }}
           >
             <div>
               <span style={{ fontWeight: activeCountry.id === country.id ? 700 : 400 }}>
-                {country.name}
+                {t(`countries.${country.id}`) || country.name}
               </span>
               <div style={{ fontSize: '0.7rem', opacity: 0.6 }}>
-                Currency: {country.currency} | {country.code}
+                {t("common.currency")}: {country.currency} | {country.code}
               </div>
             </div>
             {activeCountry.id === country.id && (

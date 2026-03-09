@@ -36,11 +36,11 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: function (req, file, cb) {
-    // Accept images only
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+    // Accept images only (case-insensitive)
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp|bmp|tif|tiff)$/i)) {
       return cb(new Error("Only image files are allowed!"), false);
     }
     cb(null, true);
@@ -149,7 +149,7 @@ const resolveProductCategory = (productDoc) => {
   };
 };
 
-const toSessionUser = (userDoc) => {
+const toSessionUser = (userDoc, token = null) => {
   const user = userDoc.toObject ? userDoc.toObject() : userDoc;
 
   return {
@@ -158,6 +158,8 @@ const toSessionUser = (userDoc) => {
     email: user.email,
     mobile: user.mobile,
     role: user.role || "user",
+    country: user.country || "",
+    token: token || (user.tokens && user.tokens.length > 0 ? user.tokens[user.tokens.length - 1].token : null),
     carts: Array.isArray(user.carts) ? user.carts : [],
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -242,15 +244,6 @@ const buildProductPayload = (body = {}, fallback = {}) => {
       shortTitle: shortTitle || longTitle || "Untitled Product",
       longTitle: longTitle || shortTitle || "Untitled Product",
     },
-    price: {
-      mrp: Number.isFinite(mrp) ? mrp : 0,
-      cost: Number.isFinite(cost) ? cost : 0,
-      discount:
-        priceDiscount ||
-        (Number.isFinite(mrp) && mrp > 0 && Number.isFinite(cost)
-          ? `${Math.max(0, Math.round(((mrp - cost) / mrp) * 100))}%`
-          : "0%"),
-    },
     description: (body.description || fallback.description || "")
       .toString()
       .trim(),
@@ -258,6 +251,22 @@ const buildProductPayload = (body = {}, fallback = {}) => {
       .toString()
       .trim(),
     tagline: (body.tagline || fallback.tagline || "").toString().trim(),
+    price: {
+      mrp: Number.isFinite(mrp) ? mrp : 0,
+      cost: Number.isFinite(cost) ? cost : 0,
+      currency: body.currency || fallback?.price?.currency || "SYP",
+      discount:
+        priceDiscount ||
+        (Number.isFinite(mrp) && mrp > 0 && Number.isFinite(cost)
+          ? `${Math.max(0, Math.round(((mrp - cost) / mrp) * 100))}%`
+          : "0%"),
+    },
+    locationDetail: {
+      country: body.country || fallback?.locationDetail?.country || "",
+      province: body.province || fallback?.locationDetail?.province || "",
+      city: body.city || fallback?.locationDetail?.city || "",
+    },
+    mobile: body.mobile || fallback?.mobile || ""
   };
 };
 
@@ -380,6 +389,7 @@ const toPublicProduct = (productDoc) => {
           email: product.createdBy.email,
         }
         : product.createdBy || null,
+    locationDetail: product.locationDetail || { country: "", province: "", city: "" },
   };
 };
 
@@ -772,7 +782,7 @@ router.get("/products/filter", async (req, res) => {
     const pageNum = parseInt(req.query.page) || 1;
     const limitNum = parseInt(req.query.limit) || 12;
     const skip = (pageNum - 1) * limitNum;
-    
+
     const [productsData, totalItems] = await Promise.all([
       products.find(query).skip(skip).limit(limitNum).lean(),
       products.countDocuments(query)
@@ -798,12 +808,12 @@ router.get("/getcategories", async (req, res) => {
     const pageNum = parseInt(req.query.page) || 1;
     const limitNum = parseInt(req.query.limit) || 50;
     const skip = (pageNum - 1) * limitNum;
-    
+
     const [categoryDocs, totalItems] = await Promise.all([
       Category.find({}, { name: 1, image: 1, _id: 0 }).sort({ name: 1 }).skip(skip).limit(limitNum).lean(),
       Category.countDocuments({})
     ]);
-    
+
     res.status(200).json({
       data: pageNum === 1 ? [{ name: CATEGORY_ALL, image: "" }, ...categoryDocs] : categoryDocs,
       page: pageNum,
@@ -1402,11 +1412,13 @@ router.get("/products/mine", authenicate, async (req, res) => {
 // File upload endpoint
 router.post(
   "/upload/images",
+  upload.array("images", 10),
   authenicate,
-  upload.array("images", 5),
   async (req, res) => {
     try {
+      console.log("Files received count:", req.files ? req.files.length : 'none');
       if (!req.files || req.files.length === 0) {
+        console.log("No files in request. Body:", req.body);
         return res.status(400).json({ error: "No files uploaded" });
       }
 
@@ -1442,7 +1454,7 @@ router.get("/getadmin", async (req, res) => {
 router.post("/register", async (req, res) => {
 
   // console.log(req.body);
-  const { fname, email, mobile, password, cpassword } = req.body;
+  const { fname, email, mobile, password, cpassword, country } = req.body;
 
   if (!fname || !email || !mobile || !password || !cpassword) {
     return res.status(422).json({ error: "fill the all details" });
@@ -1468,6 +1480,7 @@ router.post("/register", async (req, res) => {
         mobile,
         password,
         cpassword,
+        country,
         role: totalUsers === 0 ? "admin" : "user",
       });
 
@@ -1479,9 +1492,10 @@ router.post("/register", async (req, res) => {
         maxAge: ONE_YEAR_MS,
         httpOnly: true,
         sameSite: "lax",
-        secure: false,
+        path: "/",
+        secure: false, // Set to true if using HTTPS
       });
-      return res.status(201).json(toSessionUser(storedata));
+      return res.status(201).json(toSessionUser(storedata, token));
     }
   } catch (error) {
     console.log(
@@ -1521,9 +1535,10 @@ router.post("/login", async (req, res) => {
           maxAge: ONE_YEAR_MS,
           httpOnly: true,
           sameSite: "lax",
-          secure: false,
+          path: "/",
+          secure: false, // Set to true if using HTTPS
         });
-        res.status(201).json(toSessionUser(userlogin));
+        res.status(201).json(toSessionUser(userlogin, token));
       }
     } else {
       res.status(400).json({ error: "user not exist" });
@@ -2007,7 +2022,7 @@ router.get("/products/trending", async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
+
     const [trending, total] = await Promise.all([
       products.find().sort({ views: -1, createdAt: -1 }).skip(skip).limit(limit),
       products.countDocuments()
@@ -2990,3 +3005,4 @@ router.delete("/wishlist", authenicate, async (req, res) => {
 });
 
 module.exports = router;
+

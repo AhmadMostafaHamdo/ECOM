@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef, useCallback } from 'rea
 import { io } from 'socket.io-client';
 import { Logincontext } from '../context/Contextprovider';
 import { useChatContext } from '../context/ChatContext';
-import { apiUrl, getCookie } from '../../api';
+import { ROOT_URL, axiosInstance } from '../../api';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
@@ -27,7 +27,7 @@ const ChatWidget = () => {
 
     // Initialize Global Socket
     useEffect(() => {
-        socketRef.current = io(apiUrl('/').replace(/\/$/, ""), {
+        socketRef.current = io(ROOT_URL, {
             withCredentials: true
         });
         if (accountId) {
@@ -51,13 +51,9 @@ const ChatWidget = () => {
     const fetchUnreadCount = useCallback(async (isBackground = false) => {
         if (!accountId) return;
         try {
-            const res = await fetch(apiUrl('/conversations/unread/count'), {
-                credentials: 'include',
-                skipLoader: isBackground, // Bypass global loader for polling
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setUnreadCount(data.unreadCount || 0);
+            const res = await axiosInstance.get('/conversations/unread/count');
+            if (res.status === 200) {
+                setUnreadCount(res.data.unreadCount || 0);
             }
         } catch (err) {
             // silent
@@ -67,11 +63,9 @@ const ChatWidget = () => {
     const fetchConversations = useCallback(async () => {
         if (!accountId) return;
         try {
-            const res = await fetch(apiUrl('/conversations'), {
-                credentials: 'include',
-            });
-            if (res.ok) {
-                const data = await res.json();
+            const res = await axiosInstance.get('/conversations');
+            if (res.status === 200) {
+                const data = res.data;
                 const conversationsArray = Array.isArray(data) ? data : (data.data || data.conversations || []);
                 setConversations(conversationsArray);
                 return conversationsArray;
@@ -84,11 +78,9 @@ const ChatWidget = () => {
 
     const fetchMessages = useCallback(async (convId) => {
         try {
-            const res = await fetch(apiUrl(`/conversations/${convId}/messages`), {
-                credentials: 'include',
-            });
-            if (res.ok) {
-                const data = await res.json();
+            const res = await axiosInstance.get(`/conversations/${convId}/messages`);
+            if (res.status === 200) {
+                const data = res.data;
                 const messagesArray = Array.isArray(data.messages) ? data.messages : [];
                 setMessages(messagesArray.slice().reverse());
                 setTimeout(scrollToBottom, 100);
@@ -187,21 +179,15 @@ const ChatWidget = () => {
         setNewMessage('');
 
         try {
-            const res = await fetch(apiUrl(`/conversations/${activeConversation._id}/messages`), {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'x-csrf-token': getCookie('csrfToken')
-                },
-                credentials: 'include',
-                body: JSON.stringify({ text: textToSend }),
+            const res = await axiosInstance.post(`/conversations/${activeConversation._id}/messages`, {
+                text: textToSend
             });
 
-            if (res.ok) {
-                const msg = await res.json();
+            if (res.status === 200 || res.status === 201) {
+                const msg = res.data;
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
-                
+
                 // Emit socket event for real-time update
                 if (socketRef.current) {
                     socketRef.current.emit("send_message", {

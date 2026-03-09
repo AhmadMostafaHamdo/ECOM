@@ -6,7 +6,7 @@
 }
 
 .app_main {
-    padding-top: 1rem;
+    padding-top: var(--header-h);
     animation: pageFade 0.45s ease-out;
 }
 

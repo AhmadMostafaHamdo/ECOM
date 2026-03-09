@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { useTranslation } from "react-i18next";
 
 import GroupIcon from "@mui/icons-material/Group";
@@ -25,31 +25,21 @@ const DashboardHome = () => {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        const adminResponse = await fetch(apiUrl("/admin/stats"), {
-          credentials: "include",
-        });
+        const response = await axiosInstance.get("/admin/stats");
 
-        if (adminResponse.ok) {
-          const data = await adminResponse.json();
+        if (response.status === 200) {
+          const data = response.data;
           setStats({
             totalUsers: data.totalUsers || 0,
             totalAdmins: data.totalAdmins || 0,
             totalCategories: data.totalCategories || 0,
             totalProducts: data.totalProducts || 0,
           });
-        } else {
-          // Fallback to demo data if API fails
-          console.warn("API endpoint not available, using demo data");
-          setStats({
-            totalUsers: 1248,
-            totalAdmins: 5,
-            totalCategories: 12,
-            totalProducts: 342,
-          });
         }
       } catch (err) {
         console.error("Dashboard load failed:", err);
-        // Fallback to demo data on error
+        // Fallback to demo data on error or if API endpoint not available
+        console.warn("Using demo data fallback");
         setStats({
           totalUsers: 1248,
           totalAdmins: 5,

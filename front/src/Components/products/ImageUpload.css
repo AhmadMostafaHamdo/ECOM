@@ -249,6 +249,41 @@
     white-space: nowrap;
 }
 
+.image_preview_item.add_more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #d1d5db;
+    background: #f9fafb;
+    cursor: pointer;
+    gap: 8px;
+    color: #9ca3af;
+    transition: all 0.3s ease;
+}
+
+.image_preview_item.add_more:hover {
+    border-color: var(--accent, #f5a623);
+    background: #fffdf5;
+    color: var(--accent, #f5a623);
+}
+
+.image_preview_item.add_more span {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.url_tag {
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
 @media (max-width: 768px) {
     .image_upload_methods {
         flex-direction: column;

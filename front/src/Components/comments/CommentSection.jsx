@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Logincontext } from '../context/Contextprovider';
-import { apiUrl, getCookie } from '../../api';
+import { axiosInstance } from '../../api';
 import { toast } from 'react-toastify';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -25,10 +25,9 @@ const CommentSection = ({ productId }) => {
 
     const fetchComments = useCallback(async () => {
         try {
-            const res = await fetch(apiUrl(`/comments/${productId}`));
-            if (res.ok) {
-                const data = await res.json();
-                setComments(data.data || []);
+            const res = await axiosInstance.get(`/comments/${productId}`);
+            if (res.status === 200) {
+                setComments(res.data.data || []);
             }
         } catch (err) {
             console.error('Failed to fetch comments:', err);
@@ -48,25 +47,18 @@ const CommentSection = ({ productId }) => {
 
         setSubmitting(true);
         try {
-            const res = await fetch(apiUrl('/comments'), {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'x-csrf-token': getCookie('csrfToken')
-                },
-                credentials: 'include',
-                body: JSON.stringify({ productId, text: text.trim() }),
+            const res = await axiosInstance.post('/comments', {
+                productId,
+                text: text.trim()
             });
-            if (res.ok) {
+            if (res.status === 200 || res.status === 201) {
                 setText('');
                 fetchComments();
                 toast.success('Comment added!');
-            } else {
-                const data = await res.json();
-                toast.error(data.error || 'Failed to add comment');
             }
         } catch (err) {
-            toast.error('Failed to add comment');
+            const errorMsg = err.response?.data?.error || 'Failed to add comment';
+            toast.error(errorMsg);
         } finally {
             setSubmitting(false);
         }
@@ -77,16 +69,12 @@ const CommentSection = ({ productId }) => {
         if (!replyText.trim()) return;
 
         try {
-            const res = await fetch(apiUrl('/comments'), {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'x-csrf-token': getCookie('csrfToken')
-                },
-                credentials: 'include',
-                body: JSON.stringify({ productId, text: replyText.trim(), parentId }),
+            const res = await axiosInstance.post('/comments', {
+                productId,
+                text: replyText.trim(),
+                parentId
             });
-            if (res.ok) {
+            if (res.status === 200 || res.status === 201) {
                 setReplyText('');
                 setReplyingTo(null);
                 fetchComments();
@@ -100,14 +88,8 @@ const CommentSection = ({ productId }) => {
         if (!account) { toast.error('Please login to like'); return; }
         setLiking(prev => ({ ...prev, [commentId]: true }));
         try {
-            const res = await fetch(apiUrl(`/comments/${commentId}/like`), {
-                method: 'POST',
-                headers: {
-                    'x-csrf-token': getCookie('csrfToken')
-                },
-                credentials: 'include',
-            });
-            if (res.ok) {
+            const res = await axiosInstance.post(`/comments/${commentId}/like`);
+            if (res.status === 200) {
                 await fetchComments();
             }
         } catch (err) {
@@ -124,17 +106,11 @@ const CommentSection = ({ productId }) => {
 
     const confirmDelete = async () => {
         if (!commentToDelete) return;
-        
+
         setIsDeleting(true);
         try {
-            const res = await fetch(apiUrl(`/comments/${commentToDelete}`), {
-                method: 'DELETE',
-                headers: {
-                    'x-csrf-token': getCookie('csrfToken')
-                },
-                credentials: 'include',
-            });
-            if (res.ok) {
+            const res = await axiosInstance.delete(`/comments/${commentToDelete}`);
+            if (res.status === 200) {
                 await fetchComments();
                 toast.success('Comment deleted');
                 setIsConfirmOpen(false);
@@ -209,12 +185,12 @@ const CommentSection = ({ productId }) => {
                     </div>
                 ) : (
                     comments.map((comment) => {
-                        const isLiked = account && comment.likedBy?.some(id => 
+                        const isLiked = account && comment.likedBy?.some(id =>
                             (id._id || id).toString() === account._id.toString()
                         );
                         const commentUserId = comment.userId?._id || comment.userId;
-                        const isOwner = account && commentUserId && 
-                                       commentUserId.toString() === account._id.toString();
+                        const isOwner = account && commentUserId &&
+                            commentUserId.toString() === account._id.toString();
                         return (
                             <div key={comment._id} className="comment-item">
                                 <div className="comment-main">
@@ -279,8 +255,8 @@ const CommentSection = ({ productId }) => {
                                             <div className="comment-replies">
                                                 {comment.replies.map((reply) => {
                                                     const replyUserId = reply.userId?._id || reply.userId;
-                                                    const isReplyOwner = account && replyUserId && 
-                                                                       replyUserId.toString() === account._id.toString();
+                                                    const isReplyOwner = account && replyUserId &&
+                                                        replyUserId.toString() === account._id.toString();
                                                     return (
                                                         <div key={reply._id} className="reply-item">
                                                             <div className="comment-avatar reply-avatar">
@@ -313,8 +289,8 @@ const CommentSection = ({ productId }) => {
                     })
                 )}
             </div>
-            
-            <ConfirmDialog 
+
+            <ConfirmDialog
                 open={isConfirmOpen}
                 title="Delete Comment"
                 message="Are you sure you want to delete this comment? This action cannot be undone."

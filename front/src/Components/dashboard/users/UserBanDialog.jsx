@@ -1,5 +1,5 @@
 import React from "react";
-import DialogComponent from "../DialogComponent";
+import { useTranslation } from "react-i18next";
 
 const UserBanDialog = ({
     banDialogOpen, setBanDialogOpen,
@@ -7,6 +7,9 @@ const UserBanDialog = ({
     banReason, setBanReason,
     handleBanUser, banning
 }) => {
+    const { t, i18n } = useTranslation();
+    const isRtl = i18n.dir() === "rtl";
+
     if (!banDialogOpen) return null;
 
     return (
@@ -31,14 +34,14 @@ const UserBanDialog = ({
                     padding: "28px",
                     width: "100%",
                     maxWidth: "440px",
-                    direction: "rtl",
+                    direction: isRtl ? "rtl" : "ltr",
                 }}
             >
                 <h2 style={{ fontSize: "18px", fontWeight: "800", color: "#0f172a", margin: "0 0 8px" }}>
-                    حظر المستخدم
+                    {t("admin.banUser")}
                 </h2>
                 <p style={{ color: "#64748b", fontSize: "14px", margin: "0 0 20px" }}>
-                    هل تريد حظر <strong>{banTarget?.fname}</strong>؟ لن يتمكن من تسجيل الدخول.
+                    {t("admin.banConfirm", { name: banTarget?.fname })}
                 </p>
                 <div style={{ marginBottom: "20px" }}>
                     <label
@@ -50,13 +53,13 @@ const UserBanDialog = ({
                             marginBottom: "8px",
                         }}
                     >
-                        سبب الحظر
+                        {t("admin.banReason")}
                     </label>
                     <input
                         type="text"
                         value={banReason}
                         onChange={(e) => setBanReason(e.target.value)}
-                        placeholder="انتهاك شروط الخدمة..."
+                        placeholder={t("admin.banPlaceholder")}
                         style={{
                             width: "100%",
                             padding: "10px 14px",
@@ -64,6 +67,7 @@ const UserBanDialog = ({
                             border: "1px solid #e2e8f0",
                             fontSize: "14px",
                             boxSizing: "border-box",
+                            textAlign: isRtl ? "right" : "left",
                         }}
                     />
                 </div>
@@ -82,7 +86,7 @@ const UserBanDialog = ({
                             fontSize: "14px",
                         }}
                     >
-                        إلغاء
+                        {t("common.cancel")}
                     </button>
                     <button
                         onClick={handleBanUser}
@@ -99,7 +103,7 @@ const UserBanDialog = ({
                             fontSize: "14px",
                         }}
                     >
-                        {banning ? "جاري الحظر..." : "تأكيد الحظر"}
+                        {banning ? t("admin.banning") : t("admin.confirmBan")}
                     </button>
                 </div>
             </div>

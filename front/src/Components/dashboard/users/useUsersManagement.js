@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { fetchViaAxios } from "../../../api";
+import { axiosInstance } from "../../../api";
 
 export const useUsersManagement = () => {
     const [users, setUsers] = useState([]);
@@ -21,19 +21,21 @@ export const useUsersManagement = () => {
         setLoading(true);
         setError("");
         try {
-            const queryParams = new URLSearchParams({ page, limit, search });
-            const response = await fetchViaAxios(`/admin/users?${queryParams.toString()}`);
-            if (!response.ok) throw new Error("Failed to load users");
-            const resData = await response.json();
-            setUsers(resData.data || []);
-            setPagination({
-                totalItems: resData.total || resData.data.length,
-                totalPages: resData.total_pages || 1,
-                currentPage: resData.page || 1,
-                limit: resData.limit || 10
+            const response = await axiosInstance.get("/admin/users", {
+                params: { page, limit, search }
             });
+            if (response.status === 200) {
+                const resData = response.data;
+                setUsers(resData.data || []);
+                setPagination({
+                    totalItems: resData.total || resData.data.length,
+                    totalPages: resData.total_pages || 1,
+                    currentPage: resData.page || 1,
+                    limit: resData.limit || 10
+                });
+            }
         } catch (loadError) {
-            setError(loadError.message);
+            setError(loadError.response?.data?.error || loadError.message);
         } finally {
             setLoading(false);
         }
@@ -43,21 +45,16 @@ export const useUsersManagement = () => {
     const saveUser = async (userId, payload, isEditing) => {
         setSaving(true);
         try {
-            const response = await fetchViaAxios(
-                isEditing ? `/admin/users/${userId}` : "/admin/users",
-                {
-                    method: isEditing ? "PUT" : "POST",
-                    body: JSON.stringify(payload),
-                }
-            );
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || "Failed to save user");
+            const response = isEditing
+                ? await axiosInstance.put(`/admin/users/${userId}`, payload)
+                : await axiosInstance.post("/admin/users", payload);
+
+            if (response.status === 200 || response.status === 201) {
+                loadUsers(pagination.currentPage, "");
+                return { success: true };
             }
-            loadUsers(pagination.currentPage, "");
-            return { success: true };
         } catch (err) {
-            return { success: false, error: err.message };
+            return { success: false, error: err.response?.data?.error || err.message };
         } finally {
             setSaving(false);
         }
@@ -67,8 +64,8 @@ export const useUsersManagement = () => {
     const deleteUser = async (userId) => {
         setDeleting(true);
         try {
-            const response = await fetchViaAxios(`/admin/users/${userId}`, { method: "DELETE" });
-            if (response.ok) {
+            const response = await axiosInstance.delete(`/admin/users/${userId}`);
+            if (response.status === 200) {
                 loadUsers(Math.max(1, pagination.currentPage), "");
             }
         } catch (err) {
@@ -82,11 +79,10 @@ export const useUsersManagement = () => {
     const banUser = async (userId, reason) => {
         setBanning(true);
         try {
-            const response = await fetchViaAxios(`/admin/users/${userId}/ban`, {
-                method: "PATCH",
-                body: JSON.stringify({ reason: reason || "انتهاك شروط الخدمة" }),
+            const response = await axiosInstance.patch(`/admin/users/${userId}/ban`, {
+                reason: reason || "انتهاك شروط الخدمة"
             });
-            if (response.ok) loadUsers(pagination.currentPage, "");
+            if (response.status === 200) loadUsers(pagination.currentPage, "");
         } catch (err) {
             console.error(err);
         } finally {
@@ -98,10 +94,8 @@ export const useUsersManagement = () => {
     const unbanUser = async (userId) => {
         setBanning(true);
         try {
-            const response = await fetchViaAxios(`/admin/users/${userId}/unban`, {
-                method: "PATCH",
-            });
-            if (response.ok) loadUsers(pagination.currentPage, "");
+            const response = await axiosInstance.patch(`/admin/users/${userId}/unban`);
+            if (response.status === 200) loadUsers(pagination.currentPage, "");
         } catch (err) {
             console.error(err);
         } finally {
@@ -113,20 +107,17 @@ export const useUsersManagement = () => {
     const toggleAdmin = async (user) => {
         try {
             const newRole = user.role === "admin" ? "user" : "admin";
-            const response = await fetchViaAxios(`/admin/users/${user._id}`, {
-                method: "PUT",
-                body: JSON.stringify({ role: newRole }),
+            const response = await axiosInstance.put(`/admin/users/${user._id}`, {
+                role: newRole
             });
-            if (response.ok) {
+            if (response.status === 200) {
                 loadUsers(pagination.currentPage, "");
                 return { success: true };
-            } else {
-                const data = await response.json();
-                return { success: false, error: data.error };
             }
         } catch (err) {
             console.error("Error updating user role:", err);
-            return { success: false, error: "حدث خطأ أثناء تحديث الصلاحية" };
+            const errorMsg = err.response?.data?.error || "حدث خطأ أثناء تحديث الصلاحية";
+            return { success: false, error: errorMsg };
         }
     };
 

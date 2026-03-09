@@ -76,6 +76,7 @@ const userSchema = new mongoose.Schema({
         maxlength: 500
     },
     location: String,
+    country: String,
     // Verification
     isVerified: {
         type: Boolean,

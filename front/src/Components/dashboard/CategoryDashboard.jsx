@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import "./category-dashboard.css";
 import ConfirmDialog from "../common/ConfirmDialog";
 
@@ -22,21 +22,14 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch(apiUrl("/categories"), {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
+            const response = await axiosInstance.get("/categories");
 
-            if (!response.ok) {
-                throw new Error("Failed to load categories");
+            if (response.status === 200) {
+                const payload = response.data;
+                setCategories(Array.isArray(payload) ? payload : []);
             }
-
-            const payload = await response.json();
-            setCategories(Array.isArray(payload) ? payload : []);
         } catch (loadError) {
-            setError(loadError.message);
+            setError(loadError.response?.data?.error || loadError.message);
         } finally {
             setLoading(false);
         }
@@ -60,25 +53,17 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
         setMessage("");
 
         try {
-            const response = await fetch(apiUrl("/categories"), {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ name: nextName })
-            });
+            const response = await axiosInstance.post("/categories", { name: nextName });
 
-            const payload = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(payload.error || "Could not add category");
+            if (response.status === 200 || response.status === 201) {
+                const payload = response.data;
+                setCategoryName("");
+                setMessage(`Category "${payload.name}" created`);
+                await loadCategories();
+                await onCategoriesChanged();
             }
-
-            setCategoryName("");
-            setMessage(`Category "${payload.name}" created`);
-            await loadCategories();
-            await onCategoriesChanged();
         } catch (submitError) {
-            setError(submitError.message);
+            setError(submitError.response?.data?.error || submitError.message);
         } finally {
             setSubmitting(false);
         }
@@ -98,23 +83,16 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
         setMessage("");
 
         try {
-            const response = await fetch(apiUrl(`/categories/${categoryToDelete._id}`), {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
+            const response = await axiosInstance.delete(`/categories/${categoryToDelete._id}`);
 
-            const payload = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(payload.error || "Could not delete category");
+            if (response.status === 200) {
+                const payload = response.data;
+                setMessage(`Deleted "${categoryToDelete.name}". Reassigned ${payload.movedProducts || 0} product(s).`);
+                await loadCategories();
+                await onCategoriesChanged();
             }
-
-            setMessage(`Deleted "${categoryToDelete.name}". Reassigned ${payload.movedProducts || 0} product(s).`);
-            await loadCategories();
-            await onCategoriesChanged();
         } catch (deleteError) {
-            setError(deleteError.message);
+            setError(deleteError.response?.data?.error || deleteError.message);
         } finally {
             setSubmitting(false);
             setCategoryToDelete(null);
@@ -179,8 +157,8 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
                     )}
                 </div>
             </div>
-            
-            <ConfirmDialog 
+
+            <ConfirmDialog
                 open={isConfirmOpen}
                 title={t('admin.deleteCategory') || "Delete Category"}
                 message={`Are you sure you want to delete "${categoryToDelete?.name}"? All products in this category will be reassigned to Uncategorized.`}

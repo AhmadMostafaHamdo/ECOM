@@ -16,7 +16,7 @@ import {
   ChatBubbleOutline,
   Share,
 } from "@mui/icons-material";
-import { apiUrl, getCookie } from "../../api";
+import { axiosInstance } from "../../api";
 import { toast } from "react-toastify";
 import ReportModal from "../common/ReportModal";
 import useWishlist from "../wishlist/useWishlist";
@@ -44,48 +44,38 @@ const Cart = () => {
     const getinddata = async () => {
       setLoading(true);
       try {
-        const res = await fetch(apiUrl(`/getproductsone/${id}`), {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
+        const res = await axiosInstance.get(`/getproductsone/${id}`);
+        const data = res.data;
 
-        const data = await res.json().catch(() => ({}));
+        setIndedata(data);
+        setProductMongoId(data._id);
+        setLikeCount(data.likeCount || 0);
+        setLiked(account && data.likedBy?.includes(account._id));
 
-        if (!res.ok) {
-          const message = data?.error || t("errors.somethingWentWrong");
-          alert(message);
-        } else {
-          setIndedata(data);
-          setProductMongoId(data._id);
-          setLikeCount(data.likeCount || 0);
-          setLiked(account && data.likedBy?.includes(account._id));
-          // Check wishlist status
-          if (account) {
-            try {
-              const wRes = await fetch(apiUrl("/wishlist"), { credentials: "include" });
-              if (wRes.ok) {
-                const wData = await wRes.json();
-                const isInWishlist = (wData.data || []).some(
-                  (p) => (p._id || p.id)?.toString() === data._id?.toString()
-                );
-                setInitialSaved(isInWishlist);
-              }
-            } catch { }
-          }
+        // Check wishlist status
+        if (account) {
+          try {
+            const wRes = await axiosInstance.get("/wishlist");
+            if (wRes.status === 200) {
+              const wData = wRes.data;
+              const isInWishlist = (wData.data || []).some(
+                (p) => (p._id || p.id)?.toString() === data._id?.toString()
+              );
+              setInitialSaved(isInWishlist);
+            }
+          } catch { }
         }
       } catch (error) {
         console.error("Error fetching product:", error);
+        const message = error.response?.data?.error || t("errors.somethingWentWrong");
+        toast.error(message);
       } finally {
         setTimeout(() => setLoading(false), 400);
       }
     };
 
     getinddata();
-  }, [id, account]);
+  }, [id, account, t]);
 
   const addtocart = async (itemId) => {
     if (!account) {
@@ -95,20 +85,11 @@ const Cart = () => {
     }
     setAddingToCart(true);
     try {
-      const check = await fetch(apiUrl(`/addcart/${itemId}`), {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inddata }),
-        credentials: "include",
-      });
+      const res = await axiosInstance.post(`/addcart/${itemId}`, { inddata });
+      const data1 = res.data;
 
-      const data1 = await check.json();
-
-      if (check.status !== 201) {
-        alert("No data available");
+      if (res.status !== 201) {
+        toast.error("No data available");
       } else {
         setAccount(data1);
         toast.success(t('cart.itemAdded', 'Added to cart!'));
@@ -120,6 +101,7 @@ const Cart = () => {
     } catch (error) {
       console.error("Error adding to cart:", error);
       setAddingToCart(false);
+      toast.error(error.response?.data?.error || "Error adding to cart");
     }
   };
 
@@ -130,12 +112,9 @@ const Cart = () => {
     }
     setLikeLoading(true);
     try {
-      const res = await fetch(apiUrl(`/products/${id}/like`), {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const res = await axiosInstance.post(`/products/${id}/like`);
+      if (res.status === 200) {
+        const data = res.data;
         setLiked(data.liked);
         setLikeCount(data.likeCount);
       }
@@ -155,29 +134,24 @@ const Cart = () => {
 
     let sellerId = null;
 
-    // Try to get seller from product
     if (inddata?.createdBy) {
       sellerId = typeof inddata.createdBy === 'object'
         ? inddata.createdBy._id || inddata.createdBy
         : inddata.createdBy;
     }
 
-    // If no seller or seller is the current user, get the admin
     if (!sellerId || sellerId?.toString() === account._id?.toString()) {
       if (sellerId?.toString() === account._id?.toString()) {
         toast.info(t('product.ownProduct', 'This is your own product'));
         return;
       }
-      // Fetch admin as fallback
       try {
-        const adminRes = await fetch(apiUrl('/getadmin'), { credentials: 'include' });
-        if (adminRes.ok) {
-          const adminData = await adminRes.json();
+        const adminRes = await axiosInstance.get('/getadmin');
+        if (adminRes.status === 200) {
+          const adminData = adminRes.data;
           sellerId = adminData._id;
         }
-      } catch {
-        // ignore
-      }
+      } catch { }
     }
 
     if (!sellerId) {
@@ -189,29 +163,24 @@ const Cart = () => {
       setChatLoading(true);
       toast.info(t('product.openingChat', 'Opening chat...'), { autoClose: 1200 });
 
-      const res = await fetch(apiUrl('/conversations'), {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-csrf-token': getCookie('csrfToken')
-        },
-        credentials: 'include',
-        body: JSON.stringify({ recipientId: sellerId, productId: inddata._id || id }),
+      const res = await axiosInstance.post('/conversations', {
+        recipientId: sellerId,
+        productId: inddata._id || id
       });
 
-      if (res.ok) {
-        const conversation = await res.json();
+      if (res.status === 200 || res.status === 201) {
+        const conversation = res.data;
         openChat(conversation);
       } else {
-        const errData = await res.json().catch(() => ({}));
-        if (errData?.error === 'Cannot chat with yourself') {
-          toast.info(t('product.chatSelf', 'You cannot chat with yourself'));
-        } else {
-          toast.error(t('product.chatFail', 'Failed to open chat'));
-        }
+        toast.error(t('product.chatFail', 'Failed to open chat'));
       }
     } catch (err) {
-      toast.error(t('errors.serverError', 'Server connection error'));
+      const errData = err.response?.data || {};
+      if (errData?.error === 'Cannot chat with yourself') {
+        toast.info(t('product.chatSelf', 'You cannot chat with yourself'));
+      } else {
+        toast.error(t('product.chatFail', 'Failed to open chat'));
+      }
       console.error('Chat error:', err);
     } finally {
       setChatLoading(false);
@@ -263,6 +232,8 @@ const Cart = () => {
             likeLoading={likeLoading}
             handleChatWithSeller={handleChatWithSeller}
             chatLoading={chatLoading}
+            addtocart={addtocart}
+            addingToCart={addingToCart}
             wishSaved={wishSaved}
             toggleWishlist={toggleWishlist}
             wishLoading={wishLoading}

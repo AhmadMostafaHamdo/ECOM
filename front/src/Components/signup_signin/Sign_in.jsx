@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { useNavigate } from "react-router-dom";
 import "./signin.css";
 
@@ -25,16 +25,15 @@ const Sign_in = () => {
     setLoading(true);
     const { email, password } = logdata;
     try {
-      const res = await fetch(apiUrl("/login"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+      const res = await axiosInstance.post("/login", { email, password });
+
+      const data = res.data;
       if (res.status === 400 || !data) {
         toast.error(t("auth.invalidCredentials"), { position: "top-center" });
       } else {
+        if (data.token) {
+          localStorage.setItem("auth_token", data.token);
+        }
         setAccount(data);
         setData({ email: "", password: "" });
         toast.success(t("auth.loginSuccess"), { position: "top-center" });
@@ -43,6 +42,7 @@ const Sign_in = () => {
       }
     } catch (error) {
       console.log("Login error:", error.message);
+      toast.error(t("auth.invalidCredentials"), { position: "top-center" });
     } finally {
       setLoading(false);
     }
@@ -59,22 +59,19 @@ const Sign_in = () => {
           <div className="hero_inner">
             <div className="hero_badge">
               <span className="hbadge_dot" />
-              <span>السوق العربي الأوروبي</span>
+              <span>{t("auth.brandName")}</span>
             </div>
 
             <h2 className="hero_title">
-              {t("auth.heroLine1", "تسوّق بذكاء")}
+              {t("auth.heroLine1")}
               <br />
-              {t("auth.heroLine2", "وبأفضل الأسعار")}
+              {t("auth.heroLine2")}
               <br />
-              <em>{t("auth.heroLine3", "في العالم.")}</em>
+              <em>{t("auth.heroLine3")}</em>
             </h2>
 
             <p className="hero_sub">
-              {t(
-                "auth.heroSub",
-                "أكثر من 10,000 منتج أصيل بأسعار لا تُنافَس، موثوق من آلاف العملاء حول العالم.",
-              )}
+              {t("auth.heroSub")}
             </p>
           </div>
 
@@ -96,20 +93,20 @@ const Sign_in = () => {
               <span className="bi_dot1" />
               <span className="bi_dot2" />
             </div>
-            <span className="brand_name">{t("auth.brand", "متجرنا")}</span>
+            <span className="brand_name">{t("auth.brand")}</span>
           </div>
 
           <h1 className="form_title">
-            {t("auth.welcomeBack", "أهلاً بعودتك")}
+            {t("auth.welcomeBack")}
           </h1>
           <p className="form_sub">
-            {t("auth.loginSub", "سجّل دخولك للمتابعة")}
+            {t("auth.loginSub")}
           </p>
 
           <form onSubmit={senddata} noValidate className="the_form">
             <div className="field">
               <label htmlFor="si_email">
-                {t("auth.email", "البريد الإلكتروني")}
+                {t("auth.email")}
               </label>
               <input
                 id="si_email"
@@ -125,10 +122,10 @@ const Sign_in = () => {
             <div className="field">
               <div className="field_top_row">
                 <label htmlFor="si_pass">
-                  {t("auth.password", "كلمة المرور")}
+                  {t("auth.password")}
                 </label>
                 <a href="#" className="forgot_lnk">
-                  {t("auth.forgot", "نسيت كلمة المرور؟")}
+                  {t("auth.forgot")}
                 </a>
               </div>
               <input
@@ -146,14 +143,14 @@ const Sign_in = () => {
               {loading ? (
                 <span className="spin" />
               ) : (
-                t("common.signin", "تسجيل الدخول")
+                t("auth.login")
               )}
             </button>
           </form>
 
           <div className="or_row">
             <hr />
-            <span>{t("auth.or", "أو")}</span>
+            <span>{t("auth.or")}</span>
             <hr />
           </div>
 
@@ -188,9 +185,9 @@ const Sign_in = () => {
           </div>
 
           <p className="switch_p">
-            {t("auth.noAccount", "ليس لديك حساب؟")}
+            {t("auth.noAccount")}
             <NavLink to="/signup" className="switch_a">
-              {t("auth.createAccount", "إنشاء حساب")}
+              {t("auth.createAccount")}
             </NavLink>
           </p>
         </div>

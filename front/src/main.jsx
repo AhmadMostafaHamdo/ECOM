@@ -1,6 +1,4 @@
 import React from "react";
-import { fetchViaAxios } from "./api";
-window.fetch = fetchViaAxios;
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";

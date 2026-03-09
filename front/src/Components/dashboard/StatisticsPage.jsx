@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { useTranslation } from "react-i18next";
 import { Users, DollarSign, Package, TrendingUp, RefreshCw, Download } from "lucide-react";
 import "./admin-dashboard.css";
@@ -21,29 +21,21 @@ const StatisticsPage = () => {
         setLoading(true);
         setError("");
         try {
-            const response = await fetch(apiUrl("/admin/stats"), {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                credentials: "include"
-            });
+            const response = await axiosInstance.get("/admin/stats");
 
-            if (!response.ok) {
-                throw new Error("Failed to load statistics");
+            if (response.status === 200) {
+                const payload = response.data;
+                setStats({
+                    totalUsers: payload.totalUsers || 0,
+                    totalAdmins: payload.totalAdmins || 0,
+                    totalCategories: payload.totalCategories || 0,
+                    totalProducts: payload.totalProducts || 0,
+                    totalCartItems: payload.totalCartItems || 0
+                });
+                setLastUpdated(new Date().toLocaleString());
             }
-
-            const payload = await response.json();
-            setStats({
-                totalUsers: payload.totalUsers || 0,
-                totalAdmins: payload.totalAdmins || 0,
-                totalCategories: payload.totalCategories || 0,
-                totalProducts: payload.totalProducts || 0,
-                totalCartItems: payload.totalCartItems || 0
-            });
-            setLastUpdated(new Date().toLocaleString());
         } catch (statsError) {
-            setError(statsError.message);
+            setError(statsError.response?.data?.error || statsError.message);
         } finally {
             setLoading(false);
         }
@@ -64,7 +56,7 @@ const StatisticsPage = () => {
             <div className="dashboard-header">
                 <div className="dashboard-title">{t("admin.statistics")}</div>
                 <div className="dashboard-controls">
-                    <button 
+                    <button
                         onClick={fetchStats}
                         disabled={loading}
                         className="filter-btn"
@@ -137,7 +129,7 @@ const StatisticsPage = () => {
                                     <span className="progress-value">{item.value} / {item.total}</span>
                                 </div>
                                 <div className="progress-bar">
-                                    <div 
+                                    <div
                                         className="progress-bar-fill"
                                         style={{
                                             width: `${Math.min(100, (item.value / item.total) * 100)}%`,

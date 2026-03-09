@@ -4,7 +4,7 @@ import Empty from "./Empty";
 import Option from "./Option";
 import Right from "./Right";
 import Subtotal from "./Subtotal";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import "./buynow.css";
 import BackButton from "../common/BackButton";
 
@@ -13,21 +13,16 @@ const Buynow = () => {
     const [cartdata, setCartdata] = useState([]);
 
     const getdatabuy = async () => {
-        const res = await fetch(apiUrl("/cartdetails"), {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        });
+        try {
+            const res = await axiosInstance.get("/cartdetails");
 
-        const data = await res.json();
-
-        if (res.status !== 201) {
-            alert(t('errors.noDataAvailable'));
-        } else {
-            setCartdata(data.carts);
+            if (res.status !== 200 && res.status !== 201) {
+                alert(t('errors.noDataAvailable'));
+            } else {
+                setCartdata(res.data.carts || []);
+            }
+        } catch (error) {
+            console.error("Error fetching cart details:", error);
         }
     };
 

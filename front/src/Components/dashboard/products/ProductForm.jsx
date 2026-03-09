@@ -1,4 +1,5 @@
 import React from 'react';
+import PhoneInput from '../../ui/PhoneInput';
 
 const ProductForm = ({
     isEditing,
@@ -102,18 +103,31 @@ const ProductForm = ({
                         gap: "16px",
                     }}
                 >
-                    <div>
-                        <label>Market Price ($)</label>
-                        <input
-                            type="number"
-                            name="cost"
-                            value={form.cost}
-                            onChange={updateField}
-                            required
-                        />
+                    <div style={{ position: "relative" }}>
+                        <label>Market Price</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                                type="number"
+                                name="cost"
+                                value={form.cost}
+                                onChange={updateField}
+                                required
+                                style={{ flex: 1 }}
+                            />
+                            <select
+                                name="currency"
+                                value={form.currency}
+                                onChange={updateField}
+                                style={{ width: '80px' }}
+                            >
+                                <option value="SYP">سوري</option>
+                                <option value="USD">دولار</option>
+                                <option value="EUR">يورو</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
-                        <label>Base MSRP ($)</label>
+                        <label>Base MSRP</label>
                         <input
                             type="number"
                             name="mrp"
@@ -123,6 +137,78 @@ const ProductForm = ({
                         />
                     </div>
                 </div>
+
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gap: "16px",
+                        marginTop: "8px"
+                    }}
+                >
+                    <div>
+                        <label>الدولة</label>
+                        <select
+                            name="country"
+                            value={form.country}
+                            onChange={updateField}
+                        >
+                            <option value="">اختر الدولة</option>
+                            <option value="Syria">سوريا</option>
+                            <option value="Lebanon">لبنان</option>
+                            <option value="Jordan">الأردن</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>المحافظة</label>
+                        <select
+                            name="province"
+                            value={form.province}
+                            onChange={updateField}
+                        >
+                            <option value="">اختر المحافظة</option>
+                            {form.country === 'Syria' && (
+                                <>
+                                    <option value="Damascus">دمشق</option>
+                                    <option value="Aleppo">حلب</option>
+                                    <option value="Homs">حمص</option>
+                                    <option value="Latakia">اللاذقية</option>
+                                    <option value="Tartus">طرطوس</option>
+                                    <option value="Hama">حماة</option>
+                                </>
+                            )}
+                            {form.country !== 'Syria' && (
+                                <option value="Other">أخرى</option>
+                            )}
+                        </select>
+                    </div>
+                    <div>
+                        <label>المدينة</label>
+                        <input
+                            type="text"
+                            name="city"
+                            placeholder="المدينة"
+                            value={form.city}
+                            onChange={updateField}
+                            style={{ padding: '8px' }}
+                        />
+                    </div>
+                </div>
+
+                <div style={{ marginTop: "16px" }}>
+                    <label>{t("auth.mobile", "رقم الهاتف")}</label>
+                    <PhoneInput
+                        value={form.mobile}
+                        onChange={(val) => updateField({ target: { name: 'mobile', value: val } })}
+                        onCountryChange={(c) => {
+                            if (c && !form.country) {
+                                // Only auto-fill if country is empty
+                                updateField({ target: { name: 'country', value: c.name } });
+                            }
+                        }}
+                    />
+                </div>
+
                 <div>
                     <label>Product Resource URL</label>
                     <input

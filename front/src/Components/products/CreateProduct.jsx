@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiUrl } from "../../api";
+import { ROOT_URL, axiosInstance } from "../../api";
+import { useLocalize } from "../context/LocalizeContext";
 import ImageUpload from "./ImageUpload";
+import Input from "../common/Input";
 import "./create-product.css";
+import { LocalOffer, ShoppingBag, Map, FilterFrames } from "@mui/icons-material";
+import PhoneInput from "../ui/PhoneInput";
 
 const initialForm = {
   shortTitle: "",
@@ -17,10 +21,16 @@ const initialForm = {
   url: "",
   detailUrl: "",
   category: "",
+  currency: "SYP",
+  country: "",
+  province: "",
+  city: "",
+  mobile: "",
 };
 
 const CreateProduct = ({ mode = "create" }) => {
   const { t } = useTranslation();
+  const { activeCountry } = useLocalize();
   const navigate = useNavigate();
   const { id: editId } = useParams();
   const isEdit = mode === "edit" && Boolean(editId);
@@ -38,32 +48,19 @@ const CreateProduct = ({ mode = "create" }) => {
   useEffect(() => {
     const bootstrap = async () => {
       try {
-        const profileRes = await fetch(apiUrl("/profile"), {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!profileRes.ok) {
-          navigate("/login");
-          return;
-        }
+        const profileRes = await axiosInstance.get("/profile");
+        // axiosInstance ensures credentials and handles errors via interceptor or status check
 
         let categoryList = [];
-        const categoryRes = await fetch(apiUrl("/getcategories"), {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const categoryRes = await axiosInstance.get("/getcategories");
 
-        if (categoryRes.ok) {
-          const payload = await categoryRes.json();
+        if (categoryRes.status === 200) {
+          const payload = categoryRes.data;
           const categoriesArray = payload.data || payload;
           const list = Array.isArray(categoriesArray)
-            ? categoriesArray.filter((item) => item !== CATEGORY_ALL)
+            ? categoriesArray
+              .map((item) => (typeof item === "string" ? item : item.name))
+              .filter((name) => name !== CATEGORY_ALL)
             : [];
           categoryList = list;
           setCategories(list);
@@ -76,16 +73,8 @@ const CreateProduct = ({ mode = "create" }) => {
         }
 
         if (isEdit && editId) {
-          const productRes = await fetch(apiUrl(`/products/${editId}`), {
-            method: "GET",
-            credentials: "include",
-          });
-
-          const productPayload = await productRes.json().catch(() => ({}));
-
-          if (!productRes.ok) {
-            throw new Error(productPayload.error || "Failed to load product");
-          }
+          const productRes = await axiosInstance.get(`/products/${editId}`);
+          const productPayload = productRes.data;
 
           if (
             productPayload?.category &&
@@ -106,18 +95,28 @@ const CreateProduct = ({ mode = "create" }) => {
             url: productPayload?.url || "",
             detailUrl: productPayload?.detailUrl || "",
             category: productPayload?.category || categoryList[0] || "",
+            currency: productPayload?.price?.currency || "SYP",
+            country: productPayload?.locationDetail?.country || "",
+            province: productPayload?.locationDetail?.province || "",
+            city: productPayload?.locationDetail?.city || "",
+            mobile: productPayload?.mobile || "",
           });
 
           const normalizedImages = Array.isArray(productPayload?.images)
             ? productPayload.images.filter(Boolean).map((url, index) => ({
-                url,
-                name: `Image ${index + 1}`,
-                isUrl: true,
-              }))
+              url: url.startsWith('http') ? url : (url.startsWith('/') ? `${ROOT_URL}${url}` : `${ROOT_URL}/${url}`),
+              name: `Image ${index + 1}`,
+              isUrl: true,
+            }))
             : [];
           setImages(normalizedImages);
         }
       } catch (loadError) {
+        console.error("Load error:", loadError);
+        if (loadError.response?.status === 401) {
+          navigate("/login");
+          return;
+        }
         setError(loadError.message);
         if (isEdit) {
           setTimeout(() => navigate("/profile"), 800);
@@ -128,7 +127,18 @@ const CreateProduct = ({ mode = "create" }) => {
     };
 
     bootstrap();
-  }, [history, isEdit, editId]);
+  }, [editId, isEdit, navigate, t]);
+
+  // Sync form.url and form.detailUrl with images state if they are empty
+  useEffect(() => {
+    if (images.length > 0) {
+      setForm(prev => ({
+        ...prev,
+        url: prev.url || images[0].url,
+        detailUrl: prev.detailUrl || (images[1] ? images[1].url : (images[0] ? images[0].url : ""))
+      }));
+    }
+  }, [images]);
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -145,7 +155,6 @@ const CreateProduct = ({ mode = "create" }) => {
     setMessage("");
 
     try {
-      // Process images - extract URLs from image objects
       const processedImages = images.map((image) => image.url);
 
       const payload = {
@@ -153,7 +162,6 @@ const CreateProduct = ({ mode = "create" }) => {
         mrp: Number(form.mrp),
         cost: Number(form.cost),
         images: processedImages,
-        // Set primary URL if no URL provided but images exist
         url: form.url || (processedImages.length > 0 ? processedImages[0] : ""),
         detailUrl:
           form.detailUrl ||
@@ -162,32 +170,15 @@ const CreateProduct = ({ mode = "create" }) => {
             : processedImages[0] || ""),
       };
 
-      const response = await fetch(
-        apiUrl(isEdit ? `/products/${editId}` : "/products"),
-        {
-          method: isEdit ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        },
-      );
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-            (isEdit ? "Failed to update product" : "Failed to create product"),
-        );
-      }
+      const endpoint = isEdit ? `/products/${editId}` : "/products";
+      const res = await (isEdit ? axiosInstance.put(endpoint, payload) : axiosInstance.post(endpoint, payload));
 
       setMessage(
-        isEdit ? "Product updated successfully" : t("productCreator.success"),
+        isEdit ? t("productCreator.updateSuccess") : t("productCreator.success"),
       );
       setTimeout(() => navigate("/profile"), 900);
     } catch (submitError) {
-      setError(submitError.message);
+      setError(submitError.response?.data?.error || submitError.message);
     } finally {
       setSaving(false);
     }
@@ -220,60 +211,76 @@ const CreateProduct = ({ mode = "create" }) => {
           <p>
             {isEdit
               ? t(
-                  "productCreator.editSub",
-                  "Make changes and save to keep your listing fresh.",
-                )
+                "productCreator.editSub",
+                "Make changes and save to keep your listing fresh.",
+              )
               : t("productCreator.subtitle")}
           </p>
         </header>
 
         <form className="create_product_form" onSubmit={submitProduct}>
-          <label htmlFor="shortTitle">{t("productCreator.productName")}</label>
-          <input
-            id="shortTitle"
-            name="shortTitle"
-            value={form.shortTitle}
-            onChange={updateField}
-            required
-          />
+          {/* Section 1: Basic Information */}
+          <div className="form_section">
+            <div className="section_title">
+              <ShoppingBag />
+              {t("productCreator.basicInfo", "Basic Information")}
+            </div>
 
-          <label htmlFor="longTitle">{t("productCreator.fullTitle")}</label>
-          <input
-            id="longTitle"
-            name="longTitle"
-            value={form.longTitle}
-            onChange={updateField}
-            required
-          />
+            <Input
+              label={t("productCreator.productName")}
+              id="shortTitle"
+              name="shortTitle"
+              value={form.shortTitle}
+              onChange={updateField}
+              required
+            />
 
-          <label htmlFor="category">{t("navigation.categories")}</label>
-          <select
-            id="category"
-            name="category"
-            value={form.category}
-            onChange={updateField}
-            required
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+            <Input
+              label={t("productCreator.fullTitle")}
+              id="longTitle"
+              name="longTitle"
+              value={form.longTitle}
+              onChange={updateField}
+              required
+            />
 
-          <label htmlFor="description">{t("product.description")}</label>
-          <textarea
-            id="description"
-            name="description"
-            value={form.description}
-            onChange={updateField}
-            rows={4}
-          />
+            <Input
+              as="select"
+              label={t("navigation.categories")}
+              id="category"
+              name="category"
+              value={form.category}
+              onChange={updateField}
+              required
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </Input>
 
-          <div className="split_fields">
-            <div>
-              <label htmlFor="mrp">{t("productCreator.mrp")}</label>
-              <input
+            <Input
+              as="textarea"
+              label={t("product.description")}
+              id="description"
+              name="description"
+              value={form.description}
+              onChange={updateField}
+              rows={4}
+            />
+          </div>
+
+          {/* Section 2: Pricing & Offers */}
+          <div className="form_section">
+            <div className="section_title">
+              <LocalOffer />
+              {t("productCreator.pricingOffers", "Pricing & Offers")}
+            </div>
+
+            <div className="split_fields">
+              <Input
+                label={t("productCreator.mrp")}
                 id="mrp"
                 name="mrp"
                 type="number"
@@ -281,95 +288,144 @@ const CreateProduct = ({ mode = "create" }) => {
                 onChange={updateField}
                 required
               />
-            </div>
-            <div>
-              <label htmlFor="cost">{t("productCreator.sellingPrice")}</label>
-              <input
-                id="cost"
-                name="cost"
-                type="number"
-                value={form.cost}
-                onChange={updateField}
-                required
-              />
-            </div>
-          </div>
 
-          <div className="split_fields">
-            <div>
-              <label htmlFor="priceDiscount">
-                {t("productCreator.discountText")}
-              </label>
-              <input
+              <div className="price_group">
+                <Input
+                  label={t("productCreator.sellingPrice")}
+                  id="cost"
+                  name="cost"
+                  type="number"
+                  value={form.cost}
+                  onChange={updateField}
+                  required
+                  className="price_input"
+                />
+                <Input
+                  as="select"
+                  label=""
+                  id="currency"
+                  name="currency"
+                  value={form.currency}
+                  onChange={updateField}
+                  className="currency_select"
+                >
+                  <option value="SYP">S.P</option>
+                  <option value="USD">$</option>
+                  <option value="EUR">€</option>
+                </Input>
+              </div>
+            </div>
+
+            <div className="split_fields">
+              <Input
+                label={t("productCreator.discountText")}
                 id="priceDiscount"
                 name="priceDiscount"
                 value={form.priceDiscount}
                 onChange={updateField}
               />
-            </div>
-            <div>
-              <label htmlFor="offerText">
-                {t("productCreator.offerBadge")}
-              </label>
-              <input
+              <Input
+                label={t("productCreator.offerBadge")}
                 id="offerText"
                 name="offerText"
                 value={form.offerText}
                 onChange={updateField}
               />
             </div>
+
+            <Input
+              label={t("productCreator.tagline")}
+              id="tagline"
+              name="tagline"
+              value={form.tagline}
+              onChange={updateField}
+            />
           </div>
 
-          <label htmlFor="tagline">
-            {t("productCreator.tagline", "Tagline")}
-          </label>
-          <input
-            id="tagline"
-            name="tagline"
-            value={form.tagline}
-            onChange={updateField}
-          />
+          {/* Section 3: Location & Logistics */}
+          <div className="form_section">
+            <div className="section_title">
+              <Map />
+              {t("productCreator.locationLogistics", "Location & Logistics")}
+            </div>
 
-          <ImageUpload images={images} onChange={setImages} maxImages={5} />
+            <div className="split_fields three_cols">
+              <Input
+                label={t("productCreator.country")}
+                id="country"
+                name="country"
+                value={form.country}
+                onChange={updateField}
+                placeholder={t("productCreator.countryPlaceholder")}
+              />
+              <Input
+                label={t("productCreator.province")}
+                id="province"
+                name="province"
+                value={form.province}
+                onChange={updateField}
+                placeholder={t("productCreator.provincePlaceholder")}
+              />
+              <Input
+                label={t("productCreator.city")}
+                id="city"
+                name="city"
+                value={form.city}
+                onChange={updateField}
+                placeholder={t("productCreator.cityPlaceholder")}
+              />
+            </div>
 
-          <div className="split_fields">
-            <div>
-              <label htmlFor="url">{t("productCreator.primaryImage")}</label>
-              <input
+            <div className="field">
+              <label>{t("auth.mobile")}</label>
+              <PhoneInput
+                value={form.mobile}
+                onChange={(val) => setForm({ ...form, mobile: val })}
+                onCountryChange={(c) => {
+                  if (c && !form.country) {
+                    setForm((prev) => ({ ...prev, country: c.name }));
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Section 4: Media & Display */}
+          <div className="form_section">
+            <div className="section_title">
+              <FilterFrames />
+              {t("productCreator.mediaDisplay", "Media & Display")}
+            </div>
+
+            <ImageUpload images={images} onChange={setImages} maxImages={5} />
+
+            <div className="split_fields">
+              <Input
+                label={t("productCreator.primaryImage")}
                 id="url"
                 name="url"
                 value={form.url}
                 onChange={updateField}
-                placeholder={t(
-                  "productCreator.primaryImagePlaceholder",
-                  "Auto-filled from first image",
-                )}
+                placeholder={t("productCreator.primaryImagePlaceholder")}
               />
-            </div>
-            <div>
-              <label htmlFor="detailUrl">
-                {t("productCreator.detailImage")}
-              </label>
-              <input
+              <Input
+                label={t("productCreator.detailImage")}
                 id="detailUrl"
                 name="detailUrl"
                 value={form.detailUrl}
                 onChange={updateField}
-                placeholder={t(
-                  "productCreator.detailImagePlaceholder",
-                  "Auto-filled from images",
-                )}
+                placeholder={t("productCreator.detailImagePlaceholder")}
               />
             </div>
           </div>
 
-          <button type="submit" disabled={saving}>
+          <button type="submit" className="submit_product_btn" disabled={saving}>
             {saving
               ? isEdit
-                ? t("productCreator.saving", "Saving...")
+                ? t("productCreator.saving")
                 : t("productCreator.publishing")
               : isEdit
-                ? t("productCreator.saveChanges", "Save changes")
+                ? t("productCreator.saveChanges")
                 : t("productCreator.publish")}
           </button>
         </form>

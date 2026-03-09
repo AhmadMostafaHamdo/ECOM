@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import DynamicTable from "./DynamicTable";
 import { Pencil, Trash2 } from "lucide-react";
 import CategoryForm from "./categories/CategoryForm";
@@ -26,6 +26,9 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
   });
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadCategories = useCallback(
     async (search = "", page = 1, limit = 10) => {
@@ -36,16 +39,9 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
           limit,
           ...(search && { search }),
         });
-        const response = await fetch(
-          apiUrl(`/admin/categories?${queryParams.toString()}`),
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-          },
-        );
-        if (response.ok) {
-          const payload = await response.json();
+        const response = await axiosInstance.get(`/admin/categories?${queryParams.toString()}`);
+        if (response.status === 200) {
+          const payload = response.data;
           setCategories(payload.data || []);
           setPagination({
             totalItems: payload.total || 0,
@@ -88,13 +84,11 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     if (!categoryName.trim()) return;
     setSaving(true);
     try {
-      const response = await fetch(apiUrl("/admin/categories"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name: categoryName.trim(), image: categoryImage.trim() }),
+      const response = await axiosInstance.post("/admin/categories", {
+        name: categoryName.trim(),
+        image: categoryImage.trim()
       });
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         setCategoryName("");
         setCategoryImage("");
         setShowForm(false);
@@ -113,13 +107,11 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     if (!editName.trim()) return;
     setSaving(true);
     try {
-      const response = await fetch(apiUrl(`/admin/categories/${editingId}`), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name: editName.trim(), image: editImage.trim() }),
+      const response = await axiosInstance.put(`/admin/categories/${editingId}`, {
+        name: editName.trim(),
+        image: editImage.trim()
       });
-      if (response.ok) {
+      if (response.status === 200) {
         setShowForm(false);
         setEditingId("");
         setEditName("");
@@ -136,6 +128,7 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
 
   const deleteCategory = (category) => {
     setCategoryToDelete(category);
+    setIsConfirmOpen(false);
     setIsConfirmOpen(true);
   };
 
@@ -143,15 +136,8 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     if (!categoryToDelete) return;
     setIsDeleting(true);
     try {
-      const response = await fetch(
-        apiUrl(`/admin/categories/${categoryToDelete._id}`),
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        },
-      );
-      if (response.ok) {
+      const response = await axiosInstance.delete(`/admin/categories/${categoryToDelete._id}`);
+      if (response.status === 200) {
         loadCategories();
         onCategoriesChanged();
         setIsConfirmOpen(false);

@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
 import "./profile.css";
 import BackButton from "../common/BackButton";
 import Pagination from "../common/Pagination";
 import ConfirmDialog from "../common/ConfirmDialog";
+import PhoneInput from "../ui/PhoneInput";
 
 // Icons (Using standard MUI or Heroicons style)
 import PersonIcon from "@mui/icons-material/Person";
@@ -14,6 +15,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import AddIcon from "@mui/icons-material/Add";
 import PhoneIcon from "@mui/icons-material/Phone";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import PublicIcon from "@mui/icons-material/Public";
 import { useLocalize } from "../context/LocalizeContext";
 import { getLocalPhonePlaceholder } from "../../utils/localizeUtils";
 
@@ -22,7 +24,7 @@ const ProfilePage = () => {
   const { activeCountry } = useLocalize();
   const navigate = useNavigate();
   const { account, setAccount } = useContext(Logincontext);
-  const [form, setForm] = useState({ fname: "", email: "", mobile: "" });
+  const [form, setForm] = useState({ fname: "", email: "", mobile: "", country: "" });
   const [myProducts, setMyProducts] = useState([]);
   const [prodPage, setProdPage] = useState(1);
   const [prodTotalPages, setProdTotalPages] = useState(1);
@@ -37,28 +39,24 @@ const ProfilePage = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const profileResponse = await fetch(apiUrl("/profile"), {
-          credentials: "include",
-        });
-        if (!profileResponse.ok) return navigate("/login");
-
-        const profileData = await profileResponse.json();
+        const profileRes = await axiosInstance.get("/profile");
+        const profileData = profileRes.data;
         setAccount(profileData);
         setForm({
           fname: profileData.fname || "",
           email: profileData.email || "",
           mobile: profileData.mobile || "",
+          country: profileData.country || "",
         });
 
-        const productsResponse = await fetch(apiUrl("/profile/products"), {
-          credentials: "include",
-        });
-        if (productsResponse.ok) {
-          const productsData = await productsResponse.json();
+        const productsRes = await axiosInstance.get("/profile/products");
+        if (productsRes.status === 200) {
+          const productsData = productsRes.data;
           setMyProducts(Array.isArray(productsData) ? productsData : []);
           setProdTotalPages(productsData.total_pages || 1);
         }
       } catch (err) {
+        if (err.response?.status === 401) return navigate("/login");
         setError(err.message);
       } finally {
         setLoading(false);
@@ -70,15 +68,15 @@ const ProfilePage = () => {
   const handlePageChange = async (newPage) => {
     setProdPage(newPage);
     try {
-      const productsResponse = await fetch(apiUrl("/profile/products?page=" + newPage), { credentials: "include" });
-      if (productsResponse.ok) {
-        const resData = await productsResponse.json();
+      const response = await axiosInstance.get("/profile/products?page=" + newPage);
+      if (response.status === 200) {
+        const resData = response.data;
         setMyProducts(resData.data || []);
         setProdTotalPages(resData.total_pages || 1);
       }
-    } catch(e){}
+    } catch (e) { }
   };
-    
+
   const updateField = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -88,18 +86,12 @@ const ProfilePage = () => {
     setError("");
     setMessage("");
     try {
-      const response = await fetch(apiUrl("/profile"), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(form),
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Failed");
+      const response = await axiosInstance.put("/profile", form);
+      const payload = response.data;
       setAccount(payload);
       setMessage(t("profile.updateSuccess"));
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
     } finally {
       setSaving(false);
     }
@@ -112,23 +104,19 @@ const ProfilePage = () => {
 
   const confirmDeleteProduct = async () => {
     if (!productToDelete) return;
-    
+
     setDeletingId(productToDelete);
     setError("");
     setMessage("");
     try {
-      const response = await fetch(apiUrl(`/products/${productToDelete}`), {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.error || "Failed to delete product");
-
-      setMyProducts((prev) => prev.filter((product) => (product.id || product._id) !== productToDelete));
-      setMessage(t("profile.deleteSuccess", { defaultValue: "Product deleted." }));
-      setIsConfirmOpen(false);
+      const response = await axiosInstance.delete(`/products/${productToDelete}`);
+      if (response.status === 200) {
+        setMyProducts((prev) => prev.filter((product) => (product.id || product._id) !== productToDelete));
+        setMessage(t("profile.deleteSuccess", { defaultValue: "Product deleted." }));
+        setIsConfirmOpen(false);
+      }
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
     } finally {
       setDeletingId(null);
       setProductToDelete(null);
@@ -145,7 +133,7 @@ const ProfilePage = () => {
   return (
     <main className="profile_wrapper">
       <div className="profile_container">
-        <div style={{ width: '100%', marginBottom: '10px' }}>
+        <div className="profile_header_nav">
           <BackButton />
         </div>
         {/* LEFT SIDEBAR: User Overview */}
@@ -164,7 +152,11 @@ const ProfilePage = () => {
               </div>
               <div className="info_item">
                 <PhoneIcon fontSize="small" />{" "}
-                <span>{account?.mobile || "No phone added"}</span>
+                <span dir="ltr">{account?.mobile || "No phone added"}</span>
+              </div>
+              <div className="info_item">
+                <PublicIcon fontSize="small" />{" "}
+                <span>{account?.country || t("auth.countryPlaceholder", "No country added")}</span>
               </div>
             </div>
           </div>
@@ -192,13 +184,11 @@ const ProfilePage = () => {
                 </div>
                 <div className="input_box">
                   <label>
-                    {t(`localization.countries.${activeCountry.id}.phone_label`)}
+                    {t(`localization.countries.${activeCountry.id}.phone_label`, 'Phone Number')}
                   </label>
-                  <input
-                    name="mobile"
+                  <PhoneInput
                     value={form.mobile}
-                    onChange={updateField}
-                    placeholder={getLocalPhonePlaceholder(activeCountry.id)}
+                    onChange={(val) => setForm({ ...form, mobile: val })}
                     required
                   />
                 </div>
@@ -211,6 +201,16 @@ const ProfilePage = () => {
                   value={form.email}
                   onChange={updateField}
                   required
+                />
+              </div>
+
+              <div className="input_box">
+                <label>{t("auth.country")}</label>
+                <input
+                  name="country"
+                  value={form.country}
+                  onChange={updateField}
+                  placeholder={t("auth.countryPlaceholder")}
                 />
               </div>
 
@@ -242,21 +242,26 @@ const ProfilePage = () => {
                 myProducts.map((product) => (
                   <div key={product._id} className="product_row">
                     <div className="p_info">
-                      <strong>{product?.title?.shortTitle}</strong>
-                      <span>{product.category}</span>
+                      <div className="p_title_wrap">
+                        <strong>{product?.title?.shortTitle}</strong>
+                        <span className="p_category_tag">{product.category}</span>
+                      </div>
+                      <div className="p_price_meta">
+                        {product.price?.currency || "SYP"} {product.price?.cost}
+                      </div>
                     </div>
                     <div className="product_actions">
                       <NavLink
                         to={`/getproductsone/${product.id || product._id}`}
                         className="view_link"
                       >
-                        View
+                        {t('common.view', 'View')}
                       </NavLink>
                       <NavLink
                         to={`/products/edit/${product.id || product._id}`}
-                        className="view_link"
+                        className="view_link edit"
                       >
-                        Edit
+                        {t('common.edit', 'Edit')}
                       </NavLink>
                       <button
                         type="button"
@@ -264,7 +269,7 @@ const ProfilePage = () => {
                         onClick={() => deleteProduct(product.id || product._id)}
                         disabled={deletingId === (product.id || product._id)}
                       >
-                        {deletingId === (product.id || product._id) ? "Removing..." : t("profile.delete", { defaultValue: "Delete" })}
+                        {deletingId === (product.id || product._id) ? "..." : t("profile.delete", { defaultValue: "Delete" })}
                       </button>
                     </div>
                   </div>
@@ -273,15 +278,15 @@ const ProfilePage = () => {
                 <p className="empty_state">{t("profile.noProducts")}</p>
               )}
             </div>
-            
+
             {prodTotalPages > 1 && (
-                <div style={{ marginTop: '20px' }}>
-                    <Pagination 
-                        currentPage={prodPage} 
-                        totalPages={prodTotalPages} 
-                        onPageChange={handlePageChange} 
-                    />
-                </div>
+              <div style={{ marginTop: '20px' }}>
+                <Pagination
+                  currentPage={prodPage}
+                  totalPages={prodTotalPages}
+                  onPageChange={handlePageChange}
+                />
+              </div>
             )}
           </div>
         </section>

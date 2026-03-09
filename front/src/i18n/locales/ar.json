@@ -11,7 +11,8 @@
     "categories": "الفئات",
     "search": "بحث",
     "allCategories": "جميع الفئات",
-    "contact": "اتصل بنا"
+    "contact": "اتصل بنا",
+    "wishlist": "المحفوظات"
   },
   "home": {
     "title": "مرحباً بك في متجرنا",
@@ -23,7 +24,9 @@
     "category": "الفئة",
     "productsAvailable": "منتج متوفر",
     "fastDelivery": "توصيل سريع",
+    "expressDelivery": "شحن سريع",
     "fastDeliveryDesc": "الشحن في اليوم التالي للفئات الرئيسية.",
+    "expressDeliveryDesc": "الشحن في اليوم التالي للفئات الرئيسية.",
     "verifiedQuality": "جودة موثوقة",
     "verifiedQualityDesc": "فقط المنتجات الموثوقة ذات التقييمات العالية.",
     "secureCheckout": "دفع آمن",
@@ -37,6 +40,7 @@
     "loadingPersonalized": "تحميل المنتجات والعروض المخصصة",
     "dealOfTheDay": "صفقة اليوم",
     "trendingNow": "الرائج الآن",
+    "trendingNowDesc": "اكتشف المنتجات الأكثر مبيعاً الآن.",
     "topRatedPicks": "الأعلى تقييماً",
     "savingsHub": "مركز التوفير الحصري",
     "savingsDescription": "خصومات تصل إلى 80٪ على فئات مختارة هذا الأسبوع.",
@@ -78,7 +82,9 @@
     "openingChat": "جاري فتح المحادثة...",
     "chatSelf": "لا يمكنك التواصل مع نفسك",
     "chatFail": "فشل في فتح المحادثة",
-    "mrp": "سعر التجزئة"
+    "mrp": "سعر التجزئة",
+    "location": "الموقع",
+    "createdAt": "تاريخ النشر"
   },
   "productCreator": {
     "kicker": "منشئ المنتج",
@@ -93,6 +99,7 @@
     "publishing": "جاري النشر...",
     "publish": "نشر المنتج",
     "success": "تم إنشاء المنتج بنجاح. جاري التحويل إلى الملف الشخصي...",
+    "updateSuccess": "تم تحديث المنتج بنجاح. جاري التحويل إلى الملف الشخصي...",
     "primaryImage": "رابط الصورة الأساسي (اختياري)",
     "detailImage": "رابط الصورة التفصيلية (اختياري)",
     "loading": "جاري تحميل منشئ المنتجات...",
@@ -103,7 +110,27 @@
     "primaryImagePlaceholder": "يتم ملؤه تلقائياً من الصورة الأولى",
     "detailImagePlaceholder": "يتم ملؤه تلقائياً من الصور",
     "saving": "جاري الحفظ...",
-    "saveChanges": "حفظ التغييرات"
+    "saveChanges": "حفظ التغييرات",
+    "country": "الدولة",
+    "province": "المحافظة",
+    "city": "المدينة",
+    "countryPlaceholder": "أدخل اسم الدولة",
+    "provincePlaceholder": "أدخل اسم المحافظة",
+    "cityPlaceholder": "أدخل اسم المدينة",
+    "productImages": "صور المنتج",
+    "chooseFiles": "اختيار ملفات",
+    "addUrl": "إضافة رابط",
+    "urlPlaceholder": "أدخل رابط الصورة...",
+    "processingImages": "جاري معالجة الصور...",
+    "dragDrop": "اسحب وأفلت الصور هنا",
+    "clickBrowse": "أو انقر للتصفح",
+    "maxImagesHint": "الحد الأقصى {{max}} صور",
+    "maxSizeHint": "حجم الملف حتى 5 ميجابايت",
+    "previewTitle": "معاينة الصور",
+    "basicInfo": "المعلومات الأساسية",
+    "pricingOffers": "الأسعار والعروض",
+    "locationLogistics": "الموقع والخدمات اللوجستية",
+    "mediaDisplay": "الوسائط والعرض"
   },
   "cart": {
     "title": "سلة التسوق",
@@ -155,6 +182,8 @@
     "firstName": "الاسم الأول",
     "lastName": "الاسم الأخير",
     "mobile": "رقم الهاتف",
+    "country": "الدولة",
+    "countryPlaceholder": "ادخل دولتك",
     "role": "الدور",
     "role_user": "مستخدم",
     "role_admin": "مسؤول",
@@ -223,13 +252,23 @@
     "list": "قائمة",
     "fetchingProducts": "جاري جلب المنتجات...",
     "pleaseWait": "يرجى الانتظار بينما نقوم بتحميل المجموعة.",
-    "noResults": "لم يتم العثور على نتائج",
-    "noResultsDesc": "لم نتمكن من العثور على أي شيء يطابق مرشحاتك الحالية.",
-    "clearFilters": "مسح جميع المرشحات",
-    "productsFound": "منتج تم العثور عليه",
     "noProductsFound": "لم يتم العثور على منتجات",
     "tryAdjustingFilters": "جرب تعديل المرشحات أو شروط البحث",
-    "loadingProducts": "جاري تحميل المنتجات..."
+    "loadingProducts": "جاري تحميل المنتجات...",
+    "searchPlaceholder": "اكتب اسم المنتج...",
+    "priceLow": "السعر: من الأقل للأعلى",
+    "priceHigh": "السعر: من الأعلى للأقل",
+    "highestRated": "الأعلى تقييماً",
+    "nameAZ": "الاسم: أ-ي",
+    "priceRange": "نطاق السعر",
+    "min": "الأدنى",
+    "max": "الأقصى",
+    "viewMode": "نمط العرض",
+    "quickView": "عرض سريع",
+    "noResults": "لم يتم العثور على نتائج",
+    "noResultsDesc": "لم نتمكن من العثور على أي منتجات تطابق اختياراتك الحالية.",
+    "productsFound": "منتج تم العثور عليه",
+    "clearFilters": "مسح الفلاتر"
   },
   "filters": {
     "title": "المرشحات",
@@ -307,7 +346,12 @@
     "actions": "الإجراءات",
     "signup": "إنشاء حساب",
     "signin": "تسجيل الدخول",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "searching": "جاري البحث...",
+    "craftingExperience": "جاري بناء تجربتك...",
+    "selectRegion": "اختر المنطقة / العملة",
+    "selectDeliveryRegion": "اختر منطقة التوصيل",
+    "currency": "العملة"
   },
   "errors": {
     "pageNotFound": "الصفحة غير موجودة",
@@ -323,7 +367,6 @@
     "manageProducts": "إدارة المنتجات",
     "manageCategories": "إدارة الفئات",
     "manageReviews": "إدارة التقييمات",
-    "messages": "الرسائل",
     "statistics": "الإحصائيات",
     "welcome": "مرحباً بك في لوحة التحكم",
     "totalUsers": "إجمالي المستخدمين",
@@ -406,7 +449,85 @@
     "deleteUserConfirm": "سيؤدي هذا إلى إزالة المستخدم وسحب وصوله. لا يمكنك التراجع عن هذا الإجراء.",
     "deleteUserTitle": "حذف المستخدم؟",
     "deleting": "جاري الحذف...",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "banUser": "حظر المستخدم",
+    "banConfirm": "هل تريد حظر {{name}}؟ لن يتمكن من تسجيل الدخول.",
+    "banReason": "سبب الحظر",
+    "banPlaceholder": "انتهاك شروط الخدمة...",
+    "confirmBan": "تأكيد الحظر",
+    "banning": "جاري الحظر...",
+    "unbanUser": "إلغاء حظر",
+    "unbanConfirm": "هل تريد إلغاء حظر {{name}}؟",
+    "promoteAdmin": "ترقية كمسؤول",
+    "demoteAdmin": "سحب المسؤول",
+    "roleUpdateFailed": "فشل تحديث دور المستخدم",
+    "banned": "محظور",
+    "messages": {
+      "title": "رسائل التواصل",
+      "subtitle": "إدارة استفسارات العملاء وطلبات الدعم",
+      "loading": "جاري تحميل الرسائل...",
+      "search": "بحث في الرسائل...",
+      "allStatus": "كل الحالات",
+      "status": {
+        "pending": "قيد الانتظار",
+        "replied": "تم الرد",
+        "read": "مقروءة"
+      },
+      "table": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "subject": "الموضوع",
+        "date": "التاريخ",
+        "status": "الحالة",
+        "actions": "الإجراءات"
+      },
+      "detail": {
+        "title": "تفاصيل الرسالة",
+        "from": "من",
+        "at": "في",
+        "message": "الرسالة",
+        "reply": "رد",
+        "markAsReplied": "تحديد كمُرد عليه",
+        "delete": "حذف الرسالة"
+      },
+      "deleteTitle": "حذف الرسالة؟",
+      "deleteConfirm": "هل أنت متأكد من حذف هذه الرسالة؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    "reports": {
+      "title": "إدارة البلاغات",
+      "subtitle": "مراجعة ومعالجة البلاغات المقدمة من المستخدمين",
+      "total": "بلاغ",
+      "allStatus": "كل الحالات",
+      "allTypes": "كل أنواع البلاغات",
+      "productReports": "بلاغات المنتجات",
+      "userReports": "بلاغات المستخدمين",
+      "loading": "جاري تحميل البلاغات...",
+      "noReports": "لا توجد بلاغات",
+      "refresh": "تحديث",
+      "details": "التفاصيل",
+      "reason": "السبب",
+      "reporter": "المُبلِّغ",
+      "reported": "المُبلَّغ عنه",
+      "type": "النوع",
+      "date": "التاريخ",
+      "actions": "الإجراءات",
+      "deleteTitle": "حذف البلاغ",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا البلاغ؟ لا يمكن التراجع عن هذا الإجراء.",
+      "adminNote": "ملاحظة الإدارة",
+      "writeNote": "اكتب ملاحظة...",
+      "changeStatus": "تغيير الحالة",
+      "reportDetails": "تفاصيل البلاغ",
+      "reportInfo": "معلومات البلاغ",
+      "unknown": "مجهول",
+      "deletedProduct": "منتج محذوف",
+      "deletedUser": "مستخدم محذوف",
+      "status": {
+        "pending": "قيد الانتظار",
+        "reviewed": "تمت المراجعة",
+        "resolved": "تم الحل",
+        "dismissed": "مرفوض"
+      }
+    }
   },
   "table": {
     "noDataFound": "لم يتم العثور على بيانات",
@@ -438,6 +559,7 @@
     "close": "إغلاق"
   },
   "localization": {
+    "market": "سوق {{currency}}",
     "countries": {
       "sa": {
         "welcome": "حياك الله في متجرنا السعودي!",
@@ -530,5 +652,12 @@
     "nameRange": "يجب أن يكون الاسم بين 2 و 100 حرف",
     "subjectRange": "يجب أن يكون الموضوع بين 3 و 200 حرف",
     "messageRange": "يجب أن تكون الرسالة بين 10 و 1000 حرف"
+  },
+  "countries": {
+    "sa": "المملكة العربية السعودية",
+    "ae": "الإمارات العربية المتحدة",
+    "eg": "جمهورية مصر العربية",
+    "us": "الولايات المتحدة",
+    "gb": "المملكة المتحدة"
   }
 }

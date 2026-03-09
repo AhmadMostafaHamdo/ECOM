@@ -4,6 +4,7 @@ const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
 const app = express();
+app.set("trust proxy", 1);
 const port = process.env.PORT || 5007;
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
@@ -16,7 +17,7 @@ const xss = require("xss-clean");
 const hpp = require("hpp");
 const DefaultData = require("./defaultdata");
 const connectDB = require("./db/conn");
-const router = require("./routes/router");
+const router = require("./routes/index"); // Modular router
 const allowedOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173,http://127.0.0.1:5173").split(",").map((o) => o.trim()).filter(Boolean);
 
 const server = http.createServer(app);
@@ -34,8 +35,6 @@ const io = new Server(server, {
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-
     socket.on("user_online", (userId) => {
         if (userId) {
             onlineUsers.set(userId, socket.id);
@@ -53,27 +52,17 @@ io.on("connection", (socket) => {
 
     socket.on("send_message", (data) => {
         const { conversationId, message } = data;
-        socket.to(`conversation_${conversationId}`).emit("receive_message", {
-            conversationId,
-            message
-        });
+        socket.to(`conversation_${conversationId}`).emit("receive_message", { conversationId, message });
     });
 
     socket.on("typing", (data) => {
         const { conversationId, userId, userName } = data;
-        socket.to(`conversation_${conversationId}`).emit("user_typing", {
-            conversationId,
-            userId,
-            userName
-        });
+        socket.to(`conversation_${conversationId}`).emit("user_typing", { conversationId, userId, userName });
     });
 
     socket.on("stop_typing", (data) => {
         const { conversationId, userId } = data;
-        socket.to(`conversation_${conversationId}`).emit("user_stop_typing", {
-            conversationId,
-            userId
-        });
+        socket.to(`conversation_${conversationId}`).emit("user_stop_typing", { conversationId, userId });
     });
 
     socket.on("disconnect", () => {
@@ -84,17 +73,17 @@ io.on("connection", (socket) => {
             }
         }
         io.emit("online_users", Array.from(onlineUsers.keys()));
-        console.log("User disconnected:", socket.id);
     });
 });
 
 // middleware
 app.use(helmet({
     crossOriginResourcePolicy: false,
+    contentSecurityPolicy: process.env.NODE_ENV === "production" ? undefined : false,
 }));
 app.use(compression());
 app.use(express.json({ limit: "10mb" }));
-app.use(cookieParser(""));
+app.use(cookieParser());
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -110,33 +99,38 @@ app.use(cors({
 // Rate Limiters
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000,
+    max: 2000,
     standardHeaders: true,
     legacyHeaders: false,
 });
 app.use(limiter);
 
-// Data sanitization against NoSQL query injection
+// Data sanitization
 app.use(mongoSanitize());
-
-// Data sanitization against XSS
 app.use(xss());
-
-// Prevent parameter pollution
 app.use(hpp());
 
-// HTTP request logger
-app.use(morgan("dev"));
+// Logging
+if (process.env.NODE_ENV === "production") {
+    app.use(morgan("combined")); // Standard production logging
+} else {
+    app.use(morgan("dev"));
+}
 
-// Serve static files for uploads
+// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Enforce CSRF token strategy on all state-altering requests
+// Custom CSRF Protection
 app.use(require("./middleware/csrf"));
 
-app.use(router);
+// Prefix all API routes with /api for better organization
+app.use("/api", router);
 
-if (process.env.NODE_ENV == "production") {
+// Global Error Handler (Must be at the bottom)
+const { errorHandler } = require("./middleware/errorMiddleware");
+app.use(errorHandler);
+
+if (process.env.NODE_ENV === "production") {
     const distPath = path.join(__dirname, "..", "front", "dist");
     app.use(express.static(distPath, {
         maxAge: '1y',
@@ -147,9 +141,15 @@ if (process.env.NODE_ENV == "production") {
     });
 }
 
+const { ensureCategoryCatalog } = require("./controllers/productController");
+
 const startServer = async () => {
     try {
         await connectDB();
+
+        // Sync category catalog based on existing products
+        await ensureCategoryCatalog();
+
         if (process.env.SEED_DB_ON_START === "true") {
             await DefaultData();
         }
@@ -164,5 +164,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-// Trigger nodemon restart

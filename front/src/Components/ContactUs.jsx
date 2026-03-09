@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { axiosInstance } from '../api';
 import './ContactUs.css';
 
 const ContactUs = () => {
@@ -78,17 +79,9 @@ const ContactUs = () => {
     setSubmitStatus('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8005'}/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await axiosInstance.post('/contact', formData);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         setSubmitStatus('success');
         setFormData({
           name: '',
@@ -98,6 +91,7 @@ const ContactUs = () => {
         });
         setErrors({});
       } else {
+        const data = response.data;
         setSubmitStatus('error');
         if (data.details) {
           setErrors(data.details);
@@ -107,7 +101,12 @@ const ContactUs = () => {
       }
     } catch (error) {
       setSubmitStatus('error');
-      setErrors({ general: t('errors.serverError') });
+      const data = error.response?.data || {};
+      if (data.details) {
+        setErrors(data.details);
+      } else {
+        setErrors({ general: data.error || t('errors.serverError') });
+      }
     } finally {
       setIsSubmitting(false);
     }

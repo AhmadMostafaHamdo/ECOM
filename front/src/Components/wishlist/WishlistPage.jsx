@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
@@ -35,12 +35,9 @@ const WishlistPage = () => {
     const loadWishlist = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetch(apiUrl("/wishlist"), {
-                credentials: "include",
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setWishlist(data.wishlist || []);
+            const res = await axiosInstance.get("/wishlist");
+            if (res.status === 200) {
+                setWishlist(res.data.wishlist || []);
             }
         } catch (e) {
             console.error("Wishlist load error:", e);
@@ -60,11 +57,8 @@ const WishlistPage = () => {
     const handleRemove = async (productId, productName) => {
         setRemovingId(productId);
         try {
-            const res = await fetch(apiUrl(`/wishlist/toggle/${productId}`), {
-                method: "POST",
-                credentials: "include",
-            });
-            if (res.ok) {
+            const res = await axiosInstance.post(`/wishlist/toggle/${productId}`);
+            if (res.status === 200 || res.status === 201) {
                 setWishlist((prev) => prev.filter((p) => (p._id || p.id) !== productId));
                 dispatch(removeFromWishlistLocal(productId));
                 toast.success(`تم إزالة "${productName}" من المحفوظات`);
@@ -84,11 +78,8 @@ const WishlistPage = () => {
         setIsConfirmOpen(false);
         setClearing(true);
         try {
-            const res = await fetch(apiUrl("/wishlist"), {
-                method: "DELETE",
-                credentials: "include",
-            });
-            if (res.ok) {
+            const res = await axiosInstance.delete("/wishlist");
+            if (res.status === 200) {
                 setWishlist([]);
                 dispatch(clearWishlistLocal());
                 toast.success("تم مسح المحفوظات بالكامل");

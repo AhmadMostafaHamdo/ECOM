@@ -4,9 +4,18 @@ const keysecret = process.env.KEY
 
 const authenicate = async (req, res, next) => {
     try {
-        const token = req.cookies.eccomerce;
+        let token = req.cookies.eccomerce;
+        
+        // Fallback to Authorization header if cookie is missing
+        if (!token && req.headers.authorization) {
+            const authHeader = req.headers.authorization;
+            if (authHeader.startsWith('Bearer ')) {
+                token = authHeader.substring(7);
+            }
+        }
 
         if (!token) {
+            console.log("Auth failed: eccomerce cookie missing. Cookies received:", req.cookies);
             return res.status(401).json({ error: "Unauthorized: token missing" });
         }
 
@@ -44,4 +53,3 @@ const authenicate = async (req, res, next) => {
 };
 
 module.exports = authenicate;
-

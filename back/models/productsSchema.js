@@ -24,7 +24,17 @@ const productSchema = new mongoose.Schema({
     price: {
         mrp: Number,
         cost: { type: Number, index: true },
-        discount: String
+        discount: String,
+        currency: { type: String, default: "SYP" }
+    },
+    locationDetail: {
+        country: { type: String, default: "" },
+        province: { type: String, default: "" },
+        city: { type: String, default: "" }
+    },
+    mobile: {
+        type: String,
+        default: ""
     },
     description: String,
     discount: { type: String, index: true },

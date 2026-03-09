@@ -1,0 +1,217 @@
+/* === PhoneInput Component Styles === */
+.phone-input--container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: visible;
+  z-index: 50; /* Ensure internal parts are above siblings */
+  direction: ltr !important; /* Phone numbers are always LTR */
+}
+
+.phone-input--container.is-open {
+  z-index: 1000 !important; /* Ensure it stays on top while open */
+}
+
+.phone-input--container:hover {
+  border-color: var(--text-3);
+}
+
+.phone-input--container:focus-within {
+  background: var(--surface);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px var(--gold-glow);
+}
+
+.phone-input--container.error {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+.phone-input--trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-1);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity 0.2s, background 0.2s;
+  white-space: nowrap;
+  border-radius: 10px 0 0 10px;
+}
+
+.phone-input--trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.phone-input--trigger:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dark .phone-input--trigger:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.phone-input--divider {
+  width: 1.5px;
+  height: 22px;
+  background: var(--border);
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.phone-input--field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  font-family: var(--font);
+  color: var(--text-1);
+  outline: none;
+  width: 100%;
+}
+
+.phone-input--field::placeholder {
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+/* Dropdown */
+.phone-input--dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1000;
+  width: 300px;
+  max-width: 90vw;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: phoneDropdownIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top left;
+}
+
+@keyframes phoneDropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.phone-input--search-wrap {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.phone-input--search {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  font-size: 0.85rem;
+  color: var(--text-1);
+  outline: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.phone-input--search:focus {
+  border-color: var(--gold);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+.phone-input--list {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+/* Custom Scrollbar */
+.phone-input--list::-webkit-scrollbar {
+  width: 5px;
+}
+.phone-input--list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.phone-input--list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+.phone-input--item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  border-radius: 8px;
+  color: var(--text-2);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.phone-input--item:hover,
+.phone-input--item.highlighted {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.phone-input--item.selected {
+  background: var(--gold-soft) !important;
+  color: var(--gold) !important;
+  font-weight: 700;
+}
+
+.phone-input--check {
+  margin-left: auto;
+  color: var(--gold);
+  width: 16px;
+  height: 16px;
+}
+
+.phone-input--country-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phone-input--dial-code {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+.phone-input--item.selected .phone-input--dial-code {
+  color: var(--gold);
+}
+
+.phone-input--no-results {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.85rem;
+}
+
+/* RTL Support for the component itself (wrapper) */
+/* Phone numbers are already forced to LTR in the container class */

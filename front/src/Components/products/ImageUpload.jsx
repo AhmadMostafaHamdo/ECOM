@@ -1,8 +1,19 @@
 import React, { useState, useRef, useCallback } from "react";
-import { apiUrl } from "../../api";
+import { ROOT_URL, getCookie, axiosInstance } from "../../api";
 import "./ImageUpload.css";
+import { useTranslation } from "react-i18next";
+import {
+    CloudUpload,
+    Link,
+    Delete,
+    AddPhotoAlternate,
+    Clear,
+    PhotoLibrary
+} from "@mui/icons-material";
+import { CircularProgress } from "@mui/material";
 
 const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
+    const { t } = useTranslation();
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [urlInput, setUrlInput] = useState("");
@@ -23,7 +34,7 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-        
+
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             handleFiles(e.dataTransfer.files);
         }
@@ -37,50 +48,51 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
 
     const handleFiles = async (files) => {
         const fileArray = Array.from(files);
-        const validFiles = fileArray.filter(file => 
+        const validFiles = fileArray.filter(file =>
             file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
         );
 
         if (validFiles.length === 0) {
-            alert('Please select valid image files (JPEG, PNG, etc.) under 5MB');
+            alert(t('productCreator.invalidFile', 'Please select valid image files (JPEG, PNG, etc.) under 5MB'));
+            return;
+        }
+
+        if (images.length + validFiles.length > maxImages) {
+            alert(t('productCreator.maxImagesReached', `You can only upload up to ${maxImages} images`));
             return;
         }
 
         setUploading(true);
-        
+
         try {
-            // Upload files to server
+            // Upload files to server using axiosInstance (handles CSRF already)
             const formData = new FormData();
             validFiles.forEach(file => {
                 formData.append('images', file);
             });
 
-            const response = await fetch(apiUrl("/upload/images"), {
-                method: "POST",
-                credentials: "include",
-                body: formData
+            const response = await axiosInstance.post("/upload/images", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || "Upload failed");
-            }
+            const result = response.data;
 
-            const result = await response.json();
-            
             // Create image objects with server URLs
             const newImages = result.images.map((url, index) => ({
-                url: apiUrl(url),
+                url: url.startsWith('http') ? url : (url.startsWith('/') ? `${ROOT_URL}${url}` : `${ROOT_URL}/${url}`),
                 base64: null,
                 name: validFiles[index].name,
                 size: validFiles[index].size,
                 type: validFiles[index].type
             }));
-            
+
             onChange([...images, ...newImages]);
         } catch (error) {
             console.error('Error uploading files:', error);
-            alert('Error uploading images: ' + error.message);
+            const errorMsg = error.response?.data?.error || error.message;
+            alert(t('productCreator.uploadError', 'Error uploading images: ') + errorMsg);
         } finally {
             setUploading(false);
         }
@@ -97,7 +109,7 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
 
     const handleUrlAdd = () => {
         if (!urlInput.trim()) return;
-        
+
         // Basic URL validation
         try {
             new URL(urlInput);
@@ -107,7 +119,7 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
                 name: 'URL Image',
                 isUrl: true
             };
-            
+
             onChange([...images, newImage]);
             setUrlInput("");
             setShowUrlInput(false);
@@ -127,25 +139,27 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
 
     return (
         <div className="image_upload_container">
-            <label className="form_label">Product Images</label>
-            
+            <label className="form_label">{t('productCreator.productImages', 'Product Images')}</label>
+
             <div className="image_upload_methods">
-                <button 
-                    type="button" 
+                <button
+                    type="button"
                     className="upload_method_btn"
                     onClick={openFileDialog}
                     disabled={images.length >= maxImages}
                 >
-                    📁 Choose Files
+                    <PhotoLibrary fontSize="small" />
+                    {t('productCreator.chooseFiles', 'Choose Files')}
                 </button>
-                
-                <button 
-                    type="button" 
+
+                <button
+                    type="button"
                     className="upload_method_btn"
                     onClick={() => setShowUrlInput(!showUrlInput)}
                     disabled={images.length >= maxImages}
                 >
-                    🔗 Add URL
+                    <Link fontSize="small" />
+                    {t('productCreator.addUrl', 'Add URL')}
                 </button>
             </div>
 
@@ -155,29 +169,28 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
                         type="url"
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
-                        placeholder="Enter image URL..."
+                        placeholder={t('productCreator.urlPlaceholder', 'Enter image URL...')}
                         className="url_input"
                     />
                     <button type="button" onClick={handleUrlAdd} className="add_url_btn">
-                        Add
+                        {t('common.add', 'Add')}
                     </button>
-                    <button 
-                        type="button" 
-                        onClick={() => setShowUrlInput(false)} 
+                    <button
+                        type="button"
+                        onClick={() => setShowUrlInput(false)}
                         className="cancel_url_btn"
                     >
-                        Cancel
+                        {t('common.cancel', 'Cancel')}
                     </button>
                 </div>
             )}
 
-            <div 
+            <div
                 className={`image_drop_zone ${dragActive ? 'drag_active' : ''} ${uploading ? 'uploading' : ''}`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
-                onClick={openFileDialog}
             >
                 <input
                     ref={fileInputRef}
@@ -187,55 +200,65 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
                     onChange={handleFileInput}
                     style={{ display: 'none' }}
                 />
-                
+
                 {uploading ? (
                     <div className="uploading_state">
-                        <div className="spinner"></div>
-                        <p>Processing images...</p>
+                        <CircularProgress size={40} thickness={4} />
+                        <p>{t('productCreator.processingImages', 'Processing images...')}</p>
                     </div>
                 ) : (
-                    <div className="drop_zone_content">
-                        <div className="drop_icon">📸</div>
-                        <h4>Drag & Drop Images Here</h4>
-                        <p>or click to browse</p>
-                        <small>Maximum {maxImages} images • Up to 5MB each</small>
+                    <div className="drop_zone_content" onClick={openFileDialog}>
+                        <div className="drop_icon">
+                            <CloudUpload fontSize="large" style={{ fontSize: '48px', color: 'var(--accent, #f5a623)' }} />
+                        </div>
+                        <h4>{t('productCreator.dragDrop', 'Drag & Drop Images Here')}</h4>
+                        <p>{t('productCreator.clickBrowse', 'or click to browse')}</p>
+                        <small>
+                            {t('productCreator.maxImagesHint', `Maximum ${maxImages} images`)} •
+                            {t('productCreator.maxSizeHint', 'Up to 5MB each')}
+                        </small>
                     </div>
                 )}
             </div>
 
             {images.length > 0 && (
                 <div className="image_preview_container">
-                    <h4>Image Preview ({images.length}/{maxImages})</h4>
+                    <h4>{t('productCreator.previewTitle', 'Image Preview')} ({images.length}/{maxImages})</h4>
                     <div className="image_grid">
                         {images.map((image, index) => (
                             <div key={index} className="image_preview_item">
-                                <img 
-                                    src={image.url} 
+                                <img
+                                    src={image.url}
                                     alt={`Preview ${index + 1}`}
                                     className="preview_image"
                                 />
-                                <button 
+                                <button
                                     type="button"
                                     className="remove_image_btn"
-                                    onClick={() => removeImage(index)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeImage(index);
+                                    }}
+                                    title={t('common.remove', 'Remove')}
                                 >
-                                    ✕
+                                    <Clear fontSize="small" />
                                 </button>
                                 <div className="image_info">
                                     <small>{image.name}</small>
-                                    {!image.isUrl && <small>{(image.size / 1024).toFixed(1)}KB</small>}
+                                    {!image.isUrl && <small>{(image.size / 1024).toFixed(1)} KB</small>}
+                                    {image.isUrl && <small className="url_tag">URL</small>}
                                 </div>
                             </div>
                         ))}
+                        {images.length < maxImages && !uploading && (
+                            <div className="image_preview_item add_more" onClick={openFileDialog}>
+                                <AddPhotoAlternate fontSize="large" style={{ color: '#d1d5db' }} />
+                                <span>{t('common.addMore', 'Add More')}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
-
-            <input
-                type="hidden"
-                name="images"
-                value={JSON.stringify(images)}
-            />
         </div>
     );
 };

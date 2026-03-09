@@ -1,18 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { apiUrl } from '../../../api';
+import { axiosInstance } from '../../../api';
 
 export const fetchWishlist = createAsyncThunk(
     'wishlist/fetchWishlist',
     async (_, { rejectWithValue }) => {
         try {
-            const res = await fetch(apiUrl('/wishlist'), {
-                credentials: 'include',
-            });
-            if (!res.ok) throw new Error('Failed to fetch wishlist');
-            const data = await res.json();
-            return data.wishlist || [];
+            const res = await axiosInstance.get('/wishlist');
+            return res.data.wishlist || [];
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.error || error.message);
         }
     }
 );

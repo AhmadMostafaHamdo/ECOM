@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Slide from "./Slide";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 
 const SpecialProductSections = () => {
     const { t } = useTranslation();
@@ -13,22 +13,15 @@ const SpecialProductSections = () => {
     useEffect(() => {
         const fetchSpecialProducts = async () => {
             try {
-                const fetchSafe = async (url) => {
-                    try {
-                        const res = await fetch(apiUrl(url));
-                        if (!res.ok) return [];
-                        return await res.json();
-                    } catch (e) {
-                        console.error(`Error fetching ${url}:`, e);
-                        return [];
-                    }
-                };
-
-                const [topRatedData, trendingData, discountedData] = await Promise.all([
-                    fetchSafe("/products/top-rated?limit=8"),
-                    fetchSafe("/products/trending?limit=8"),
-                    fetchSafe("/products/discounted?limit=8")
+                const [topRatedRes, trendingRes, discountedRes] = await Promise.all([
+                    axiosInstance.get("/products/top-rated?limit=8").catch(() => ({ data: [] })),
+                    axiosInstance.get("/products/trending?limit=8").catch(() => ({ data: [] })),
+                    axiosInstance.get("/products/discounted?limit=8").catch(() => ({ data: [] }))
                 ]);
+
+                const topRatedData = topRatedRes.data;
+                const trendingData = trendingRes.data;
+                const discountedData = discountedRes.data;
 
                 setTopRated(topRatedData.data || (Array.isArray(topRatedData) ? topRatedData : []));
                 setTrending(trendingData.data || (Array.isArray(trendingData) ? trendingData : []));
@@ -53,31 +46,37 @@ const SpecialProductSections = () => {
     }
 
     return (
-        <>
+        <div className="special_sections_container">
             {dealOfTheDay.length > 0 && (
-                <Slide title={t('home.dealOfTheDay')} products={dealOfTheDay} category="all" />
+                <div className="reveal_section" style={{ animationDelay: '0.1s' }}>
+                    <Slide title={t('home.dealOfTheDay')} products={dealOfTheDay} category="all" />
+                </div>
             )}
 
-            <div className="center_img">
+            <div className="center_img reveal_section" style={{ animationDelay: '0.2s' }}>
                 <div className="center_img_overlay">
                     <h3>{t('home.savingsHub')}</h3>
                     <p>{t('home.savingsDescription')}</p>
                 </div>
                 <img
-                    src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"
+                    src="/assets/banners/sale.png"
                     alt="Special offers"
                     loading="lazy"
                 />
             </div>
 
             {trending.length > 0 && (
-                <Slide title={t('home.trendingNow')} products={trending} category="all" />
+                <div className="reveal_section" style={{ animationDelay: '0.3s' }}>
+                    <Slide title={t('home.trendingNow')} products={trending} category="all" />
+                </div>
             )}
 
             {topRated.length > 0 && (
-                <Slide title={t('home.topRatedPicks')} products={topRated} category="all" />
+                <div className="reveal_section" style={{ animationDelay: '0.4s' }}>
+                    <Slide title={t('home.topRatedPicks')} products={topRated} category="all" />
+                </div>
             )}
-        </>
+        </div>
     );
 };
 

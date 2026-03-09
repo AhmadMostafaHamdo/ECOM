@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flag, Clock, Eye, CheckCircle, Package, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const StatCard = ({ icon: Icon, label, value, color }) => (
     <div
@@ -39,16 +40,17 @@ export const StatCard = ({ icon: Icon, label, value, color }) => (
 );
 
 const ReportsStats = ({ stats }) => {
+    const { t } = useTranslation();
     if (!stats) return null;
 
     return (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: "16px", marginBottom: "28px" }}>
-            <StatCard icon={Flag} label="إجمالي البلاغات" value={stats.total} color="#6366f1" />
-            <StatCard icon={Clock} label="قيد الانتظار" value={stats.pending} color="#f59e0b" />
-            <StatCard icon={Eye} label="تمت المراجعة" value={stats.reviewed} color="#3b82f6" />
-            <StatCard icon={CheckCircle} label="تم الحل" value={stats.resolved} color="#22c55e" />
-            <StatCard icon={Package} label="بلاغات المنتجات" value={stats.productReports} color="#8b5cf6" />
-            <StatCard icon={User} label="بلاغات المستخدمين" value={stats.userReports} color="#ec4899" />
+            <StatCard icon={Flag} label={t("admin.reports.allTypes")} value={stats.total} color="#6366f1" />
+            <StatCard icon={Clock} label={t("admin.reports.status.pending")} value={stats.pending} color="#f59e0b" />
+            <StatCard icon={Eye} label={t("admin.reports.status.reviewed")} value={stats.reviewed} color="#3b82f6" />
+            <StatCard icon={CheckCircle} label={t("admin.reports.status.resolved")} value={stats.resolved} color="#22c55e" />
+            <StatCard icon={Package} label={t("admin.reports.productReports")} value={stats.productReports} color="#8b5cf6" />
+            <StatCard icon={User} label={t("admin.reports.userReports")} value={stats.userReports} color="#ec4899" />
         </div>
     );
 };

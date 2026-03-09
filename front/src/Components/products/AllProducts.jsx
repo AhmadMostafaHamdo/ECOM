@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useLocalize } from "../context/LocalizeContext";
+import { formatCurrency } from "../../utils/localizeUtils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Slider, Tooltip, Skeleton } from "@mui/material";
 import {
@@ -15,9 +17,10 @@ import {
     ShoppingBag,
     Inventory2,
     FavoriteBorder,
-    AddShoppingCart
+    AddShoppingCart,
+    CalendarMonth
 } from "@mui/icons-material";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import "./AllProducts.css";
 import Pagination from "../common/Pagination";
 import BackButton from "../common/BackButton";
@@ -26,17 +29,28 @@ const AllProducts = () => {
     const { t } = useTranslation();
     const { category: categorySlug } = useParams();
     const navigate = useNavigate();
-    
+    const { activeCountry } = useLocalize();
+
+    const formatDate = (dateString) => {
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        return date.toLocaleDateString(activeCountry.locale === 'ar' ? 'ar-EG' : 'en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: '2-digit'
+        });
+    };
+
     const location = useLocation();
 
     // Core State
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Filter State
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
-    
+
     // Initial fetch from URL
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -49,11 +63,11 @@ const AllProducts = () => {
 
     const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid");
-    
+
     // Using array for min & max price
     const [priceRange, setPriceRange] = useState([0, 30000]);
     const [debouncedPrice, setDebouncedPrice] = useState([0, 30000]);
-    
+
     // Pagination State
     const [pagination, setPagination] = useState({
         totalItems: 0,
@@ -98,14 +112,8 @@ const AllProducts = () => {
                 limit: 12
             };
 
-            const response = await fetch(apiUrl("/products/filter"), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error("Network response was not ok");
-            const resData = await response.json();
+            const response = await axiosInstance.post("/products/filter", payload);
+            const resData = response.data;
 
             if (resData.data) {
                 setProducts(resData.data);
@@ -117,11 +125,11 @@ const AllProducts = () => {
                 });
             } else {
                 setProducts(Array.isArray(resData) ? resData : []);
-                setPagination(prev => ({ 
-                    ...prev, 
-                    totalItems: resData.length || 0,
+                setPagination(prev => ({
+                    ...prev,
+                    totalItems: (Array.isArray(resData) ? resData.length : 0),
                     totalPages: 1,
-                    currentPage: 1 
+                    currentPage: 1
                 }));
             }
         } catch (error) {
@@ -138,7 +146,7 @@ const AllProducts = () => {
     }, [fetchProducts]);
 
     const handlePageChange = (newPage) => {
-        if(newPage === pagination.currentPage) return;
+        if (newPage === pagination.currentPage) return;
         fetchProducts(newPage);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -176,12 +184,12 @@ const AllProducts = () => {
     const renderSkeletons = () => {
         return Array.from({ length: viewMode === "grid" ? 12 : 6 }).map((_, idx) => (
             <div key={idx} className={`premium_product_card skeleton ${viewMode}`} style={{ cursor: "default" }}>
-                <div className="card_image_wrapper" style={{background: 'transparent'}}>
-                    <Skeleton 
-                        variant="rectangular" 
-                        width="100%" 
-                        height="100%" 
-                        sx={{ position: 'absolute', top: 0, left: 0, bgcolor: 'var(--surface-2)' }} 
+                <div className="card_image_wrapper" style={{ background: 'transparent' }}>
+                    <Skeleton
+                        variant="rectangular"
+                        width="100%"
+                        height="100%"
+                        sx={{ position: 'absolute', top: 0, left: 0, bgcolor: 'var(--surface-2)' }}
                     />
                 </div>
                 <div className="card_details" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -204,17 +212,17 @@ const AllProducts = () => {
                 <div className="hero_glass">
                     <div className="hero_content">
                         <BackButton className="glass_back_btn" />
-                        <motion.div 
-                            initial={{ opacity: 0, y: 30 }} 
-                            animate={{ opacity: 1, y: 0 }} 
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
                             className="title_area"
                         >
-                            <span className="category_tag">{t('allProducts.exploring', 'Exploring Category')}</span>
+                            <span className="category_tag">{t('allProducts.exploring')}</span>
                             <h1>{displayCategoryName}</h1>
                             <div className="stats_row">
                                 <Inventory2 className="stat_icon" />
-                                <span>{pagination.totalItems} {t('allProducts.productsFound', 'Products Found')}</span>
+                                <span>{pagination.totalItems} {t('allProducts.productsFound')}</span>
                             </div>
                         </motion.div>
                     </div>
@@ -227,16 +235,16 @@ const AllProducts = () => {
                     <div className="filter_card">
                         <div className="filter_header">
                             <FilterList />
-                            <h3>{t('allProducts.filters', 'Filters')}</h3>
+                            <h3>{t('allProducts.filters')}</h3>
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.search', 'Search Products')}</label>
+                            <label>{t('allProducts.search')}</label>
                             <div className="search_input_wrapper">
                                 <Search className="search_icon" />
                                 <input
                                     type="text"
-                                    placeholder={t('allProducts.searchPlaceholder', 'Type product name...')}
+                                    placeholder={t('allProducts.searchPlaceholder')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -244,29 +252,29 @@ const AllProducts = () => {
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.sortBy', 'Sort By')}</label>
+                            <label>{t('allProducts.sortBy')}</label>
                             <div className="select_wrapper">
                                 <Sort className="select_icon" />
                                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                                    <option value="newest">{t('allProducts.newest', 'Newest First')}</option>
-                                    <option value="price-low">{t('allProducts.priceLow', 'Price: Low to High')}</option>
-                                    <option value="price-high">{t('allProducts.priceHigh', 'Price: High to Low')}</option>
-                                    <option value="rating">{t('allProducts.highestRated', 'Highest Rated')}</option>
-                                    <option value="name">{t('allProducts.nameAZ', 'Name: A-Z')}</option>
+                                    <option value="newest">{t('allProducts.newest')}</option>
+                                    <option value="price-low">{t('allProducts.priceLow')}</option>
+                                    <option value="price-high">{t('allProducts.priceHigh')}</option>
+                                    <option value="rating">{t('allProducts.highestRated')}</option>
+                                    <option value="name">{t('allProducts.nameAZ')}</option>
                                 </select>
                             </div>
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.priceRange', 'Price Range')}</label>
+                            <label>{t('allProducts.priceRange')}</label>
                             <div className="price_inputs_grid">
                                 <div className="price_box">
-                                    <span>{t('allProducts.min', 'Min')}</span>
-                                    <div className="price_value_display">Rs. {priceRange[0]}</div>
+                                    <span>{t('allProducts.min')}</span>
+                                    <div className="price_value_display">{formatCurrency(priceRange[0], activeCountry.locale, activeCountry.currency)}</div>
                                 </div>
                                 <div className="price_box" style={{ alignItems: 'flex-end', textAlign: 'end' }}>
-                                    <span>{t('allProducts.max', 'Max')}</span>
-                                    <div className="price_value_display">Rs. {priceRange[1]}</div>
+                                    <span>{t('allProducts.max')}</span>
+                                    <div className="price_value_display">{formatCurrency(priceRange[1], activeCountry.locale, activeCountry.currency)}</div>
                                 </div>
                             </div>
                             <div style={{ padding: '0 10px' }}>
@@ -300,21 +308,21 @@ const AllProducts = () => {
                         </div>
 
                         <div className="filter_section">
-                            <label>{t('allProducts.viewMode', 'View Mode')}</label>
+                            <label>{t('allProducts.viewMode')}</label>
                             <div className="view_mode_toggle">
                                 <button
                                     className={viewMode === "grid" ? "active" : ""}
                                     onClick={() => setViewMode("grid")}
                                 >
                                     <GridView />
-                                    <span>{t('allProducts.grid', 'Grid')}</span>
+                                    <span>{t('allProducts.grid')}</span>
                                 </button>
                                 <button
                                     className={viewMode === "list" ? "active" : ""}
                                     onClick={() => setViewMode("list")}
                                 >
                                     <FormatListBulleted />
-                                    <span>{t('allProducts.list', 'List')}</span>
+                                    <span>{t('allProducts.list')}</span>
                                 </button>
                             </div>
                         </div>
@@ -346,33 +354,33 @@ const AllProducts = () => {
                                                 <img src={product.url} alt={product.title.shortTitle} loading="lazy" />
                                                 <div className="card_overlay">
                                                     <div className="overlay_actions">
-                                                        <Tooltip title="Add to Cart" placement="top">
-                                                            <button 
-                                                                className="icon_action_btn" 
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation(); 
+                                                        <Tooltip title={t('product.addToCart')} placement="top">
+                                                            <button
+                                                                className="icon_action_btn"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     handleProductClick(product.id);
                                                                 }}
                                                             >
                                                                 <AddShoppingCart />
                                                             </button>
                                                         </Tooltip>
-                                                        <Tooltip title={t('allProducts.quickView', 'Quick View')} placement="top">
-                                                            <button 
-                                                                className="icon_action_btn primary" 
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation(); 
-                                                                    handleProductClick(product.id); 
+                                                        <Tooltip title={t('allProducts.quickView')} placement="top">
+                                                            <button
+                                                                className="icon_action_btn primary"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleProductClick(product.id);
                                                                 }}
                                                             >
                                                                 <Visibility />
                                                             </button>
                                                         </Tooltip>
-                                                        <Tooltip title="Add to Wishlist" placement="top">
-                                                            <button 
-                                                                className="icon_action_btn" 
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation(); 
+                                                        <Tooltip title={t('product.addToWishlist')} placement="top">
+                                                            <button
+                                                                className="icon_action_btn"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     handleProductClick(product.id);
                                                                 }}
                                                             >
@@ -389,7 +397,15 @@ const AllProducts = () => {
                                                 )}
                                             </div>
                                             <div className="card_details">
-                                                <span className="product_category">{product.category}</span>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span className="product_category">{product.category}</span>
+                                                    {product.locationDetail && (product.locationDetail.country || product.locationDetail.city) && (
+                                                        <span className="product_location" style={{ fontSize: '11px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <LocalOffer style={{ fontSize: '12px', color: 'var(--gold)' }} />
+                                                            {product.locationDetail.city || product.locationDetail.province || product.locationDetail.country}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <h3 className="product_title">{product.title.shortTitle}</h3>
                                                 <p className="product_tagline">{product.tagline}</p>
 
@@ -402,12 +418,18 @@ const AllProducts = () => {
                                                         <Visibility className="meta_icon" />
                                                         <span>{product.views || 0}</span>
                                                     </div>
+                                                    {product.createdAt && (
+                                                        <div className="publish_date" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#888' }}>
+                                                            <CalendarMonth style={{ fontSize: '12px' }} />
+                                                            <span>{formatDate(product.createdAt)}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div className="price_footer">
                                                     <div className="price_info">
-                                                        <span className="cost">Rs. {product.price.cost}</span>
-                                                        <span className="mrp">Rs. {product.price.mrp}</span>
+                                                        <span className="cost">{formatCurrency(product.price.cost, activeCountry.locale, product.price.currency || activeCountry.currency)}</span>
+                                                        <span className="mrp">{formatCurrency(product.price.mrp, activeCountry.locale, product.price.currency || activeCountry.currency)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -426,7 +448,7 @@ const AllProducts = () => {
                             </div>
                         </>
                     ) : (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             className="premium_empty_state"
@@ -435,15 +457,15 @@ const AllProducts = () => {
                                 <Search className="bg_icon" />
                                 <ShoppingBag className="main_icon" />
                             </div>
-                            <h2>{t('allProducts.noResults', 'No Results Found')}</h2>
-                            <p>{t('allProducts.noResultsDesc', 'We could not find any products matching your current filters.')}</p>
+                            <h2>{t('allProducts.noResults')}</h2>
+                            <p>{t('allProducts.noResultsDesc')}</p>
                             <button className="reset_btn" onClick={() => {
                                 setSearchTerm("");
                                 setPriceRange([0, 30000]);
                                 setDebouncedSearch("");
                                 setDebouncedPrice([0, 30000]);
                             }}>
-                                {t('allProducts.clearFilters', 'Clear Filters')}
+                                {t('allProducts.clearFilters')}
                             </button>
                         </motion.div>
                     )}

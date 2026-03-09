@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import DynamicTable from "./DynamicTable";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { Button } from "./Button";
 import { Pencil, Trash2 } from "lucide-react";
 import ProductForm from "./products/ProductForm";
 
-const CATEGORY_ALL = "All Categories";
+const CATEGORY_ALL = "All Categories"; // internal value, label will be translated
 
 const emptyForm = {
   shortTitle: "",
@@ -21,6 +21,11 @@ const emptyForm = {
   url: "",
   detailUrl: "",
   category: "",
+  currency: "SYP",
+  country: "",
+  province: "",
+  city: "",
+  mobile: "",
 };
 
 const ProductsManagement = () => {
@@ -58,23 +63,18 @@ const ProductsManagement = () => {
         if (selectedCategory !== CATEGORY_ALL) {
           queryParams.set("category", selectedCategory);
         }
-        const response = await fetch(
-          apiUrl(`/admin/products?${queryParams.toString()}`),
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-          },
-        );
-        if (response.ok) {
-          const payload = await response.json();
+
+        const response = await axiosInstance.get(`/admin/products?${queryParams.toString()}`);
+
+        if (response.status === 200) {
+          const payload = response.data;
           setProducts(payload.data || []);
           setPagination({
-              totalItems: payload.total || 0,
-              totalPages: payload.total_pages || 1,
-              currentPage: payload.page || 1,
-              limit: payload.limit || 10,
-            });
+            totalItems: payload.total || 0,
+            totalPages: payload.total_pages || 1,
+            currentPage: payload.page || 1,
+            limit: payload.limit || 10,
+          });
         }
       } catch (error) {
         console.error(error);
@@ -96,15 +96,12 @@ const ProductsManagement = () => {
 
   const loadCategories = useCallback(async () => {
     try {
-      const response = await fetch(apiUrl("/admin/categories"), {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      if (response.ok) {
-        const payload = await response.json();
-        const list = Array.isArray(payload)
-          ? payload.map((item) => item.name)
+      const response = await axiosInstance.get("/admin/categories");
+      if (response.status === 200) {
+        const payload = response.data;
+        const categoriesArray = payload.data || payload;
+        const list = Array.isArray(categoriesArray)
+          ? categoriesArray.map((item) => (typeof item === 'string' ? item : item.name))
           : [];
         setCategories(list);
       }
@@ -143,6 +140,11 @@ const ProductsManagement = () => {
       url: product?.url || "",
       detailUrl: product?.detailUrl || "",
       category: product?.category || "",
+      currency: product?.price?.currency || "SYP",
+      country: product?.locationDetail?.country || "",
+      province: product?.locationDetail?.province || "",
+      city: product?.locationDetail?.city || "",
+      mobile: product?.mobile || "",
     });
     setShowForm(true);
   }, []);
@@ -167,18 +169,11 @@ const ProductsManagement = () => {
         mrp: Number(form.mrp),
         cost: Number(form.cost),
       };
-      const response = await fetch(
-        isEditing
-          ? apiUrl(`/admin/products/${editingId}`)
-          : apiUrl("/admin/products"),
-        {
-          method: isEditing ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        },
-      );
-      if (response.ok) {
+
+      const endpoint = isEditing ? `/admin/products/${editingId}` : "/admin/products";
+      const response = await (isEditing ? axiosInstance.put(endpoint, payload) : axiosInstance.post(endpoint, payload));
+
+      if (response.status === 200 || response.status === 201) {
         resetForm();
         loadProducts(pagination.currentPage);
       }
@@ -198,15 +193,8 @@ const ProductsManagement = () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const response = await fetch(
-        apiUrl(`/admin/products/${deleteTarget._id}`),
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        },
-      );
-      if (response.ok) {
+      const response = await axiosInstance.delete(`/admin/products/${deleteTarget._id}`);
+      if (response.status === 200) {
         const nextPage = Math.max(1, pagination.currentPage);
         await loadProducts(nextPage);
       }
@@ -222,13 +210,13 @@ const ProductsManagement = () => {
   const tableFilters = React.useMemo(() => [
     {
       key: "category",
-      label: "Category",
+      label: t("navigation.categories"),
       options: [
-        { value: "All Categories", label: "All Categories" },
+        { value: CATEGORY_ALL, label: t("home.showingAll") },
         ...categories.map((cat) => ({ value: cat, label: cat })),
       ],
     },
-  ], [categories]);
+  ], [categories, t]);
 
   const tableColumns = React.useMemo(() => [
     {
@@ -254,10 +242,17 @@ const ProductsManagement = () => {
       type: "custom",
       render: (product) => (
         <div>
-          <div className="product-price">${product?.price?.cost}</div>
-          <div className="product-category line-through">
-            ${product?.price?.mrp}
+          <div className="product-price">
+            {product?.price?.currency || "$"} {product?.price?.cost}
           </div>
+          <div className="product-category line-through" style={{ fontSize: '12px' }}>
+            {product?.price?.currency || "$"} {product?.price?.mrp}
+          </div>
+          {product?.locationDetail?.province && (
+            <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+              {product.locationDetail.province}, {product.locationDetail.country}
+            </div>
+          )}
         </div>
       ),
       sortable: true,

@@ -3,7 +3,7 @@ import "./navbaar.css";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchWishlist } from "../redux/features/wishlistSlice";
 import { useTranslation } from "react-i18next";
@@ -56,11 +56,8 @@ const Navbaar = React.memo(({ onSearch }) => {
     }
     setIsSearching(true);
     try {
-      const res = await fetch(
-        apiUrl(`/getproducts?search=${encodeURIComponent(query)}&limit=6`),
-      );
-      const resData = await res.json();
-      // The backend returns { data: [...], total: ... }
+      const response = await axiosInstance.get(`/getproducts?search=${encodeURIComponent(query)}&limit=6`);
+      const resData = response.data;
       const items = resData.data || resData.products || (Array.isArray(resData) ? resData : []);
       setSuggestions(items);
     } catch {
@@ -85,12 +82,18 @@ const Navbaar = React.memo(({ onSearch }) => {
   }, [account, dispatch]);
 
   const logoutuser = useCallback(async () => {
-    await fetch(apiUrl("/logout"), { credentials: "include" });
-    setAccount(false);
-    setAnchorEl(null);
-    toast.success(t("auth.logoutSuccess") || "Logged out");
-    navigate("/");
-  }, [history, setAccount, t]);
+    try {
+      await axiosInstance.get("/logout");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setAccount(false);
+      localStorage.removeItem("auth_token");
+      setAnchorEl(null);
+      toast.success(t("auth.logoutSuccess") || "Logged out");
+      navigate("/");
+    }
+  }, [setAccount, t, navigate]);
 
   const isAdmin = account?.role === "admin";
 
@@ -120,8 +123,8 @@ const Navbaar = React.memo(({ onSearch }) => {
         <div
           className={`search_section ${showMobileSearch ? "mobile_visible" : ""}`}
         >
-          <form 
-            className="nav_searchbaar" 
+          <form
+            className="nav_searchbaar"
             onSubmit={(e) => {
               e.preventDefault();
               if (text.trim()) {
@@ -143,7 +146,7 @@ const Navbaar = React.memo(({ onSearch }) => {
             {text && (
               <List className="extrasearch_dropdown">
                 {isSearching ? (
-                  <ListItem className="searching_status">Searching…</ListItem>
+                  <ListItem className="searching_status">{t("common.searching")}</ListItem>
                 ) : suggestions.length ? (
                   suggestions.map((p) => (
                     <ListItem key={p.id} className="suggestion_item">
@@ -194,16 +197,29 @@ const Navbaar = React.memo(({ onSearch }) => {
           </div>
 
           {account && (
-            <NavLink to="/wishlist" className="nav_wishlist_btn" title={t('product.removeFromWishlist', 'My Wishlist')}>
-              <Badge badgeContent={wishlistItems.length} color="secondary" className="wishlist_badge">
-                <FavoriteIcon
-                  style={{
-                    fontSize: isWishlistPage ? 25 : 20,
-                    color: isWishlistPage ? "#f43f5e" : "#ff00009e"
-                  }}
-                />
-              </Badge>
-            </NavLink>
+            <div className="nav_actions_group">
+              <NavLink to="/wishlist" className="nav_wishlist_btn" title={t('navigation.wishlist', 'My Wishlist')}>
+                <Badge badgeContent={wishlistItems.length} color="secondary" className="wishlist_badge">
+                  <FavoriteIcon
+                    style={{
+                      fontSize: isWishlistPage ? 25 : 20,
+                      color: isWishlistPage ? "#f43f5e" : "#ff00009e"
+                    }}
+                  />
+                </Badge>
+              </NavLink>
+
+              <NavLink to="/buynow" className="nav_cart_btn" title={t('cart.title', 'My Bag')}>
+                <Badge badgeContent={account.carts?.length || 0} color="primary" className="cart_badge">
+                  <ShoppingCartIcon
+                    style={{
+                      fontSize: location.pathname === "/buynow" ? 25 : 20,
+                      color: location.pathname === "/buynow" ? "#2563eb" : "currentColor"
+                    }}
+                  />
+                </Badge>
+              </NavLink>
+            </div>
           )}
 
           {/* Dark / Light toggle */}
@@ -258,7 +274,7 @@ const Navbaar = React.memo(({ onSearch }) => {
                 <div className="menu_item_icon">
                   <FavoriteIcon fontSize="small" style={{ color: '#f43f5e' }} />
                 </div>
-                <span className="menu_item_text">محفوظاتي</span>
+                <span className="menu_item_text">{t("navigation.wishlist")}</span>
               </MenuItem>
             )}
             {account && (

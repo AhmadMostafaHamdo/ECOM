@@ -313,6 +313,11 @@
   flex-direction: column;
   gap: 7px;
   animation: fadeSlide 0.5s ease both;
+  position: relative; /* Ensure z-index works */
+}
+
+.field:focus-within {
+  z-index: 20; /* Lift the active field above others */
 }
 
 .field:nth-child(1) {
@@ -507,8 +512,7 @@
   }
 
   .hero_panel {
-    padding: 50px 34px 180px;
-    min-height: 260px;
+    display: none;
   }
 
   .hero_title {

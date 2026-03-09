@@ -1,25 +1,107 @@
-.banner_img {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-    border-radius: 12px;
+.banner_wrapper {
+    position: relative;
+    border-radius: 20px;
     overflow: hidden;
-    border: 1px solid #e5e7eb;
+    background: var(--surface);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.banner_img img {
+.carasousel {
+    z-index: 1;
+}
+
+.banner_slide {
+    position: relative;
+    height: 450px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.banner_img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.banner_img img:hover {
-    transform: scale(1.02);
+.banner_slide:hover .banner_img {
+    transform: scale(1.05);
+}
+
+.banner_overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.3) 50%,
+        transparent 100%
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 60px;
+    color: #ffffff;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.banner_overlay p {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUpFade 0.6s forwards 0.3s;
+}
+
+.banner_overlay h2 {
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.1;
+    max-width: 500px;
+    margin-bottom: 24px;
+    transform: translateY(30px);
+    opacity: 0;
+    animation: slideUpFade 0.6s forwards 0.5s;
+}
+
+@keyframes slideUpFade {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 1024px) {
+    .banner_slide {
+        height: 350px;
+    }
+    .banner_overlay h2 {
+        font-size: 2.2rem;
+    }
 }
 
 @media (max-width: 768px) {
-    .banner_img {
-        height: 250px;
+    .banner_slide {
+        height: 280px;
+    }
+    .banner_overlay {
+        padding: 0 30px;
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.8) 0%,
+            transparent 100%
+        );
+        justify-content: flex-end;
+        padding-bottom: 40px;
+    }
+    .banner_overlay h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
     }
 }
+

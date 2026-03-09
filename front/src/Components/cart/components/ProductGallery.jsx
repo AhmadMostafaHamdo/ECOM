@@ -13,6 +13,8 @@ const ProductGallery = ({
     likeLoading,
     handleChatWithSeller,
     chatLoading,
+    addtocart,
+    addingToCart,
     wishSaved,
     toggleWishlist,
     wishLoading,
@@ -56,6 +58,21 @@ const ProductGallery = ({
             )}
 
             <div className="cart_btn">
+                <button
+                    className="cart_btn_buy"
+                    onClick={() => addtocart(product.id || product._id)}
+                    disabled={addingToCart}
+                >
+                    {addingToCart ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="btn_icon">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                    )}
+                    <span>{t('cart.buyNow', 'Buy Now')}</span>
+                </button>
+
                 <button className="cart_btn_chat" onClick={handleChatWithSeller} disabled={chatLoading}>
                     {chatLoading ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : <ChatBubbleOutline className="btn_icon" />}
                     <span>{t('product.chatWithSeller', 'Chat with Seller')}</span>
@@ -67,7 +84,7 @@ const ProductGallery = ({
                     disabled={wishLoading}
                     title={wishSaved ? t('product.removeFromWishlist', 'Remove from Wishlist') : t('product.addToWishlist', 'Add to Wishlist')}
                 >
-                    {wishLoading ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : (wishSaved ? <Favorite className="btn_icon" />  : <FavoriteBorder className="btn_icon" />)}
+                    {wishLoading ? <CircularProgress size={20} className="btn_icon" color="inherit" /> : (wishSaved ? <Favorite className="btn_icon" /> : <FavoriteBorder className="btn_icon" />)}
                     <span>{wishSaved ? t('product.saved', 'Saved') : t('product.saveForLater', 'Save for Later')}</span>
                 </button>
 
@@ -87,7 +104,7 @@ const ProductGallery = ({
                         onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = '#fff5f5'; }}
                     >
-                        <AlertCircle/> {t('product.reportProduct', 'Report Product')}
+                        <AlertCircle /> {t('product.reportProduct', 'Report Product')}
                     </button>
                 )}
             </div>

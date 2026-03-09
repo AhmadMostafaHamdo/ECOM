@@ -3,12 +3,12 @@ import React, {
   useContext,
   useEffect,
   useState,
-  Suspense, 
+  Suspense,
   lazy,
 } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
-import { apiUrl } from "./api";
+import { axiosInstance } from "./api";
 import { Logincontext } from "./Components/context/Contextprovider";
 import "./App.css";
 import "./i18n/i18n";
@@ -38,7 +38,7 @@ const CATEGORY_ALL = "All Categories";
 function App() {
   const location = useLocation();
   const { account, setAccount } = useContext(Logincontext);
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
   const [categories, setCategories] = useState([{ name: CATEGORY_ALL }]);
@@ -59,18 +59,8 @@ function App() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch(apiUrl("/getcategories"), {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        return;
-      }
-
-      const payload = await response.json();
+      const response = await axiosInstance.get("/getcategories");
+      const payload = response.data;
       const categoriesArray = payload.data || payload;
       if (Array.isArray(categoriesArray) && categoriesArray.length) {
         setCategories(categoriesArray);
@@ -87,23 +77,21 @@ function App() {
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const res = await fetch(apiUrl("/validuser"), {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
+        const res = await axiosInstance.get("/validuser");
 
-        if (res.status === 201) {
-          const payload = await res.json();
+        if (res.status === 200 || res.status === 201) {
+          const payload = res.data;
           setAccount(payload);
+          if (payload.token) {
+            localStorage.setItem("auth_token", payload.token);
+          }
         } else {
           setAccount(false);
+          localStorage.removeItem("auth_token");
         }
       } catch (error) {
         setAccount(false);
+        localStorage.removeItem("auth_token");
       } finally {
         setAuthChecked(true);
       }
@@ -153,7 +141,7 @@ function App() {
           fallback={
             <div className="circle">
               <CircularProgress />
-              <h2>Loading...</h2>
+              <h2>{t("common.loading")}</h2>
             </div>
           }
         >
@@ -247,7 +235,7 @@ function App() {
       ) : (
         <div className="circle">
           <CircularProgress />
-          <h2>Crafting your experience...</h2>
+          <h2>{t("common.craftingExperience")}</h2>
         </div>
       )}
     </div>

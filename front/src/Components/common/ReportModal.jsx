@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { Flag, X, AlertTriangle, CheckCircle } from "lucide-react";
 import "./ReportModal.css";
 
@@ -34,17 +34,18 @@ const ReportModal = ({ open, onClose, targetType, targetId, targetName }) => {
         setLoading(true);
         setError("");
         try {
-            const res = await fetch(apiUrl("/reports"), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ targetType, targetId, reason, description }),
+            const res = await axiosInstance.post("/reports", {
+                targetType,
+                targetId,
+                reason,
+                description
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || t('errors.somethingWentWrong'));
-            setSuccess(true);
+
+            if (res.status === 200 || res.status === 201) {
+                setSuccess(true);
+            }
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.error || t('errors.somethingWentWrong'));
         } finally {
             setLoading(false);
         }

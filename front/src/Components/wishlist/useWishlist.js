@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { addToWishlistLocal, removeFromWishlistLocal } from "../redux/features/wishlistSlice";
+import { useCallback, useState } from "react";
 
 /**
  * useWishlist — Hook for toggling product wishlist status
@@ -33,13 +33,10 @@ const useWishlist = (initialSaved = false, productId, productName = "", isLogged
 
         setLoading(true);
         try {
-            const res = await fetch(apiUrl(`/wishlist/toggle/${productId}`), {
-                method: "POST",
-                credentials: "include",
-            });
+            const res = await axiosInstance.post(`/wishlist/toggle/${productId}`);
 
-            if (res.ok) {
-                const data = await res.json();
+            if (res.status === 200 || res.status === 201) {
+                const data = res.data;
                 setSaved(data.saved);
                 if (data.saved) {
                     dispatch(addToWishlistLocal({ id: productId, _id: productId }));
@@ -57,7 +54,7 @@ const useWishlist = (initialSaved = false, productId, productName = "", isLogged
         } finally {
             setLoading(false);
         }
-    }, [productId, productName, isLoggedIn, onLoginRequired, loading]);
+    }, [productId, productName, isLoggedIn, onLoginRequired, loading, dispatch]);
 
     return { saved, toggle, loading };
 };

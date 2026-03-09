@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import StarRating from './StarRating';
 import Button from '../common/Button';
 import { Logincontext } from '../context/Contextprovider';
-import { apiUrl } from '../../api';
+import { axiosInstance } from '../../api';
 import { toast } from 'react-toastify';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
@@ -23,16 +23,12 @@ const ReviewList = ({ targetType, targetId, onReviewsUpdate }) => {
     const fetchReviews = async () => {
         setLoading(true);
         try {
-            const response = await fetch(
-                apiUrl(`/reviews/${targetType}/${targetId}?page=${page}&limit=10`),
-                {
-                    method: 'GET',
-                    credentials: 'include'
-                }
-            );
+            const response = await axiosInstance.get(`/reviews/${targetType}/${targetId}`, {
+                params: { page, limit: 10 }
+            });
 
-            if (response.ok) {
-                const data = await response.json();
+            if (response.status === 200) {
+                const data = response.data;
                 const newReviews = data.data || data.reviews || [];
                 setReviews(prev => page === 1 ? newReviews : [...prev, ...newReviews]);
                 setHasMore(data.page < data.total_pages);
@@ -54,16 +50,10 @@ const ReviewList = ({ targetType, targetId, onReviewsUpdate }) => {
         }
 
         try {
-            const response = await fetch(apiUrl(`/reviews/${reviewId}/helpful`), {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include'
-            });
+            const response = await axiosInstance.put(`/reviews/${reviewId}/helpful`);
 
-            if (response.ok) {
-                const data = await response.json();
+            if (response.status === 200) {
+                const data = response.data;
                 setReviews(prev => prev.map(review =>
                     review._id === reviewId ? data : review
                 ));

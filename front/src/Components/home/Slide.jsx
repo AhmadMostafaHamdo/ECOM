@@ -75,6 +75,14 @@ const Slide = React.memo(({ title, products, category }) => {
                                 </div>
                                 <div className="product_info">
                                     <p className="products_name">{e.title.shortTitle}</p>
+                                    <div className="location_badge_mini" style={{ fontSize: '10px', color: '#888', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        {e.locationDetail && (e.locationDetail.city || e.locationDetail.country) ? (
+                                            <>
+                                                <LocalOffer style={{ fontSize: '11px', color: '#f5a623' }} />
+                                                <span>{e.locationDetail.city || e.locationDetail.province || e.locationDetail.country}</span>
+                                            </>
+                                        ) : null}
+                                    </div>
                                     <p className="products_explore">{e.tagline}</p>
                                     <div className="meta_row">
                                         <span className="rating_chip">
@@ -88,10 +96,10 @@ const Slide = React.memo(({ title, products, category }) => {
                                     </div>
                                     <div className="price_section">
                                         <span className="price_value">
-                                          {formatCurrency(e.price.cost, activeCountry.locale, activeCountry.currency)}
+                                          {formatCurrency(e.price.cost, activeCountry.locale, e.price.currency || activeCountry.currency)}
                                         </span>
                                         <span className="strike_price">
-                                          {formatCurrency(e.price.mrp, activeCountry.locale, activeCountry.currency)}
+                                          {formatCurrency(e.price.mrp, activeCountry.locale, e.price.currency || activeCountry.currency)}
                                         </span>
                                     </div>
                                 </div>

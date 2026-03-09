@@ -9,7 +9,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import StarIcon from "@mui/icons-material/Star";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import { useLocalize } from "../context/LocalizeContext";
 
 const CATEGORY_ALL = "All Categories";
@@ -42,15 +42,9 @@ const Maincomp = React.memo(
             search: searchTerm,
           };
 
-          const response = await fetch(apiUrl("/products/filter"), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          });
+          const response = await axiosInstance.post("/products/filter", payload);
+          const resData = response.data;
 
-          const resData = await response.json();
           if (isMounted) {
             setProducts(
               resData.data || (Array.isArray(resData.data) ? resData.data : []),
@@ -62,7 +56,9 @@ const Maincomp = React.memo(
           }
           console.log("Products fetch failed:", error.message);
         } finally {
-          setLoading(false);
+          if (isMounted) {
+            setLoading(false);
+          }
         }
       };
 
@@ -106,7 +102,7 @@ const Maincomp = React.memo(
             </div>
             <div className="territory_market">
               <span className="market_tag">
-                {activeCountry.currency} Market
+                {t("localization.market", { currency: activeCountry.currency })}
               </span>
               <div className="tax_note">
                 {t(`localization.countries.${activeCountry.id}.tax_note`)}
@@ -125,7 +121,7 @@ const Maincomp = React.memo(
                 <p>{t("home.premiumDescription")}</p>
                 <div className="right_img_wrapper">
                   <img
-                    src="https://images-eu.ssl-images-amazon.com/images/G/31/img21/Wireless/Jupiter/Launches/T3/DesktopGateway_CategoryCard2x_758X608_T3._SY608_CB639883570_.jpg"
+                    src="/assets/banners/electronics.png"
                     alt="Latest launch"
                     loading="lazy"
                   />
@@ -144,8 +140,7 @@ const Maincomp = React.memo(
                 : `${t("home.category")}: ${selectedCategory}`}
             </h4>
             <p>
-              {products.length} {t("home.productsAvailable")}
-              {products.length === 1 ? "" : "s"}
+              {products.length} {t("allProducts.productsFound")}
             </p>
           </section>
 
@@ -193,13 +188,13 @@ const Maincomp = React.memo(
                     }
                   />
 
-                  <div className="center_img">
+                  <div className="center_img reveal_section" style={{ animationDelay: '0.2s' }}>
                     <div className="center_img_overlay">
                       <h3>{t("home.savingsHub")}</h3>
                       <p>{t("home.savingsDescription")}</p>
                     </div>
                     <img
-                      src="https://m.media-amazon.com/images/G/31/AMS/IN/970X250-_desktop_banner.jpg"
+                      src="/assets/banners/sale.png"
                       alt="Special offers"
                       loading="lazy"
                     />

@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import StarRating from './StarRating';
 import Button from '../common/Button';
 import { Logincontext } from '../context/Contextprovider';
-import { apiUrl } from '../../api';
+import { axiosInstance } from '../../api';
 import { toast } from 'react-toastify';
 import './ReviewForm.css';
 
@@ -34,35 +34,26 @@ const ReviewForm = ({ targetType, targetId, onSubmit, onCancel }) => {
         setLoading(true);
 
         try {
-            const response = await fetch(apiUrl('/reviews'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    targetType,
-                    targetId,
-                    rating,
-                    title: title.trim(),
-                    comment: comment.trim()
-                })
+            const response = await axiosInstance.post('/reviews', {
+                targetType,
+                targetId,
+                rating,
+                title: title.trim(),
+                comment: comment.trim()
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
+            if (response.status === 200 || response.status === 201) {
                 toast.success('Review submitted successfully!');
                 setRating(0);
                 setTitle('');
                 setComment('');
-                if (onSubmit) onSubmit(data);
+                if (onSubmit) onSubmit(response.data);
             } else {
-                toast.error(data.error || 'Failed to submit review');
+                toast.error(response.data.error || 'Failed to submit review');
             }
         } catch (error) {
-            console.error('Review submission error:', error);
-            toast.error('Failed to submit review');
+            const errorMsg = error.response?.data?.error || 'Failed to submit review';
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }

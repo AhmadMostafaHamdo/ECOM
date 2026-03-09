@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import "./Messages.css";
 
 const Messages = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -20,35 +20,23 @@ const Messages = () => {
   const fetchMessages = async (page = 1, status = "all", search = "") => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
+      const params = {
         page: page.toString(),
         limit: "10",
         status: status,
         search: search,
-      });
+      };
 
-      const response = await fetch(
-        apiUrl(`/admin/contact/messages?${params}`),
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          credentials: "include",
-        },
-      );
+      const response = await axiosInstance.get("/admin/contact/messages", { params });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch messages");
+      if (response.status === 200) {
+        const data = response.data;
+        setMessages(data.data || []);
+        setTotalPages(data.pagination?.totalPages || 1);
+        setCurrentPage(data.pagination?.currentPage || 1);
       }
-
-      const data = await response.json();
-      setMessages(data.data || []);
-      setTotalPages(data.pagination?.totalPages || 1);
-      setCurrentPage(data.pagination?.currentPage || 1);
     } catch (error) {
-      setError(error.message);
+      setError(error.response?.data?.error || error.message);
     } finally {
       setLoading(false);
     }
@@ -61,35 +49,23 @@ const Messages = () => {
   const handleStatusChange = async (messageId, newStatus) => {
     try {
       setIsUpdating(true);
-      const response = await fetch(
-        apiUrl(`/admin/contact/messages/${messageId}`),
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({ status: newStatus }),
-        },
-      );
+      const response = await axiosInstance.put(`/admin/contact/messages/${messageId}`, {
+        status: newStatus
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to update message status");
-      }
+      if (response.status === 200) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === messageId ? { ...msg, status: newStatus } : msg,
+          ),
+        );
 
-      const data = await response.json();
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === messageId ? { ...msg, status: newStatus } : msg,
-        ),
-      );
-
-      if (selectedMessage && selectedMessage._id === messageId) {
-        setSelectedMessage((prev) => ({ ...prev, status: newStatus }));
+        if (selectedMessage && selectedMessage._id === messageId) {
+          setSelectedMessage((prev) => ({ ...prev, status: newStatus }));
+        }
       }
     } catch (error) {
-      setError(error.message);
+      setError(error.response?.data?.error || error.message);
     } finally {
       setIsUpdating(false);
     }
@@ -99,30 +75,18 @@ const Messages = () => {
     if (!messageToDelete) return;
 
     try {
-      const response = await fetch(
-        apiUrl(`/admin/contact/messages/${messageToDelete}`),
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          credentials: "include",
-        },
-      );
+      const response = await axiosInstance.delete(`/admin/contact/messages/${messageToDelete}`);
 
-      if (!response.ok) {
-        throw new Error("Failed to delete message");
-      }
-
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
-      setShowDeleteModal(false);
-      setMessageToDelete(null);
-      if (selectedMessage && selectedMessage._id === messageToDelete) {
-        setSelectedMessage(null);
+      if (response.status === 200) {
+        setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
+        setShowDeleteModal(false);
+        setMessageToDelete(null);
+        if (selectedMessage && selectedMessage._id === messageToDelete) {
+          setSelectedMessage(null);
+        }
       }
     } catch (error) {
-      setError(error.message);
+      setError(error.response?.data?.error || error.message);
     }
   };
 
@@ -142,19 +106,19 @@ const Messages = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "pending":
-        return "Pending";
+        return t("admin.messages.status.pending");
       case "read":
-        return "Read";
+        return t("admin.messages.status.read");
       case "replied":
-        return "Replied";
+        return t("admin.messages.status.replied");
       default:
-        return "Pending";
+        return t("admin.messages.status.pending");
     }
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(i18n.language === "ar" ? "ar-SA" : "en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -188,18 +152,18 @@ const Messages = () => {
       <div className="messages-container">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading messages...</p>
+          <p>{t("admin.messages.loading")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="messages-container">
+    <div className="messages-container" style={{ direction: i18n.dir() }}>
       <div className="messages-header">
-        <h1 className="messages-title">Contact Messages</h1>
+        <h1 className="messages-title">{t("admin.messages.title")}</h1>
         <p className="messages-subtitle">
-          Manage customer inquiries and support requests
+          {t("admin.messages.subtitle")}
         </p>
       </div>
 
@@ -234,7 +198,7 @@ const Messages = () => {
             </svg>
             <input
               type="text"
-              placeholder="Search messages..."
+              placeholder={t("admin.messages.search")}
               value={searchTerm}
               onChange={handleSearch}
               className="search-input"
@@ -247,7 +211,7 @@ const Messages = () => {
               onChange={handleStatusFilterChange}
               className="filter-select"
             >
-              <option value="all">All Status</option>
+              <option value="all">{t("admin.messages.allStatus")}</option>
               <option value="pending">Pending</option>
               <option value="read">Read</option>
               <option value="replied">Replied</option>

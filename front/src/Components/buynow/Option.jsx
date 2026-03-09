@@ -1,8 +1,7 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Logincontext } from "../context/Contextprovider";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { apiUrl } from "../../api";
+import { axiosInstance } from "../../api";
 import "./option.css";
 import ConfirmDialog from "../common/ConfirmDialog";
 
@@ -15,26 +14,17 @@ const Option = ({ deletedata, get }) => {
         setIsConfirmOpen(false);
         setIsRemoving(true);
         try {
-            const res = await fetch(apiUrl(`/remove/${id}`), {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json"
-                },
-                credentials: "include"
-            });
-
-            const data = await res.json();
-
-            if (res.status === 400 || !data) {
-                return;
-            }
+            const res = await axiosInstance.delete(`/remove/${id}`);
+            const data = res.data;
 
             setAccount(data);
             get();
             toast.success("Item removed from cart.", {
                 position: "top-center"
             });
+        } catch (error) {
+            console.error("Remove error:", error);
+            toast.error("Failed to remove item.");
         } finally {
             setIsRemoving(false);
         }
@@ -55,8 +45,8 @@ const Option = ({ deletedata, get }) => {
             <p className="forremovemedia">Save for later</p>
             <span>|</span>
             <p className="forremovemedia">See similar items</p>
-            
-            <ConfirmDialog 
+
+            <ConfirmDialog
                 open={isConfirmOpen}
                 title="Remove Item"
                 message="Are you sure you want to remove this item from your cart?"
