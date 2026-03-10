@@ -1,111 +1,154 @@
 const User = require("../models/userSchema");
-const { toPublicUser } = require("../utils/helpers");
-const { USER_ROLES } = require("../utils/constants");
+const products = require("../models/productsSchema");
+const { asyncHandler } = require("../middleware/errorMiddleware");
 
-exports.getUsers = async (req, res) => {
-    try {
-        const { page = 1, limit = 10, search = "" } = req.query;
-        const pageNum = parseInt(page);
-        const limitNum = parseInt(limit);
-        const skip = (pageNum - 1) * limitNum;
+/**
+ * Get user wishlist
+ */
+exports.getWishlist = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.userID).populate("wishlist");
+    if (!user) {
+        return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user.wishlist || []);
+});
 
-        let query = {};
-        if (search) {
-            const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-            query.$or = [{ fname: searchRegex }, { email: searchRegex }, { mobile: searchRegex }];
-        }
+/**
+ * Add or remove from wishlist
+ */
+exports.toggleWishlist = asyncHandler(async (req, res) => {
+    const { productId } = req.body;
 
-        const [users, totalItems] = await Promise.all([
-            User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
-            User.countDocuments(query),
-        ]);
+    // Check if product exists
+    const product = await products.findById(productId);
+    if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+    }
 
-        res.status(200).json({
-            data: users.map(toPublicUser),
-            page: pageNum,
+    const user = await User.findById(req.userID);
+    if (!user) {
+        return res.status(404).json({ error: "User not found" });
+    }
+
+    // Initialize wishlist if it doesn't exist
+    if (!user.wishlist) user.wishlist = [];
+
+    const index = user.wishlist.indexOf(productId);
+    let saved = false;
+
+    if (index > -1) {
+        // Remove from wishlist
+        user.wishlist.splice(index, 1);
+        saved = false;
+    } else {
+        // Add to wishlist
+        user.wishlist.push(productId);
+        saved = true;
+    }
+
+    await user.save();
+    res.status(200).json({
+        saved,
+        wishlistCount: user.wishlist.length,
+        message: saved ? "Added to wishlist" : "Removed from wishlist"
+    });
+});
+
+/**
+ * Clear the entire wishlist
+ */
+exports.clearWishlist = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.userID);
+    if (!user) {
+        return res.status(404).json({ error: "User not found" });
+    }
+
+    user.wishlist = [];
+    await user.save();
+    res.status(200).json({ message: "Wishlist cleared", wishlist: [] });
+});
+
+/**
+ * Admin: Get all users
+ */
+exports.getUsers = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 20, role, search } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    let query = {};
+    if (role) query.role = role;
+    if (search) {
+        const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+        query.$or = [{ fname: searchRegex }, { email: searchRegex }];
+    }
+
+    const [users, totalItems] = await Promise.all([
+        User.find(query).select("-password -tokens -cpassword").sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+        User.countDocuments(query),
+    ]);
+
+    res.status(200).json({
+        data: users,
+        pagination: {
+            totalItems,
+            totalPages: Math.ceil(totalItems / limitNum),
+            currentPage: pageNum,
             limit: limitNum,
-            total: totalItems,
-            total_pages: Math.ceil(totalItems / limitNum),
-        });
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch users" });
-    }
-};
+        },
+    });
+});
 
-exports.getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ error: "User not found" });
-        res.status(200).json(toPublicUser(user));
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch user details" });
-    }
-};
+/**
+ * Admin: Get user by ID
+ */
+exports.getUserById = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id).select("-password -tokens -cpassword");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.status(200).json(user);
+});
 
-exports.createUser = async (req, res) => {
-    try {
-        const { fname, email, mobile, password, cpassword, role } = req.body;
-        if (!fname || !email || !mobile || !password) return res.status(422).json({ error: "Name, email, mobile and password are required" });
+/**
+ * Admin: Update user
+ */
+exports.updateUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-        if (password !== (cpassword || password)) return res.status(422).json({ error: "Passwords do not match" });
+    const updates = req.body;
+    delete updates.password; // Don't allow password update through this route
+    delete updates.tokens;
 
-        const safeRole = USER_ROLES.has(role) ? role : "user";
-        const user = new User({ fname, email, mobile, password, cpassword: cpassword || password, role: safeRole });
-        const savedUser = await user.save();
-        res.status(201).json(toPublicUser(savedUser));
-    } catch (error) {
-        if (error?.code === 11000) return res.status(409).json({ error: "Email or mobile already exists" });
-        res.status(500).json({ error: "Failed to create user" });
-    }
-};
+    Object.assign(user, updates);
+    await user.save();
 
-exports.updateUser = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ error: "User not found" });
+    res.status(200).json({ success: true, data: user });
+});
 
-        const { fname, email, mobile, password, cpassword, role } = req.body;
-        if (fname) user.fname = fname.trim();
-        if (email) user.email = email.trim();
-        if (mobile) user.mobile = mobile.toString().trim();
-        if (role && USER_ROLES.has(role)) user.role = role;
+/**
+ * Admin: Delete user
+ */
+exports.deleteUser = asyncHandler(async (req, res) => {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.status(200).json({ success: true, deletedUserId: user._id });
+});
 
-        if (typeof password === "string" && password.trim()) {
-            if (password !== (cpassword || password)) return res.status(422).json({ error: "Passwords do not match" });
-            user.password = password;
-            user.cpassword = cpassword || password;
-        }
+/**
+ * Admin: Ban user
+ */
+exports.banUser = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { isBanned, banReason } = req.body;
 
-        const updatedUser = await user.save();
-        res.status(200).json(toPublicUser(updatedUser));
-    } catch (error) {
-        if (error?.code === 11000) return res.status(409).json({ error: "Email or mobile already exists" });
-        res.status(500).json({ error: "Failed to update user" });
-    }
-};
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-exports.deleteUser = async (req, res) => {
-    try {
-        const deletedUser = await User.findByIdAndDelete(req.params.id);
-        if (!deletedUser) return res.status(404).json({ error: "User not found" });
-        res.status(200).json({ success: true, deletedUserId: deletedUser._id });
-    } catch (error) {
-        res.status(500).json({ error: "Failed to delete user" });
-    }
-};
+    user.isBanned = isBanned;
+    user.banReason = isBanned ? banReason : "";
+    user.bannedAt = isBanned ? new Date() : null;
 
-exports.banUser = async (req, res) => {
-    try {
-        const { isBanned, banReason } = req.body;
-        const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        user.isBanned = isBanned;
-        user.banReason = isBanned ? banReason : "";
-        user.bannedAt = isBanned ? new Date() : null;
-        await user.save();
-        res.status(200).json(toPublicUser(user));
-    } catch (error) {
-        res.status(500).json({ error: "Failed to ban/unban user" });
-    }
-};
+    await user.save();
+    res.status(200).json({ success: true, data: user });
+});

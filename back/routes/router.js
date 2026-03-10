@@ -13,25 +13,11 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const { optimizeImage } = require("../utils/helpers");
 
 const keysecret = process.env.KEY;
 const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    if (!fs.existsSync(UPLOADS_DIR)) {
-      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-    }
-    cb(null, UPLOADS_DIR);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname),
-    );
-  },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
@@ -1422,12 +1408,15 @@ router.post(
         return res.status(400).json({ error: "No files uploaded" });
       }
 
-      const imageUrls = req.files.map((file) => {
-        return `/uploads/${file.filename}`;
-      });
+      const imageUrls = await Promise.all(
+        req.files.map(async (file) => {
+          const filename = await optimizeImage(file.buffer, file.originalname);
+          return `/uploads/${filename}`;
+        })
+      );
 
       res.status(200).json({
-        message: "Files uploaded successfully",
+        message: "Files uploaded and optimized successfully",
         images: imageUrls,
       });
     } catch (error) {
@@ -2900,109 +2889,4 @@ router.patch("/admin/users/:id/unban", authenicate, requireAdmin, async (req, re
   }
 });
 
-
-// ─────────────────────────────────────────────
-// WISHLIST API
-// ─────────────────────────────────────────────
-
-// GET: fetch the authenticated user's wishlist with full product details
-router.get("/wishlist", authenicate, async (req, res) => {
-  try {
-    const user = await User.findById(req.userID).populate({
-      path: "wishlist",
-      model: "products",
-      select: "id title url detailUrl price discount rating averageRating totalReviews views category likeCount"
-    });
-
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    // Convert populated documents to plain objects
-    const wishlist = (user.wishlist || []).map(p => {
-      const obj = p.toObject ? p.toObject() : p;
-      return obj;
-    });
-
-    const pageNum = parseInt(req.query.page) || 1;
-    const limitNum = parseInt(req.query.limit) || 20;
-    const start = (pageNum - 1) * limitNum;
-    const paginatedWishlist = wishlist.slice(start, start + limitNum);
-
-    res.status(200).json({
-      data: paginatedWishlist,
-      page: pageNum,
-      limit: limitNum,
-      total: wishlist.length,
-      total_pages: Math.ceil(wishlist.length / limitNum)
-    });
-  } catch (error) {
-    console.log("Wishlist GET error:", error.message);
-    res.status(500).json({ error: "Failed to fetch wishlist" });
-  }
-});
-
-// POST: toggle a product in/out of the wishlist
-router.post("/wishlist/toggle/:productId", authenicate, async (req, res) => {
-  try {
-    const { productId } = req.params;
-
-    // Validate ObjectId format to prevent CastError
-    const mongoose = require("mongoose");
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ error: "Invalid product ID" });
-    }
-
-    // Verify product exists
-    const product = await products.findById(productId);
-    if (!product) return res.status(404).json({ error: "Product not found" });
-
-    const user = await User.findById(req.userID);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    // Ensure wishlist is initialized
-    if (!user.wishlist) user.wishlist = [];
-
-    const alreadySaved = user.wishlist.some(
-      (id) => id.toString() === productId.toString()
-    );
-
-    if (alreadySaved) {
-      // Remove from wishlist
-      user.wishlist = user.wishlist.filter(
-        (id) => id.toString() !== productId.toString()
-      );
-    } else {
-      // Add to wishlist
-      user.wishlist.push(productId);
-    }
-
-    await user.save();
-
-    res.status(200).json({
-      saved: !alreadySaved,
-      wishlistCount: user.wishlist.length,
-      message: alreadySaved ? "Removed from wishlist" : "Added to wishlist"
-    });
-  } catch (error) {
-    console.log("Wishlist toggle error:", error.message);
-    res.status(500).json({ error: "Failed to update wishlist" });
-  }
-});
-
-// DELETE: clear the entire wishlist
-router.delete("/wishlist", authenicate, async (req, res) => {
-  try {
-    const user = await User.findById(req.userID);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    user.wishlist = [];
-    await user.save();
-
-    res.status(200).json({ message: "Wishlist cleared", wishlist: [] });
-  } catch (error) {
-    console.log("Wishlist clear error:", error.message);
-    res.status(500).json({ error: "Failed to clear wishlist" });
-  }
-});
-
 module.exports = router;
-

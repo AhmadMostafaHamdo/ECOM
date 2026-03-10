@@ -1,0 +1,38 @@
+.product-skeleton-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    height: 100%;
+}
+
+.product-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 24px;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.product-skeleton-card .meta-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+@media (max-width: 640px) {
+    .product-skeleton-grid {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+}

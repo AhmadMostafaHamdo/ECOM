@@ -13,6 +13,7 @@ const {
 } = require("../utils/helpers");
 const { CATEGORY_ALL, TEXT_FILTER_FIELDS, UNCATEGORIZED } = require("../utils/constants");
 const { asyncHandler } = require("../middleware/errorMiddleware");
+const { clearCache } = require("../middleware/cacheMiddleware");
 
 // Category sync logic - run once at startup or when explicitly needed
 exports.ensureCategoryCatalog = async () => {
@@ -217,6 +218,10 @@ exports.createProduct = asyncHandler(async (req, res) => {
         createdBy: req.userID,
     });
 
+    // Clear product-related caches
+    clearCache("/api/getproducts");
+    clearCache("/api/products/trending");
+
     const populated = await products.findById(product._id).populate("createdBy", "fname email");
     res.status(201).json(toPublicProduct(populated));
 });
@@ -236,6 +241,11 @@ exports.updateProduct = asyncHandler(async (req, res) => {
     Object.assign(product, payload);
     await product.save();
 
+    // Clear caches
+    clearCache("/api/getproducts");
+    clearCache(`/api/getproductsone/${req.params.id}`);
+    clearCache("/api/products/trending");
+
     const populated = await products.findById(product._id).populate("createdBy", "fname email");
     res.status(200).json(toPublicProduct(populated));
 });
@@ -253,6 +263,12 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
 
     await products.deleteOne({ _id: product._id });
     await ProductView.deleteMany({ productId: product.id });
+
+    // Clear caches
+    clearCache("/api/getproducts");
+    clearCache(`/api/getproductsone/${req.params.id}`);
+    clearCache("/api/products/trending");
+
     res.status(200).json({ success: true, deletedProductId: product.id });
 });
 

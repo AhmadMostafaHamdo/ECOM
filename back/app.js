@@ -105,6 +105,27 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Auth Limiter
+const authLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // 10 attempts
+    message: "Too many login/registration attempts from this IP, please try again after an hour",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use("/api/login", authLimiter);
+app.use("/api/register", authLimiter);
+
+// Contact Limiter
+const contactLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5, // 5 messages
+    message: "Too many contact messages from this IP, please try again after an hour",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use("/api/contact", contactLimiter);
+
 // Data sanitization
 app.use(mongoSanitize());
 app.use(xss());

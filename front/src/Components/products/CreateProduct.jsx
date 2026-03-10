@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ROOT_URL, axiosInstance } from "../../api";
@@ -140,15 +140,15 @@ const CreateProduct = ({ mode = "create" }) => {
     }
   }, [images]);
 
-  const updateField = (event) => {
+  const updateField = useCallback((event) => {
     const { name, value } = event.target;
     setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const submitProduct = async (event) => {
+  const submitProduct = useCallback(async (event) => {
     event.preventDefault();
     setSaving(true);
     setError("");
@@ -182,7 +182,7 @@ const CreateProduct = ({ mode = "create" }) => {
     } finally {
       setSaving(false);
     }
-  };
+  }, [form, images, isEdit, editId, navigate, t]);
 
   if (loading) {
     return (

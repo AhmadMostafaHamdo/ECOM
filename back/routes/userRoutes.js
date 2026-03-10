@@ -4,6 +4,11 @@ const userController = require("../controllers/userController");
 const authenticate = require("../middleware/authenticate");
 const requireAdmin = require("../middleware/admin");
 
+// Wishlist operations
+router.get("/wishlist", authenticate, userController.getWishlist);
+router.post("/wishlist", authenticate, userController.toggleWishlist);
+router.delete("/wishlist", authenticate, userController.clearWishlist);
+
 // All admin operations
 router.get("/admin/users", authenticate, requireAdmin, userController.getUsers);
 router.get("/admin/users/:id", authenticate, requireAdmin, userController.getUserById);

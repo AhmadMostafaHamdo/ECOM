@@ -11,6 +11,7 @@ import StarIcon from "@mui/icons-material/Star";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { axiosInstance } from "../../api";
 import { useLocalize } from "../context/LocalizeContext";
+import { ProductSkeletonList } from "../common/ProductSkeleton";
 
 const CATEGORY_ALL = "All Categories";
 
@@ -69,20 +70,10 @@ const Maincomp = React.memo(
       };
     }, [selectedCategory, filters, searchTerm]);
 
-    if (loading) {
+    if (loading && products.length === 0) {
       return (
-        <div className="main_loader">
-          <div className="loader_content">
-            <div className="loader_icon">
-              <ShoppingBagIcon className="shopping_icon pulse" />
-            </div>
-            <div className="loader_spinner_main"></div>
-            <h2>{t("home.preparingCollections")}</h2>
-            <p>{t("home.loadingPersonalized")}</p>
-            <div className="loader_progress">
-              <div className="loader_progress_bar"></div>
-            </div>
-          </div>
+        <div className="home_section">
+          <ProductSkeletonList count={8} />
         </div>
       );
     }

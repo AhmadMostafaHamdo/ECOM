@@ -1,6 +1,9 @@
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { ONE_YEAR_MS, UNCATEGORIZED } = require("./constants");
+const sharp = require("sharp");
+const path = require("path");
+const fs = require("fs");
 
 const keysecret = process.env.KEY;
 
@@ -222,6 +225,23 @@ const buildProductPayload = (body = {}, fallback = {}) => {
     };
 };
 
+const optimizeImage = async (fileBuffer, filename) => {
+    const uploadDir = path.join(__dirname, "..", "uploads");
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const outputFilename = `${path.parse(filename).name}-${Date.now()}.webp`;
+    const outputPath = path.join(uploadDir, outputFilename);
+
+    await sharp(fileBuffer)
+        .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toFile(outputPath);
+
+    return outputFilename;
+};
+
 module.exports = {
     normalizeCategory,
     generateSessionId,
@@ -235,5 +255,6 @@ module.exports = {
     toPublicUser,
     toPublicProduct,
     parseImages,
-    buildProductPayload
+    buildProductPayload,
+    optimizeImage
 };
