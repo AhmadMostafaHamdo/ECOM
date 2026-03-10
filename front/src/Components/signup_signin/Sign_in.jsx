@@ -14,16 +14,38 @@ const Sign_in = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [logdata, setData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
 
   const adddata = (e) => {
     const { name, value } = e.target;
     setData((pre) => ({ ...pre, [name]: value }));
+    if (errors[name]) setErrors((pre) => ({ ...pre, [name]: null }));
   };
 
   const senddata = async (e) => {
     e.preventDefault();
-    setLoading(true);
     const { email, password } = logdata;
+    const newErrors = {};
+
+    if (!email) {
+      newErrors.email = t("auth.emailRequired");
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = t("auth.invalidEmail");
+    }
+
+    if (!password) {
+      newErrors.password = t("auth.passwordRequired");
+    } else if (password.length < 6) {
+      newErrors.password = t("auth.passwordLength");
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setLoading(true);
     try {
       const res = await axiosInstance.post("/login", { email, password });
 
@@ -104,7 +126,7 @@ const Sign_in = () => {
           </p>
 
           <form onSubmit={senddata} noValidate className="the_form">
-            <div className="field">
+            <div className={`field ${errors.email ? "error" : ""}`}>
               <label htmlFor="si_email">
                 {t("auth.email")}
               </label>
@@ -115,11 +137,11 @@ const Sign_in = () => {
                 placeholder="name@example.com"
                 value={logdata.email}
                 onChange={adddata}
-                required
               />
+              {errors.email && <span className="error_msg">{errors.email}</span>}
             </div>
 
-            <div className="field">
+            <div className={`field ${errors.password ? "error" : ""}`}>
               <div className="field_top_row">
                 <label htmlFor="si_pass">
                   {t("auth.password")}
@@ -135,8 +157,8 @@ const Sign_in = () => {
                 placeholder="••••••••"
                 value={logdata.password}
                 onChange={adddata}
-                required
               />
+              {errors.password && <span className="error_msg">{errors.password}</span>}
             </div>
 
             <button type="submit" className="login_btn" disabled={loading}>

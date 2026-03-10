@@ -110,6 +110,38 @@ exports.getUserById = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Admin: Create a new user
+ */
+exports.createUser = asyncHandler(async (req, res) => {
+    const { fname, email, mobile, password, cpassword, role, country } = req.body;
+
+    if (!fname || !email || !mobile || !password || !cpassword) {
+        return res.status(422).json({ error: "Please fill all details" });
+    }
+
+    const preuser = await User.findOne({ email });
+    if (preuser) return res.status(422).json({ error: "This email already exists" });
+
+    const premobile = await User.findOne({ mobile });
+    if (premobile) return res.status(422).json({ error: "This mobile already exists" });
+
+    if (password !== cpassword) return res.status(422).json({ error: "Passwords do not match" });
+
+    const user = new User({
+        fname,
+        email,
+        mobile,
+        password,
+        cpassword,
+        role: role || "user",
+        country
+    });
+
+    await user.save();
+    res.status(201).json({ success: true, data: user });
+});
+
+/**
  * Admin: Update user
  */
 exports.updateUser = asyncHandler(async (req, res) => {
