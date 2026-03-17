@@ -1,0 +1,136 @@
+.login_prompt_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.login_prompt_card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    transform: translateY(0);
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.login_prompt_card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #ff9900, #ff4d00);
+}
+
+.login_icon_box {
+    width: 80px;
+    height: 80px;
+    background: #fff8f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: #ff9900;
+}
+
+.login_icon_box svg {
+    font-size: 40px;
+}
+
+.login_prompt_card h2 {
+    margin-bottom: 1rem;
+    color: #232f3e;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.login_prompt_card p {
+    color: #565959;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+.countdown_timer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f2f2;
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    color: #232f3e;
+    margin-bottom: 2rem;
+}
+
+.timer_number {
+    color: #ff9900;
+    font-size: 1.2rem;
+    margin: 0 5px;
+}
+
+.login_prompt_actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.prompt_btn {
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 0.95rem;
+}
+
+.prompt_btn.login_now {
+    background: #ff9900;
+    color: white;
+}
+
+.prompt_btn.login_now:hover {
+    background: #ff8c00;
+    transform: translateY(-2px);
+}
+
+.prompt_btn.close_prompt {
+    background: transparent;
+    color: #888;
+}
+
+.prompt_btn.close_prompt:hover {
+    color: #333;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* RTL Support */
+[dir="rtl"] .login_prompt_card h2,
+[dir="rtl"] .login_prompt_card p {
+    font-family: 'Outfit', sans-serif;
+}

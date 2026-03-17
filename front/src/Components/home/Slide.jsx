@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocalize } from "../context/LocalizeContext";
+import { Logincontext } from "../context/Contextprovider";
 import { formatCurrency } from "../../utils/localizeUtils";
 import "../home/slide.css";
 import Carousel from "react-multi-carousel";
@@ -26,13 +27,26 @@ const responsive = {
 const Slide = React.memo(({ title, products, category }) => {
     const { t } = useTranslation();
     const { activeCountry } = useLocalize();
+    const { account, setShowLoginPrompt } = useContext(Logincontext);
     const navigate = useNavigate();
     const items = Array.isArray(products) ? products : [];
 
     const handleViewAll = () => {
+        if (!account) {
+            setShowLoginPrompt(true);
+            return;
+        }
         // Use provided category or extract from title
         const targetCategory = category || (title ? title.toLowerCase().replace(/\s+/g, '-') : "all");
         navigate(`/products/all/${targetCategory}`);
+    };
+
+    const handleProductClick = (e, productId) => {
+        if (!account) {
+            e.preventDefault();
+            setShowLoginPrompt(true);
+            return;
+        }
     };
 
     return (
@@ -62,7 +76,7 @@ const Slide = React.memo(({ title, products, category }) => {
                     containerClass="carousel-container"
                 >
                     {items.map((e) => (
-                        <NavLink to={`/getproductsone/${e.id}`} key={e.id} className="product_link">
+                        <NavLink to={`/getproductsone/${e.id}`} key={e.id} className="product_link" onClick={(evt) => handleProductClick(evt, e.id)}>
                             <div className="products_items">
                                 <div className="product_img">
                                     <img src={e.url} alt={e.title.shortTitle} loading="lazy" />

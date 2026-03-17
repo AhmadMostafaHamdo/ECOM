@@ -311,6 +311,7 @@ const ProductsManagement = () => {
           <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: "14px" }}>
             {t("admin.welcomeMessage")}
           </p>
+          <p>{t("admin.welcomeMessage")}</p>
         </div>
         {!showForm && (
           <button className="btn_primary" onClick={() => setShowForm(true)}>

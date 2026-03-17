@@ -32,12 +32,13 @@ const AllProducts = lazy(() => import("./Components/products/AllProducts"));
 const ContactUs = lazy(() => import("./Components/ContactUs"));
 const ChatWidget = lazy(() => import("./Components/chat/ChatWidget"));
 const WishlistPage = lazy(() => import("./Components/wishlist/WishlistPage"));
+const LoginPrompt = lazy(() => import("./Components/common/LoginPrompt"));
 
 const CATEGORY_ALL = "All Categories";
 
 function App() {
   const location = useLocation();
-  const { account, setAccount } = useContext(Logincontext);
+  const { account, setAccount, showLoginPrompt, setShowLoginPrompt } = useContext(Logincontext);
   const { t, i18n } = useTranslation();
   const [data, setData] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
@@ -229,6 +230,9 @@ function App() {
               )}
               {!isDashboardRoute && <Footer />}
               {!isDashboardRoute && !isAuthRoute && <ChatWidget />}
+              {showLoginPrompt && (
+                <LoginPrompt onCancel={() => setShowLoginPrompt(false)} />
+              )}
             </>
           )}
         </Suspense>

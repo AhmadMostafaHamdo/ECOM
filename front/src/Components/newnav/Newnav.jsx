@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, useContext } from "react";
+import { Logincontext } from "../context/Contextprovider";
 import "../newnav/newnav.css";
 
 const CATEGORY_ALL = "All Categories";
@@ -9,6 +10,7 @@ const Newnav = ({
   onCategoryChange = () => {},
 }) => {
   const scrollRef = useRef(null);
+  const { account, setShowLoginPrompt } = useContext(Logincontext);
   
   // Normalize categories: support strings and object shapes
   const visibleCategories = Array.isArray(categories) && categories.length
@@ -16,6 +18,11 @@ const Newnav = ({
     : [{ name: CATEGORY_ALL, image: '' }];
 
   const handleCategoryClick = (categoryName, e) => {
+    if (!account) {
+        setShowLoginPrompt(true);
+        return;
+    }
+
     onCategoryChange(categoryName);
     // UX: Center the selected chip in the scroll view
     e.target.scrollIntoView({

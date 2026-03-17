@@ -1,108 +1,104 @@
+/* Overlay يغطي الشاشة بالكامل */
 .confirm-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(4px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    animation: fadeIn 0.2s ease-out;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: overlayFade 0.2s ease;
 }
 
+/* الكارد في المنتصف */
 .confirm-card {
-    background: white;
-    border-radius: 20px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    overflow: hidden;
-    animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 420px;
+  max-width: 90%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  animation: cardPop 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
+/* الهيدر */
 .confirm-header {
-    padding: 24px 24px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
+/* أيقونة */
 .confirm-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* زر الإغلاق */
 .confirm-close-btn {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 50%;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
 }
 
 .confirm-close-btn:hover {
-    background: #f1f5f9;
-    color: #64748b;
+  background: rgba(0,0,0,0.06);
 }
 
+/* المحتوى */
 .confirm-body {
-    padding: 0 24px 24px;
+  text-align: center;
 }
 
 .confirm-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .confirm-message {
-    font-size: 0.95rem;
-    color: #475569;
-    line-height: 1.6;
-    margin: 0;
+  font-size: 15px;
+  color: #555;
 }
 
+/* الفوتر */
 .confirm-footer {
-    padding: 16px 24px 24px;
-    background: #f8fafc;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.confirm-cancel-btn {
-    color: #64748b !important;
+/* أنيميشن */
+@keyframes overlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.confirm-action-btn {
-    min-width: 110px;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-/* RTL Support if needed */
-[dir="rtl"] .confirm-footer {
-    justify-content: flex-start;
+@keyframes cardPop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

@@ -230,7 +230,11 @@
     "feat2": "Money back guarantee",
     "feat3": "Exclusive member offers",
     "or": "Or",
-    "loginRequired": "Please login to continue"
+    "loginRequired": "Please login to continue",
+    "loginPromptMessage": "You must login to continue and see full details.",
+    "redirectingIn": "Redirecting in",
+    "seconds": "seconds",
+    "loginNow": "Login Now"
   },
   "profile": {
     "title": "My Profile",

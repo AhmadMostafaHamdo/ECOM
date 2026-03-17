@@ -12,6 +12,9 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { axiosInstance } from "../../api";
 import { useLocalize } from "../context/LocalizeContext";
 import { ProductSkeletonList } from "../common/ProductSkeleton";
+import { Logincontext } from "../context/Contextprovider";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 const CATEGORY_ALL = "All Categories";
 
@@ -24,8 +27,18 @@ const Maincomp = React.memo(
   }) => {
     const { t } = useTranslation();
     const { activeCountry } = useLocalize();
+    const { account, setShowLoginPrompt } = useContext(Logincontext);
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const handleExploreClick = () => {
+        if (!account) {
+            setShowLoginPrompt(true);
+        } else {
+            navigate('/products/all');
+        }
+    };
 
     useEffect(() => {
       let isMounted = true;
@@ -117,7 +130,7 @@ const Maincomp = React.memo(
                     loading="lazy"
                   />
                 </div>
-                <button type="button" className="explore_link">
+                <button type="button" className="explore_link" onClick={handleExploreClick}>
                   {t("home.exploreCollection")}
                 </button>
               </div>

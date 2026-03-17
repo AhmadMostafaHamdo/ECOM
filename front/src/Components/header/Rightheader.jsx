@@ -10,11 +10,17 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
+import StoreIcon from "@mui/icons-material/Store";
+import ContactSupportIcon from "@mui/icons-material/ContactSupport";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import LoginIcon from "@mui/icons-material/Login";
+import LanguageSwitcher from "../common/LanguageSwitcher";
+import CountrySelector from "../common/CountrySelector";
 
 const Rightheader = ({ userlog, logclose }) => {
-  const { account } = useContext(Logincontext);
+  const { account, setShowLoginPrompt } = useContext(Logincontext);
   const { t } = useTranslation();
+  const isAdmin = account?.role === "admin";
 
   return (
     <div className="drawer">
@@ -35,20 +41,49 @@ const Rightheader = ({ userlog, logclose }) => {
           <HomeIcon /> {t('navigation.home')}
         </NavLink>
 
+        <NavLink to="/products/all" onClick={(e) => {
+          if (!account) {
+            e.preventDefault();
+            setShowLoginPrompt(true);
+            logclose();
+          } else {
+            logclose();
+          }
+        }}>
+          <StoreIcon /> {t('navigation.products', 'Products')}
+        </NavLink>
+
         {account && (
           <>
             <NavLink to="/profile" onClick={logclose}>
               <AccountCircleIcon /> {t('navigation.profile')}
             </NavLink>
             <NavLink to="/wishlist" onClick={logclose}>
-              <FavoriteIcon /> {t('navigation.wishlist')}
+              <FavoriteIcon /> {t('navigation.wishlist', 'My Wishlist')}
             </NavLink>
             <NavLink to="/buynow" onClick={logclose}>
-              <ShoppingCartIcon /> {t('cart.title')}
+              <ShoppingCartIcon /> {t('cart.title', 'My Bag')}
             </NavLink>
           </>
         )}
+
+        {isAdmin && (
+          <NavLink to="/dashboard" onClick={logclose}>
+            <DashboardIcon /> {t('navigation.dashboard', 'Dashboard')}
+          </NavLink>
+        )}
+
+        <NavLink to="/contact" onClick={logclose}>
+          <ContactSupportIcon /> {t('navigation.contact', 'Contact Us')}
+        </NavLink>
       </nav>
+
+      <Divider className="divider_custom" />
+
+      <div className="drawer_settings">
+        <CountrySelector />
+        <LanguageSwitcher />
+      </div>
 
       <Divider className="divider_custom" />
 

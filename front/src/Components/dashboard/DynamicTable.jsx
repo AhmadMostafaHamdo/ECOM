@@ -877,12 +877,10 @@ const DynamicTable = ({
           text-align: right;
           font-family: 'DM Mono', monospace;
         }
-
         /* ── Actions cell ── */
         .dt-actions {
           display: flex;
           align-items: center;
-          justify-content: center;
           gap: 6px;
           /* FIX: prevent action buttons from being squeezed */
           flex-wrap: nowrap;

@@ -723,20 +723,165 @@
   }
 }
 
-@media (max-width: 480px) {
-  .trust_strip {
-    grid-template-columns: 1fr;
-  }
+/* Category Empty State Premium Styling */
+.category_empty_state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 40px;
+  background: var(--surface);
+  border-radius: 40px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  margin: 60px 0;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  backdrop-filter: blur(10px);
+}
 
-  .center_img img {
-    height: 180px;
-  }
+.category_empty_state::before {
+  content: "";
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  filter: blur(50px);
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
 
-  .center_img_overlay h3 {
-    font-size: 1.5rem;
-  }
+.category_empty_state::after {
+  content: "";
+  position: absolute;
+  bottom: -150px;
+  right: -150px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  filter: blur(70px);
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.5;
+}
 
-  .right_img_wrapper img {
-    height: 160px;
-  }
+.floating_icon {
+  position: absolute;
+  font-size: 3rem;
+  opacity: 0.12;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.1));
+  z-index: 1;
+  animation: floatIcon 8s infinite ease-in-out;
+  user-select: none;
+}
+
+.floating_icon:nth-child(1) { top: 12%; left: 8%; animation-delay: 0s; }
+.floating_icon:nth-child(2) { top: 18%; right: 10%; animation-delay: 2s; font-size: 2.2rem; }
+.floating_icon:nth-child(3) { bottom: 18%; left: 12%; animation-delay: 4s; font-size: 2.5rem; }
+.floating_icon:nth-child(4) { bottom: 12%; right: 8%; animation-delay: 6s; }
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  50% { transform: translateY(-40px) rotate(10deg) scale(1.1); }
+}
+
+.empty_title {
+  font-size: 3rem;
+  font-weight: 950;
+  color: var(--text-1);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, var(--text-1), var(--text-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.empty_description {
+  font-size: 1.25rem;
+  color: var(--text-2);
+  max-width: 550px;
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 2;
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+.empty_actions {
+  display: flex;
+  gap: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.action_btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 36px;
+  border-radius: 18px;
+  font-weight: 900;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.action_btn span {
+  font-size: 1.4rem;
+  transition: transform 0.3s ease;
+}
+
+.action_btn:hover span {
+  transform: scale(1.2) rotate(10deg);
+}
+
+.primary_btn {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: #111;
+  box-shadow: 0 15px 35px var(--gold-glow);
+}
+
+.primary_btn:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px var(--gold-glow);
+  filter: brightness(1.1);
+}
+
+.secondary_btn {
+  background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+}
+
+.secondary_btn:hover {
+  transform: translateY(-8px);
+  background: var(--surface);
+  border-color: var(--gold);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .category_empty_state { padding: 80px 24px; margin: 30px 0; border-radius: 30px; }
+  .empty_title { font-size: 2rem; letter-spacing: -1px; }
+  .empty_description { font-size: 1.1rem; }
+  .empty_actions { flex-direction: column; width: 100%; gap: 16px; }
+  .action_btn { justify-content: center; width: 100%; }
+  .floating_icon { font-size: 2rem !important; opacity: 0.08; }
 }

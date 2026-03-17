@@ -6,18 +6,34 @@ import { Pencil, Trash2, Ban, ShieldCheck, ShieldOff } from "lucide-react";
 import { useUsersManagement } from "./users/useUsersManagement";
 import UserForm from "./users/UserForm";
 import UserBanDialog from "./users/UserBanDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 const defaultForm = {
-  fname: "", lname: "", email: "", mobile: "",
-  password: "", cpassword: "", role: "user",
+  fname: "",
+  lname: "",
+  email: "",
+  mobile: "",
+  password: "",
+  cpassword: "",
+  role: "user",
 };
 
 const UsersManagement = () => {
   const { t } = useTranslation();
   const {
-    users, loading, error: listError, pagination,
-    saving, deleting, banning,
-    loadUsers, saveUser, deleteUser, banUser, unbanUser, toggleAdmin
+    users,
+    loading,
+    error: listError,
+    pagination,
+    saving,
+    deleting,
+    banning,
+    loadUsers,
+    saveUser,
+    deleteUser,
+    banUser,
+    unbanUser,
+    toggleAdmin,
   } = useUsersManagement();
 
   // Local Form and Dialog States
@@ -36,6 +52,10 @@ const UsersManagement = () => {
   const [unbanTarget, setUnbanTarget] = useState(null);
   const [unbanDialogOpen, setUnbanDialogOpen] = useState(false);
 
+  const [adminTarget, setAdminTarget] = useState(null);
+  const [adminConfirmOpen, setAdminConfirmOpen] = useState(false);
+  const [roleUpdating, setRoleUpdating] = useState(false);
+
   const isEditing = Boolean(editingUserId);
 
   useEffect(() => {
@@ -43,9 +63,18 @@ const UsersManagement = () => {
   }, [loadUsers]);
 
   // Data Actions
-  const handleSearch = useCallback((term) => loadUsers(1, term, pagination.limit), [loadUsers, pagination.limit]);
-  const handlePageChange = useCallback((newPage) => loadUsers(newPage, "", pagination.limit), [loadUsers, pagination.limit]);
-  const handlePageSizeChange = useCallback((newSize) => loadUsers(1, "", newSize), [loadUsers]);
+  const handleSearch = useCallback(
+    (term) => loadUsers(1, term, pagination.limit),
+    [loadUsers, pagination.limit],
+  );
+  const handlePageChange = useCallback(
+    (newPage) => loadUsers(newPage, "", pagination.limit),
+    [loadUsers, pagination.limit],
+  );
+  const handlePageSizeChange = useCallback(
+    (newSize) => loadUsers(1, "", newSize),
+    [loadUsers],
+  );
 
   // Form Management
   const resetForm = useCallback(() => {
@@ -88,7 +117,9 @@ const UsersManagement = () => {
 
     const res = await saveUser(editingUserId, payload, isEditing);
     if (!res.success) {
-      setFormError(res.error || t("admin.failedSaveUser") || "Failed to save user");
+      setFormError(
+        res.error || t("admin.failedSaveUser") || "Failed to save user",
+      );
     } else {
       resetForm();
     }
@@ -133,109 +164,155 @@ const UsersManagement = () => {
     setUnbanTarget(null);
   }, [unbanTarget, unbanUser]);
 
-  const handleToggleAdmin = useCallback(async (user) => {
-    const res = await toggleAdmin(user);
+  const requestToggleAdmin = useCallback((user) => {
+    setAdminTarget(user);
+    setAdminConfirmOpen(true);
+  }, []);
+
+  const confirmToggleAdmin = useCallback(async () => {
+    if (!adminTarget) return;
+    setRoleUpdating(true);
+    const res = await toggleAdmin(adminTarget);
+    setRoleUpdating(false);
     if (!res.success) {
       alert(res.error || t("admin.roleUpdateFailed"));
     }
-  }, [toggleAdmin, t]);
+    setAdminConfirmOpen(false);
+    setAdminTarget(null);
+  }, [adminTarget, toggleAdmin, t]);
 
-  const tableFilters = React.useMemo(() => [
-    {
-      key: "role",
-      label: t("admin.role"),
-      options: [
-        { value: "all", label: t("admin.allRoles") },
-        { value: "admin", label: t("admin.adminRole") },
-        { value: "user", label: t("admin.userRole") },
-      ],
-    },
-  ], [t]);
+  const tableFilters = React.useMemo(
+    () => [
+      {
+        key: "role",
+        label: t("admin.role"),
+        options: [
+          { value: "all", label: t("admin.allRoles") },
+          { value: "admin", label: t("admin.adminRole") },
+          { value: "user", label: t("admin.userRole") },
+        ],
+      },
+    ],
+    [t],
+  );
 
-  const tableColumns = React.useMemo(() => [
-    {
-      key: "fname",
-      title: t("profile.personalInfo"),
-      type: "avatar",
-      getAvatarText: (user) => (user.fname ? user.fname[0].toUpperCase() : "?"),
-      getName: (user) => `${user.fname ?? ""} ${user.lname ?? ""}`.trim() || "—",
-      getSubtitle: (user) => (user._id ? `ID: ${user._id.slice(-8)}` : ""),
-      sortable: true,
-    },
-    { key: "email", title: t("auth.email"), sortable: true },
-    { key: "mobile", title: t("auth.mobile") || "Mobile", sortable: false },
-    { key: "role", title: t("auth.role"), type: "role", align: "center", sortable: true },
-    {
-      key: "status",
-      title: t("common.status"),
-      type: "status",
-      getStatusClass: (_, item) => (item?.isBanned ? "banned" : "active"),
-      getStatusText: (_, item) => (item?.isBanned ? t("admin.banned") : t("common.active") || "Active"),
-      align: "center",
-    },
-    { key: "actions", title: t("common.actions") || "Actions", type: "actions", align: "center" },
-  ], [t]);
+  const tableColumns = React.useMemo(
+    () => [
+      {
+        key: "fname",
+        title: t("profile.personalInfo"),
+        type: "avatar",
+        getAvatarText: (user) =>
+          user.fname ? user.fname[0].toUpperCase() : "?",
+        getName: (user) =>
+          `${user.fname ?? ""} ${user.lname ?? ""}`.trim() || "—",
+        getSubtitle: (user) => (user._id ? `ID: ${user._id.slice(-8)}` : ""),
+        sortable: true,
+      },
+      { key: "email", title: t("auth.email"), sortable: true },
+      { key: "mobile", title: t("auth.mobile") || "Mobile", sortable: false },
+      {
+        key: "role",
+        title: t("auth.role"),
+        type: "role",
+        align: "center",
+        sortable: true,
+      },
+      {
+        key: "status",
+        title: t("common.status"),
+        type: "status",
+        getStatusClass: (_, item) => (item?.isBanned ? "banned" : "active"),
+        getStatusText: (_, item) =>
+          item?.isBanned ? t("admin.banned") : t("common.active") || "Active",
+        align: "center",
+      },
+      {
+        key: "actions",
+        title: t("common.actions") || "Actions",
+        type: "actions",
+        align: "center",
+      },
+    ],
+    [t],
+  );
 
-  const tableActions = React.useMemo(() => [
-    {
-      icon: Pencil, label: t("common.edit"), tooltipKey: "common.edit",
-      variant: "edit", onClick: handleEdit,
-    },
-    {
-      icon: Trash2, label: t("common.delete"), tooltipKey: "common.delete",
-      variant: "delete", onClick: requestDelete,
-    },
-    {
-      icon: Ban, label: t("admin.banUser"), tooltipKey: t("admin.banUser"),
-      variant: "delete", isVisible: (user) => !user.isBanned && user.role !== "admin",
-      onClick: requestBan,
-    },
-    {
-      icon: ShieldCheck, label: t("admin.unbanUser"), tooltipKey: t("admin.unbanUser"),
-      variant: "edit", isVisible: (user) => user.isBanned,
-      onClick: requestUnban,
-    },
-    {
-      icon: ShieldCheck, label: t("admin.adminRole"), tooltipKey: t("admin.promoteAdmin"),
-      variant: "edit", isVisible: (user) => user.role !== "admin" && !user.isBanned,
-      onClick: handleToggleAdmin,
-    },
-    {
-      icon: ShieldOff, label: t("admin.userRole"), tooltipKey: t("admin.demoteAdmin"),
-      variant: "delete", isVisible: (user) => user.role === "admin",
-      onClick: handleToggleAdmin,
-    },
-  ], [t, handleEdit, requestDelete, requestBan, requestUnban, handleToggleAdmin]);
+  const tableActions = React.useMemo(
+    () => [
+      {
+        icon: Pencil,
+        label: t("common.edit"),
+        tooltipKey: "common.edit",
+        variant: "edit",
+        onClick: handleEdit,
+      },
+      {
+        icon: Trash2,
+        label: t("common.delete"),
+        tooltipKey: "common.delete",
+        variant: "delete",
+        onClick: requestDelete,
+      },
+      {
+        icon: Ban,
+        label: t("admin.banUser"),
+        tooltipKey: t("admin.banUser"),
+        variant: "delete",
+        isVisible: (user) => !user.isBanned && user.role !== "admin",
+        onClick: requestBan,
+      },
+      {
+        icon: ShieldCheck,
+        label: t("admin.unbanUser"),
+        tooltipKey: t("admin.unbanUser"),
+        variant: "edit",
+        isVisible: (user) => user.isBanned,
+        onClick: requestUnban,
+      },
+      {
+        icon: ShieldCheck,
+        label: t("admin.adminRole"),
+        tooltipKey: t("admin.promoteAdmin"),
+        variant: "edit",
+        isVisible: (user) => user.role !== "admin" && !user.isBanned,
+        onClick: requestToggleAdmin,
+      },
+      {
+        icon: ShieldOff,
+        label: t("admin.userRole"),
+        tooltipKey: t("admin.demoteAdmin"),
+        variant: "delete",
+        isVisible: (user) => user.role === "admin",
+        onClick: requestToggleAdmin,
+      },
+    ],
+    [t, handleEdit, requestDelete, requestBan, requestUnban, requestToggleAdmin],
+  );
 
   return (
-    <div className="admin_page bg-transparent">
-      <header className="admin_page_header flex justify-between items-center mb-8">
+    <div className="admin_page">
+      <header className="admin_page_header admin_flex_between">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#0f1729] m-0">
+          <h1 className="admin_page_title">
             {t("admin.manageUsers")}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="admin_page_subtitle">
             {t("admin.welcomeMessage")}
           </p>
         </div>
-        {!showForm && (
-          <button className="btn_primary" onClick={() => setShowForm(true)}>
-            {t("admin.createUser")}
-          </button>
-        )}
+        <button className="btn_primary" onClick={() => setShowForm(true)}>
+          {t("admin.createUser")}
+        </button>
       </header>
 
       {listError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <div className="admin_error_alert">
           {listError}
         </div>
       )}
 
-      <div
-        className="grid gap-8 items-start relative"
-        style={{ gridTemplateColumns: showForm ? "1fr 400px" : "1fr" }}
-      >
-        <section className="dashboard-section w-full">
+      <div className="admin_page_body">
+        <section className="dashboard-section">
           <DynamicTable
             data={users}
             loading={loading}
@@ -244,7 +321,9 @@ const UsersManagement = () => {
             pagination={pagination}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
-            onRefresh={() => loadUsers(pagination.currentPage, "", pagination.limit)}
+            onRefresh={() =>
+              loadUsers(pagination.currentPage, "", pagination.limit)
+            }
             cacheKey="users-management"
             cacheTTL={30000}
             title={t("admin.manageUsers")}
@@ -261,23 +340,39 @@ const UsersManagement = () => {
           />
         </section>
 
-        {showForm && (
-          <UserForm
-            form={form}
-            setForm={setForm}
-            isEditing={isEditing}
-            saving={saving}
-            onSubmit={handleSubmit}
-            onCancel={resetForm}
-            error={formError}
-          />
-        )}
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogContent className="admin_dialog_content admin_dialog_large">
+            <DialogHeader>
+              <DialogTitle>
+                {isEditing
+                  ? t("admin.modifyPortalAccess")
+                  : t("admin.grantNewAccess")}
+              </DialogTitle>
+            </DialogHeader>
+            <UserForm
+              form={form}
+              setForm={setForm}
+              isEditing={isEditing}
+              saving={saving}
+              onSubmit={handleSubmit}
+              onCancel={resetForm}
+              error={formError}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <ConfirmDialog
         open={confirmOpen}
-        title={deleteTarget ? `${t("admin.deleteUserTitle")} ${deleteTarget.fname || "this user"}?` : t("admin.deleteUserTitle")}
-        message={t("admin.deleteUserConfirm") || "Are you sure you want to delete this user? This action cannot be undone."}
+        title={
+          deleteTarget
+            ? `${t("admin.deleteUserTitle")} ${deleteTarget.fname || "this user"}?`
+            : t("admin.deleteUserTitle")
+        }
+        message={
+          t("admin.deleteUserConfirm") ||
+          "Are you sure you want to delete this user? This action cannot be undone."
+        }
         confirmText={deleting ? t("admin.deleting") : t("dialog.delete")}
         cancelText={t("dialog.cancel")}
         onConfirm={handleDeleteUser}
@@ -316,6 +411,31 @@ const UsersManagement = () => {
         }}
         loading={banning}
         type="info"
+      />
+
+      <ConfirmDialog
+        open={adminConfirmOpen}
+        title={
+          adminTarget?.role === "admin"
+            ? t("admin.demoteAdminTitle") || "إزالة صلاحية الإدارة"
+            : t("admin.promoteAdminTitle") || "ترقية لمدير"
+        }
+        message={
+          adminTarget?.role === "admin"
+            ? `هل تريد إزالة صلاحية الإدارة من ${adminTarget?.fname || "المستخدم"} وتقليصه إلى مستخدم عادي؟`
+            : `هل أنت متأكد من ترقية ${adminTarget?.fname || "المستخدم"} إلى مدير (Admin)؟`
+        }
+        confirmText={roleUpdating ? "جاري التحديث..." : "تأكيد"}
+        cancelText="إلغاء"
+        onConfirm={confirmToggleAdmin}
+        onCancel={() => {
+          if (!roleUpdating) {
+            setAdminConfirmOpen(false);
+            setAdminTarget(null);
+          }
+        }}
+        loading={roleUpdating}
+        type={adminTarget?.role === "admin" ? "danger" : "info"}
       />
     </div>
   );

@@ -9,7 +9,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 
 const UNCATEGORIZED = "uncategorized";
 
-const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
+const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");
@@ -39,7 +39,9 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
           limit,
           ...(search && { search }),
         });
-        const response = await axiosInstance.get(`/admin/categories?${queryParams.toString()}`);
+        const response = await axiosInstance.get(
+          `/admin/categories?${queryParams.toString()}`,
+        );
         if (response.status === 200) {
           const payload = response.data;
           setCategories(payload.data || []);
@@ -86,7 +88,7 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     try {
       const response = await axiosInstance.post("/admin/categories", {
         name: categoryName.trim(),
-        image: categoryImage.trim()
+        image: categoryImage.trim(),
       });
       if (response.status === 200 || response.status === 201) {
         setCategoryName("");
@@ -107,10 +109,13 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     if (!editName.trim()) return;
     setSaving(true);
     try {
-      const response = await axiosInstance.put(`/admin/categories/${editingId}`, {
-        name: editName.trim(),
-        image: editImage.trim()
-      });
+      const response = await axiosInstance.put(
+        `/admin/categories/${editingId}`,
+        {
+          name: editName.trim(),
+          image: editImage.trim(),
+        },
+      );
       if (response.status === 200) {
         setShowForm(false);
         setEditingId("");
@@ -136,7 +141,9 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     if (!categoryToDelete) return;
     setIsDeleting(true);
     try {
-      const response = await axiosInstance.delete(`/admin/categories/${categoryToDelete._id}`);
+      const response = await axiosInstance.delete(
+        `/admin/categories/${categoryToDelete._id}`,
+      );
       if (response.status === 200) {
         loadCategories();
         onCategoriesChanged();

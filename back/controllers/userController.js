@@ -181,6 +181,10 @@ exports.banUser = asyncHandler(async (req, res) => {
     user.banReason = isBanned ? banReason : "";
     user.bannedAt = isBanned ? new Date() : null;
 
+    if (isBanned) {
+        user.tokens = [];
+    }
+
     await user.save();
     res.status(200).json({ success: true, data: user });
 });

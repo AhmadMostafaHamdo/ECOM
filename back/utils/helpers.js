@@ -256,5 +256,7 @@ module.exports = {
     toPublicProduct,
     parseImages,
     buildProductPayload,
-    optimizeImage
+    optimizeImage,
+    ONE_YEAR_MS,
+    UNCATEGORIZED
 };

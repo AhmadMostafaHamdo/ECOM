@@ -79,8 +79,9 @@ export const useUsersManagement = () => {
     const banUser = async (userId, reason) => {
         setBanning(true);
         try {
-            const response = await axiosInstance.patch(`/admin/users/${userId}/ban`, {
-                reason: reason || "انتهاك شروط الخدمة"
+            const response = await axiosInstance.post(`/admin/users/${userId}/ban`, {
+                isBanned: true,
+                banReason: reason || "انتهاك شروط الخدمة"
             });
             if (response.status === 200) loadUsers(pagination.currentPage, "");
         } catch (err) {
@@ -94,7 +95,10 @@ export const useUsersManagement = () => {
     const unbanUser = async (userId) => {
         setBanning(true);
         try {
-            const response = await axiosInstance.patch(`/admin/users/${userId}/unban`);
+            const response = await axiosInstance.post(`/admin/users/${userId}/ban`, {
+                isBanned: false,
+                banReason: ""
+            });
             if (response.status === 200) loadUsers(pagination.currentPage, "");
         } catch (err) {
             console.error(err);

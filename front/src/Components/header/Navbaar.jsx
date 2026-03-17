@@ -34,7 +34,7 @@ import CountrySelector from "../common/CountrySelector";
 const Navbaar = React.memo(({ onSearch }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { account, setAccount } = useContext(Logincontext);
+  const { account, setAccount, setShowLoginPrompt } = useContext(Logincontext);
   const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const isWishlistPage = location.pathname === "/wishlist";
@@ -128,8 +128,12 @@ const Navbaar = React.memo(({ onSearch }) => {
             onSubmit={(e) => {
               e.preventDefault();
               if (text.trim()) {
-                navigate(`/products/all?search=${encodeURIComponent(text.trim())}`);
-                setText("");
+                if (!account) {
+                  setShowLoginPrompt(true);
+                } else {
+                  navigate(`/products/all?search=${encodeURIComponent(text.trim())}`);
+                  setText("");
+                }
               }
             }}
           >
@@ -152,7 +156,14 @@ const Navbaar = React.memo(({ onSearch }) => {
                     <ListItem key={p.id} className="suggestion_item">
                       <NavLink
                         to={`/getproductsone/${p.id}`}
-                        onClick={() => setText("")}
+                        onClick={(e) => {
+                          if (!account) {
+                            e.preventDefault();
+                            setShowLoginPrompt(true);
+                          } else {
+                            setText("");
+                          }
+                        }}
                       >
                         {p.title.longTitle}
                       </NavLink>
