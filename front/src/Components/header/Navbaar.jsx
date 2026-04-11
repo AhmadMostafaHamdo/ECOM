@@ -29,7 +29,7 @@ import LanguageSwitcher from "../common/LanguageSwitcher";
 import { useTheme } from "../context/ThemeContext";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-import CountrySelector from "../common/CountrySelector";
+
 
 const Navbaar = React.memo(({ onSearch }) => {
   const { t } = useTranslation();
@@ -190,7 +190,7 @@ const Navbaar = React.memo(({ onSearch }) => {
           </IconButton>
 
           <div className="desktop_items">
-            <CountrySelector />
+
             <LanguageSwitcher />
             <NavLink to="/contact" className="nav_pill_btn">
               {t("navigation.contact")}

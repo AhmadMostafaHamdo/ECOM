@@ -10,7 +10,7 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import StarIcon from "@mui/icons-material/Star";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { axiosInstance } from "../../api";
-import { useLocalize } from "../context/LocalizeContext";
+
 import { ProductSkeletonList } from "../common/ProductSkeleton";
 import { Logincontext } from "../context/Contextprovider";
 import { useContext } from "react";
@@ -26,7 +26,7 @@ const Maincomp = React.memo(
     searchTerm = "",
   }) => {
     const { t } = useTranslation();
-    const { activeCountry } = useLocalize();
+
     const { account, setShowLoginPrompt } = useContext(Logincontext);
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
@@ -37,6 +37,14 @@ const Maincomp = React.memo(
             setShowLoginPrompt(true);
         } else {
             navigate('/products/all');
+        }
+    };
+
+    const handleCreateProductClick = () => {
+        if (!account) {
+            setShowLoginPrompt(true);
+        } else {
+            navigate('/products/new');
         }
     };
 
@@ -95,24 +103,7 @@ const Maincomp = React.memo(
       <>
         <div className="home_section">
           {/* Localized Territory Banner */}
-          <div className="territory_banner">
-            <div className="territory_info">
-              <h3>
-                {t(`localization.countries.${activeCountry.id}.welcome`)}
-              </h3>
-              <p>
-                {t(`localization.countries.${activeCountry.id}.delivery`)}
-              </p>
-            </div>
-            <div className="territory_market">
-              <span className="market_tag">
-                {t("localization.market", { currency: activeCountry.currency })}
-              </span>
-              <div className="tax_note">
-                {t(`localization.countries.${activeCountry.id}.tax_note`)}
-              </div>
-            </div>
-          </div>
+
 
           <section className="hero_grid">
             <div className="banner_part">
@@ -228,6 +219,14 @@ const Maincomp = React.memo(
                 </button>
                 <button
                   type="button"
+                  className="action_btn create_btn"
+                  onClick={handleCreateProductClick}
+                >
+                  <span>✨</span>
+                  {t("admin.createProduct", "Create Product")}
+                </button>
+                <button
+                  type="button"
                   className="action_btn secondary_btn"
                   onClick={() => window.location.reload()}
                 >
@@ -246,3 +245,4 @@ const Maincomp = React.memo(
 );
 
 export default Maincomp;
+                                                        

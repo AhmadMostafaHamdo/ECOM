@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
 
   // Verify token for state-changing methods
   if (!safeMethods.includes(req.method)) {
-    const exemptPaths = ["/login", "/register", "/api/admin"];
+    const exemptPaths = ["/api/login", "/api/register", "/api/admin"];
     if (exemptPaths.some((path) => req.path.startsWith(path))) {
       return next();
     }

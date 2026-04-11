@@ -2,21 +2,25 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
 import DynamicTable from "./DynamicTable";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus, Layers, Package, Activity } from "lucide-react";
 import CategoryForm from "./categories/CategoryForm";
 import "./admin-dashboard.css";
+import "./CategoriesManagement.css";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
-const UNCATEGORIZED = "uncategorized";
+import { toast } from "react-toastify";
 
 const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");
   const [categoryImage, setCategoryImage] = useState("");
+  const [categoryFile, setCategoryFile] = useState(null);
   const [editingId, setEditingId] = useState("");
   const [editName, setEditName] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [editFile, setEditFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     totalItems: 0,
@@ -65,7 +69,6 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
     loadCategories();
   }, [loadCategories]);
 
-  // Server-side search handler passed to DynamicTable
   const handleSearch = useCallback(
     (term) => loadCategories(term, 1, pagination.limit),
     [loadCategories, pagination.limit],
@@ -86,19 +89,32 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
     if (!categoryName.trim()) return;
     setSaving(true);
     try {
-      const response = await axiosInstance.post("/admin/categories", {
-        name: categoryName.trim(),
-        image: categoryImage.trim(),
+      const formData = new FormData();
+      formData.append("name", categoryName.trim());
+      if (categoryFile) {
+        formData.append("imageFile", categoryFile);
+      } else if (categoryImage) {
+        formData.append("image", categoryImage.trim());
+      }
+
+      const response = await axiosInstance.post("/admin/categories", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
+
       if (response.status === 200 || response.status === 201) {
+        toast.success(t("admin.categoryAddedSuccess") || "Category added successfully!");
         setCategoryName("");
         setCategoryImage("");
+        setCategoryFile(null);
         setShowForm(false);
         loadCategories();
         onCategoriesChanged();
       }
     } catch (err) {
       console.error(err);
+      toast.error(t("admin.categoryAddError") || "Failed to add category");
     } finally {
       setSaving(false);
     }
@@ -109,23 +125,36 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
     if (!editName.trim()) return;
     setSaving(true);
     try {
+      const formData = new FormData();
+      formData.append("name", editName.trim());
+      if (editFile) {
+        formData.append("imageFile", editFile);
+      } else if (editImage) {
+        formData.append("image", editImage.trim());
+      }
+
       const response = await axiosInstance.put(
         `/admin/categories/${editingId}`,
+        formData,
         {
-          name: editName.trim(),
-          image: editImage.trim(),
-        },
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
       if (response.status === 200) {
+        toast.success(t("admin.categoryUpdatedSuccess") || "Category updated successfully!");
         setShowForm(false);
         setEditingId("");
         setEditName("");
         setEditImage("");
+        setEditFile(null);
         loadCategories();
         onCategoriesChanged();
       }
     } catch (err) {
       console.error(err);
+      toast.error(t("admin.categoryUpdateError") || "Failed to update category");
     } finally {
       setSaving(false);
     }
@@ -133,7 +162,6 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
 
   const deleteCategory = (category) => {
     setCategoryToDelete(category);
-    setIsConfirmOpen(false);
     setIsConfirmOpen(true);
   };
 
@@ -145,47 +173,78 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
         `/admin/categories/${categoryToDelete._id}`,
       );
       if (response.status === 200) {
+        toast.success(t("admin.categoryDeletedSuccess") || "Category deleted successfully!");
         loadCategories();
         onCategoriesChanged();
         setIsConfirmOpen(false);
       }
     } catch (err) {
       console.error(err);
+      toast.error(t("admin.categoryDeleteError") || "Failed to delete category");
     } finally {
       setIsDeleting(false);
       setCategoryToDelete(null);
     }
   };
 
+  const totalProducts = categories.reduce((sum, cat) => sum + (cat.productCount || 0), 0);
+
   return (
-    <div className="admin_page" style={{ background: "transparent" }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: showForm ? "1fr 400px" : "1fr",
-          gap: "32px",
-          alignItems: "start",
-        }}
-      >
+    <div className="admin_page categories-container">
+      {/* Stats Summary */}
+      <div className="categories-stats">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <Layers size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{pagination.totalItems}</div>
+            <div className="stat-label">{t("admin.segments")}</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb'}}>
+            <Package size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{totalProducts}</div>
+            <div className="stat-label">{t("admin.products")}</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{background: 'rgba(16, 185, 129, 0.1)', color: '#10b981'}}>
+            <Activity size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">Active</div>
+            <div className="stat-label">{t("common.status")}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="categories-main-grid">
         <section className="dashboard-section">
-          <div className="dashboard-header">
+          <div className="dashboard-header" style={{border: 'none', paddingBottom: 0}}>
             <div className="dashboard-title">
-              {t("admin.segments")}{" "}
-              <span className="user-id">
-                {categories.length} {t("admin.total")}
+              <span style={{fontSize: '20px', fontWeight: '900'}}>{t("admin.segments")}</span>
+              <span className="user-id" style={{marginLeft: '12px', background: 'var(--brand-light)', color: 'var(--brand)', border: 'none'}}>
+                {pagination.totalItems} {t("admin.total")}
               </span>
             </div>
             <button
-              className="btn_primary"
-              style={{ fontSize: 13 }}
+              className="submit-btn-premium"
+              style={{ width: 'auto', padding: '10px 20px', fontSize: '13px' }}
               onClick={() => {
                 setShowForm(true);
                 setEditingId("");
                 setCategoryName("");
                 setCategoryImage("");
+                setCategoryFile(null);
+                setEditFile(null);
               }}
             >
-              + {t("admin.createCategory")}
+              <Plus size={18} />
+              {t("admin.createCategory")}
             </button>
           </div>
 
@@ -196,8 +255,8 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
             loadingMessage={t("admin.mappingSectors")}
             cacheKey="categories-management"
             cacheTTL={30000}
-            title={t("admin.segments")}
-            subtitle={`${categories.length} ${t("admin.totalSegments")}`}
+            title=""
+            subtitle=""
             searchable={true}
             searchPlaceholder={t("admin.searchSegments")}
             searchMode="server"
@@ -212,11 +271,11 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
             }
             columns={[
               {
-                // FIX: key="name" so sorting works AND avatar callbacks get the item
                 key: "name",
                 title: t("admin.segmentName"),
                 type: "avatar",
                 getAvatarText: (cat) => cat.name?.[0]?.toUpperCase() || "?",
+                getAvatarImage: (cat) => cat.image,
                 getName: (cat) => cat.name || "—",
                 getSubtitle: (cat) =>
                   cat._id ? `ID: ${cat._id.slice(-8)}` : "",
@@ -229,9 +288,6 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
                 sortable: true,
               },
               {
-                // FIX: key="name" reused — getStatusClass/Text ignore the value
-                // and always return "active"/"Active", so any key is fine here.
-                // Using a dedicated key avoids collision with sorting.
                 key: "_id",
                 title: t("common.status"),
                 type: "status",
@@ -256,6 +312,7 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
                   setEditingId(cat._id);
                   setEditName(cat.name);
                   setEditImage(cat.image || "");
+                  setEditFile(null);
                   setShowForm(true);
                 },
               },
@@ -265,32 +322,42 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
                 tooltipKey: "common.delete",
                 variant: "delete",
                 onClick: (cat) => deleteCategory(cat),
-                // FIX: "Uncategorized" row should NOT show delete button
                 isVisible: (cat) => cat.name !== t("admin.uncategorized"),
               },
             ]}
           />
         </section>
 
-        {showForm && (
-          <CategoryForm
-            editingId={editingId}
-            editName={editName}
-            categoryName={categoryName}
-            editImage={editImage}
-            categoryImage={categoryImage}
-            setEditName={setEditName}
-            setCategoryName={setCategoryName}
-            setEditImage={setEditImage}
-            setCategoryImage={setCategoryImage}
-            updateCategory={updateCategory}
-            addCategory={addCategory}
-            setShowForm={setShowForm}
-            setEditingId={setEditingId}
-            saving={saving}
-            t={t}
-          />
-        )}
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogContent className="admin_dialog_content admin_dialog_large">
+            <DialogHeader>
+              <DialogTitle>
+                {editingId ? t("admin.editCategory") : t("admin.createCategory")}
+              </DialogTitle>
+            </DialogHeader>
+            <CategoryForm
+              editingId={editingId}
+              editName={editName}
+              categoryName={categoryName}
+              editImage={editImage}
+              categoryImage={categoryImage}
+              categoryFile={categoryFile}
+              editFile={editFile}
+              setEditName={setEditName}
+              setCategoryName={setCategoryName}
+              setEditImage={setEditImage}
+              setCategoryImage={setCategoryImage}
+              setCategoryFile={setCategoryFile}
+              setEditFile={setEditFile}
+              updateCategory={updateCategory}
+              addCategory={addCategory}
+              setShowForm={setShowForm}
+              setEditingId={setEditingId}
+              saving={saving}
+              t={t}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <ConfirmDialog
@@ -312,3 +379,4 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
 };
 
 export default CategoriesManagement;
+

@@ -4,8 +4,11 @@ import { axiosInstance } from "../../api";
 import DynamicTable from "./DynamicTable";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { Button } from "./Button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus, Layers, Package, Activity } from "lucide-react";
+import "./CategoriesManagement.css";
 import ProductForm from "./products/ProductForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { toast } from "react-toastify";
 
 const CATEGORY_ALL = "All Categories"; // internal value, label will be translated
 
@@ -174,11 +177,13 @@ const ProductsManagement = () => {
       const response = await (isEditing ? axiosInstance.put(endpoint, payload) : axiosInstance.post(endpoint, payload));
 
       if (response.status === 200 || response.status === 201) {
+        toast.success(isEditing ? t("admin.productUpdatedSuccess") || "Product updated successfully!" : t("admin.productCreatedSuccess") || "Product created successfully!");
         resetForm();
         loadProducts(pagination.currentPage);
       }
     } catch (err) {
       console.error(err);
+      toast.error(t("admin.productSaveError") || "Failed to save product");
     } finally {
       setSaving(false);
     }
@@ -195,11 +200,13 @@ const ProductsManagement = () => {
     try {
       const response = await axiosInstance.delete(`/admin/products/${deleteTarget._id}`);
       if (response.status === 200) {
+        toast.success(t("admin.productDeletedSuccess") || "Product deleted successfully!");
         const nextPage = Math.max(1, pagination.currentPage);
         await loadProducts(nextPage);
       }
     } catch (err) {
       console.error(err);
+      toast.error(t("admin.productDeleteError") || "Failed to delete product");
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
@@ -286,12 +293,46 @@ const ProductsManagement = () => {
     },
   ], [t, handleEdit, requestDelete]);
 
+  const totalProducts = pagination.totalItems;
+  const categoriesCount = categories.length;
+
   return (
-    <div className="admin_page" style={{ background: "transparent" }}>
+    <div className="admin_page categories-container">
+      {/* Stats Summary */}
+      <div className="categories-stats" style={{ marginBottom: '32px' }}>
+        <div className="stat-card">
+          <div className="stat-icon" style={{background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb'}}>
+            <Package size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{totalProducts}</div>
+            <div className="stat-label">{t("admin.products")}</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">
+            <Layers size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{categoriesCount}</div>
+            <div className="stat-label">{t("admin.segments")}</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{background: 'rgba(16, 185, 129, 0.1)', color: '#10b981'}}>
+            <Activity size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">Live</div>
+            <div className="stat-label">Inventory Status</div>
+          </div>
+        </div>
+      </div>
+
       <header
         className="admin_page_header"
         style={{
-          marginBottom: "32px",
+          marginBottom: "24px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -301,33 +342,26 @@ const ProductsManagement = () => {
           <h1
             style={{
               fontSize: "24px",
-              fontWeight: "800",
+              fontWeight: "900",
               color: "#1e293b",
               margin: 0,
+              letterSpacing: '-0.02em'
             }}
           >
             {t("admin.manageProducts")}
           </h1>
           <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: "14px" }}>
-            {t("admin.welcomeMessage")}
+            {t("admin.productsTotal")}: {totalProducts}
           </p>
-          <p>{t("admin.welcomeMessage")}</p>
         </div>
-        {!showForm && (
-          <button className="btn_primary" onClick={() => setShowForm(true)}>
-            {t("admin.createProduct")}
-          </button>
-        )}
+        <button className="submit-btn-premium" style={{width: 'auto', padding: '10px 24px'}} onClick={() => setShowForm(true)}>
+          <Plus size={18} />
+          {t("admin.createProduct")}
+        </button>
       </header>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: showForm ? "1fr 420px" : "1fr",
-          gap: "32px",
-          alignItems: "start",
-        }}
-      >
+
+      <div className="admin_page_body">
         <section className="dashboard-section">
           <div className="dashboard-header">
             <div className="dashboard-controls">
@@ -402,18 +436,25 @@ const ProductsManagement = () => {
           />
         </section>
 
-        {showForm && (
-          <ProductForm
-            isEditing={isEditing}
-            form={form}
-            categories={categories}
-            updateField={updateField}
-            handleSubmit={handleSubmit}
-            resetForm={resetForm}
-            saving={saving}
-            t={t}
-          />
-        )}
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogContent className="admin_dialog_content admin_dialog_large">
+            <DialogHeader>
+              <DialogTitle>
+                {isEditing ? t("admin.editProduct") : t("admin.createProduct")}
+              </DialogTitle>
+            </DialogHeader>
+            <ProductForm
+              isEditing={isEditing}
+              form={form}
+              categories={categories}
+              updateField={updateField}
+              handleSubmit={handleSubmit}
+              resetForm={resetForm}
+              saving={saving}
+              t={t}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <ConfirmDialog

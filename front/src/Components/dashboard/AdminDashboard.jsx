@@ -35,6 +35,7 @@ import { Logincontext } from "../context/Contextprovider";
 import { axiosInstance } from "../../api";
 import { useTranslation } from "react-i18next";
 import DialogComponent from "./DialogComponent";
+import { toast } from "react-toastify";
 import Messages from "./Messages";
 import ChatWidget from "../chat/ChatWidget";
 import AdminSidebar from "./components/AdminSidebar";
@@ -53,7 +54,7 @@ const getNavItems = (t) => [
   { key: "users", label: t("admin.manageUsers"), icon: GroupIcon, path: "/users" },
   { key: "products", label: t("admin.manageProducts"), icon: Inventory2Icon, path: "/products" },
   { key: "categories", label: t("admin.manageCategories"), icon: CategoryIcon, path: "/categories" },
-  { key: "messages", label: t("admin.messages"), icon: MailIcon, path: "/messages" },
+  { key: "messages", label: t("admin.messages.title"), icon: MailIcon, path: "/messages" },
   { key: "chat", label: "Live Chat", icon: ChatIcon, path: "/chat" },
   { key: "reports", label: t("report.title"), icon: FlagIcon, path: "/reports" },
   { key: "stats", label: t("admin.statistics"), icon: QueryStatsIcon, path: "/statistics" },
@@ -81,13 +82,14 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
 
       if (res.status === 200) {
         setAccount(false);
-
+        toast.success(t("auth.logoutSuccess") || "Logged out successfully");
         navigate("/login");
       }
     } catch (error) {
       console.error("Logout failed:", error);
+      toast.error("Logout failed");
     }
-  }, [navigate, setAccount]);
+  }, [navigate, setAccount, t]);
 
   const handleLogoutConfirm = useCallback(async () => {
     await logoutuser();

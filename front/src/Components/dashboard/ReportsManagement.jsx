@@ -1,16 +1,36 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
 import DialogComponent from "./DialogComponent";
+import { 
+    Flag, 
+    RefreshCw, 
+    Eye, 
+    Trash2, 
+    Package, 
+    User,
+    AlertCircle,
+    CheckCircle2,
+    Clock,
+    XCircle,
+    ChevronLeft,
+    ChevronRight
+} from "lucide-react";
+import ReportsStats from "./reports/ReportsStats";
+import ReportsDetailModal from "./reports/ReportsDetailModal";
+import "./ReportsManagement.css";
+import { toast } from "react-toastify";
 
 const STATUS_COLORS = {
-    pending: { bg: "#fef3c7", text: "#92400e", dot: "#f59e0b" },
-    reviewed: { bg: "#dbeafe", text: "#1e40af", dot: "#3b82f6" },
-    resolved: { bg: "#dcfce7", text: "#166534", dot: "#22c55e" },
-    dismissed: { bg: "#f1f5f9", text: "#475569", dot: "#94a3b8" },
+    pending: { bg: "#fff7ed", text: "#c2410c", dot: "#f97316" },
+    reviewed: { bg: "#f0f9ff", text: "#0369a1", dot: "#0ea5e9" },
+    resolved: { bg: "#f0fdf4", text: "#15803d", dot: "#22c55e" },
+    dismissed: { bg: "#f8fafc", text: "#475569", dot: "#94a3b8" },
 };
 
 const ReportsManagement = () => {
     const { t, i18n } = useTranslation();
+
     const isRtl = i18n.dir() === "rtl";
     const [reports, setReports] = useState([]);
     const [stats, setStats] = useState(null);
@@ -71,6 +91,7 @@ const ReportsManagement = () => {
                 adminNote
             });
             if (res.status === 200) {
+                toast.success(t("admin.reports.statusUpdateSuccess") || "تم تحديث الحالة بنجاح");
                 loadReports(pagination.currentPage, filterStatus, filterType);
                 loadStats();
                 setDetailOpen(false);
@@ -78,6 +99,7 @@ const ReportsManagement = () => {
             }
         } catch (e) {
             console.error(e);
+            toast.error(t("admin.reports.statusUpdateError") || "فشل تحديث الحالة");
         } finally {
             setUpdating(false);
         }
@@ -88,11 +110,13 @@ const ReportsManagement = () => {
         try {
             const res = await axiosInstance.delete(`/admin/reports/${deleteTarget._id}`);
             if (res.status === 200) {
+                toast.success(t("admin.reports.deleteSuccess") || "تم حذف البلاغ بنجاح");
                 loadReports(pagination.currentPage, filterStatus, filterType);
                 loadStats();
             }
         } catch (e) {
             console.error(e);
+            toast.error(t("admin.reports.deleteError") || "فشل حذف البلاغ");
         } finally {
             setConfirmDeleteOpen(false);
             setDeleteTarget(null);
@@ -106,28 +130,24 @@ const ReportsManagement = () => {
     };
 
     return (
-        <div className="admin_page" style={{ background: "transparent", direction: isRtl ? "rtl" : "ltr" }}>
+        <div className="reports-container" style={{ direction: isRtl ? "rtl" : "ltr" }}>
             {/* Header */}
-            <header style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <header className="admin_page_header" style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                    <h1 style={{ fontSize: "24px", fontWeight: "800", color: "#0f1729", margin: 0, display: "flex", alignItems: "center", gap: "10px" }}>
-                        <Flag size={24} color="#ef4444" />
+                    <h1 className="messages-title" style={{ margin: 0, display: "flex", alignItems: "center", gap: "12px" }}>
+                        <Flag size={32} color="#ff9d00" />
                         {t("admin.reports.title")}
                     </h1>
-                    <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: "14px" }}>
+                    <p className="messages-subtitle" style={{ margin: "4px 0 0" }}>
                         {t("admin.reports.subtitle")}
                     </p>
                 </div>
                 <button
+                    className="submit-btn-premium"
+                    style={{ width: "auto", padding: "10px 24px" }}
                     onClick={() => { loadReports(1, filterStatus, filterType); loadStats(); }}
-                    style={{
-                        display: "flex", alignItems: "center", gap: "8px",
-                        padding: "10px 20px", borderRadius: "10px",
-                        border: "1px solid #e2e8f0", background: "#fff",
-                        color: "#475569", cursor: "pointer", fontWeight: "600", fontSize: "14px"
-                    }}
                 >
-                    <RefreshCw size={16} />
+                    <RefreshCw size={18} />
                     {t("admin.reports.refresh")}
                 </button>
             </header>
@@ -136,124 +156,120 @@ const ReportsManagement = () => {
             <ReportsStats stats={stats} />
 
             {/* Filters */}
-            <div style={{ background: "#fff", borderRadius: "14px", padding: "16px 20px", marginBottom: "20px", display: "flex", gap: "16px", alignItems: "center", border: "1px solid #e2e8f0", flexWrap: "wrap" }}>
-                <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    style={{ padding: "8px 14px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px", color: "#374151", background: "#f8fafc", cursor: "pointer" }}
-                >
-                    <option value="">{t("admin.reports.allStatus")}</option>
-                    <option value="pending">{t("admin.reports.status.pending")}</option>
-                    <option value="reviewed">{t("admin.reports.status.reviewed")}</option>
-                    <option value="resolved">{t("admin.reports.status.resolved")}</option>
-                    <option value="dismissed">{t("admin.reports.status.dismissed")}</option>
-                </select>
+            <div className="messages-controls" style={{ background: "#fff", borderRadius: "16px", padding: "1.25rem", border: "1px solid #e2e8f0" }}>
+                <div className="search-filter-group">
+                    <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="filter-select"
+                        style={{ minWidth: "200px" }}
+                    >
+                        <option value="">{t("admin.reports.allStatus")}</option>
+                        <option value="pending">{t("admin.reports.status.pending")}</option>
+                        <option value="reviewed">{t("admin.reports.status.reviewed")}</option>
+                        <option value="resolved">{t("admin.reports.status.resolved")}</option>
+                        <option value="dismissed">{t("admin.reports.status.dismissed")}</option>
+                    </select>
 
-                <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    style={{ padding: "8px 14px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px", color: "#374151", background: "#f8fafc", cursor: "pointer" }}
-                >
-                    <option value="">{t("admin.reports.allTypes")}</option>
-                    <option value="product">{t("admin.reports.productReports")}</option>
-                    <option value="user">{t("admin.reports.userReports")}</option>
-                </select>
+                    <select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="filter-select"
+                        style={{ minWidth: "200px" }}
+                    >
+                        <option value="">{t("admin.reports.allTypes")}</option>
+                        <option value="product">{t("admin.reports.productReports")}</option>
+                        <option value="user">{t("admin.reports.userReports")}</option>
+                    </select>
+                </div>
 
-                <span style={{ fontSize: "13px", color: "#94a3b8", [isRtl ? "marginRight" : "marginLeft"]: "auto" }}>
-                    {pagination.totalItems} {t("admin.reports.total")}
-                </span>
+                <div className="stat-item">
+                    <AlertCircle size={18} />
+                    <span>{pagination.totalItems} {t("admin.reports.total")}</span>
+                </div>
             </div>
 
             {/* Table */}
-            <div style={{ background: "#fff", borderRadius: "16px", border: "1px solid #e2e8f0", overflow: "hidden" }}>
+            <div className="reports-table-wrapper">
                 {loading ? (
-                    <div style={{ padding: "60px", textAlign: "center", color: "#94a3b8" }}>
-                        <div style={{ fontSize: "16px" }}>{t("admin.reports.loading")}</div>
+                    <div className="loading-spinner">
+                        <div className="spinner"></div>
+                        <p>{t("admin.reports.loading")}</p>
                     </div>
                 ) : reports.length === 0 ? (
-                    <div style={{ padding: "60px", textAlign: "center" }}>
-                        <Flag size={48} color="#e2e8f0" style={{ marginBottom: "12px" }} />
-                        <p style={{ color: "#94a3b8", fontSize: "16px" }}>{t("admin.reports.noReports")}</p>
+                    <div className="empty-state">
+                        <Flag size={64} color="#e2e8f0" style={{ marginBottom: "1rem" }} />
+                        <h3 style={{ color: "#64748b" }}>{t("admin.reports.noReports")}</h3>
                     </div>
                 ) : (
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <table className="reports-table">
                         <thead>
-                            <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                            <tr>
                                 {["type", "reported", "reporter", "reason", "status", "date", "actions"].map((h) => (
-                                    <th key={h} style={{ padding: "14px 16px", textAlign: isRtl ? "right" : "left", fontSize: "12px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                                        {t(`admin.reports.${h}`)}
-                                    </th>
+                                    <th key={h}>{t(`admin.reports.${h}`)}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
-                            {reports.map((report, i) => {
+                            {reports.map((report) => {
                                 const sc = STATUS_COLORS[report.status] || STATUS_COLORS.pending;
                                 return (
-                                    <tr
-                                        key={report._id}
-                                        style={{ borderBottom: i < reports.length - 1 ? "1px solid #f1f5f9" : "none", transition: "background 0.15s" }}
-                                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f8fafc")}
-                                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                                    >
-                                        <td style={{ padding: "14px 16px" }}>
-                                            <span style={{
-                                                display: "inline-flex", alignItems: "center", gap: "6px",
-                                                padding: "4px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: "700",
-                                                background: report.targetType === "product" ? "#ede9fe" : "#fce7f3",
-                                                color: report.targetType === "product" ? "#7c3aed" : "#be185d",
+                                    <tr key={report._id}>
+                                        <td>
+                                            <span className="status-badge" style={{
+                                                background: report.targetType === "product" ? "#f5f3ff" : "#fdf2f8",
+                                                color: report.targetType === "product" ? "#7c3aed" : "#db2777",
+                                                display: "inline-flex", alignItems: "center", gap: "6px"
                                             }}>
-                                                {report.targetType === "product" ? <Package size={12} /> : <User size={12} />}
+                                                {report.targetType === "product" ? <Package size={14} /> : <User size={14} />}
                                                 {report.targetType === "product" ? t("report.product") : t("report.user")}
                                             </span>
                                         </td>
-                                        <td style={{ padding: "14px 16px", fontSize: "13px", color: "#374151", fontWeight: "600" }}>
+                                        <td style={{ fontWeight: "700", color: "#1e293b" }}>
                                             {report.targetInfo?.name && report.targetInfo.name !== "منتج محذوف" && report.targetInfo.name !== "مستخدم محذوف"
                                                 ? report.targetInfo.name
                                                 : (report.targetType === "product" ? t("admin.reports.deletedProduct") : t("admin.reports.deletedUser"))}
                                             {report.targetInfo?.email && (
-                                                <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "2px" }}>{report.targetInfo.email}</div>
+                                                <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "400", marginTop: "2px" }}>{report.targetInfo.email}</div>
                                             )}
                                         </td>
-                                        <td style={{ padding: "14px 16px", fontSize: "13px", color: "#374151" }}>
-                                            {report.reporter?.fname || t("admin.reports.unknown")}
+                                        <td>
+                                            <div style={{ fontWeight: "600" }}>{report.reporter?.fname || t("admin.reports.unknown")}</div>
                                             {report.reporter?.email && (
-                                                <div style={{ fontSize: "11px", color: "#94a3b8" }}>{report.reporter.email}</div>
+                                                <div style={{ fontSize: "11px", color: "#64748b" }}>{report.reporter.email}</div>
                                             )}
                                         </td>
-                                        <td style={{ padding: "14px 16px" }}>
-                                            <span style={{ fontSize: "13px", color: "#ef4444", fontWeight: "600" }}>
+                                        <td>
+                                            <span style={{ color: "#ef4444", fontWeight: "700", fontSize: "0.85rem" }}>
                                                 {t(`report.reasons.${report.reason}`) || report.reason}
                                             </span>
                                         </td>
-                                        <td style={{ padding: "14px 16px" }}>
-                                            <span style={{
-                                                display: "inline-flex", alignItems: "center", gap: "6px",
-                                                padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700",
-                                                background: sc.bg, color: sc.text,
-                                            }}>
-                                                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: sc.dot }} />
+                                        <td>
+                                            <span className="status-badge" style={{ background: sc.bg, color: sc.text, display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                                                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: sc.dot }} />
                                                 {t(`admin.reports.status.${report.status}`)}
                                             </span>
                                         </td>
-                                        <td style={{ padding: "14px 16px", fontSize: "12px", color: "#94a3b8" }}>
+                                        <td style={{ color: "#64748b", fontSize: "0.85rem", fontWeight: "600" }}>
                                             {new Date(report.createdAt).toLocaleDateString(i18n.language === "ar" ? "ar-SA" : "en-US")}
                                         </td>
-                                        <td style={{ padding: "14px 16px" }}>
-                                            <div style={{ display: "flex", gap: "8px" }}>
+                                        <td>
+                                            <div style={{ display: "flex", gap: "10px" }}>
                                                 <button
+                                                    className="pagination-btn"
+                                                    style={{ padding: "8px" }}
                                                     onClick={() => openDetail(report)}
                                                     title={t("admin.reports.details")}
-                                                    style={{ padding: "6px", borderRadius: "8px", border: "1px solid #e2e8f0", background: "#fff", cursor: "pointer", color: "#3b82f6", display: "flex", alignItems: "center" }}
                                                 >
-                                                    <Eye size={15} />
+                                                    <Eye size={18} />
                                                 </button>
                                                 <button
+                                                    className="delete-btn"
+                                                    style={{ padding: "8px" }}
                                                     onClick={() => { setDeleteTarget(report); setConfirmDeleteOpen(true); }}
                                                     title={t("common.delete")}
-                                                    style={{ padding: "6px", borderRadius: "8px", border: "1px solid #fee2e2", background: "#fff", cursor: "pointer", color: "#ef4444", display: "flex", alignItems: "center" }}
                                                 >
-                                                    <Trash2 size={15} />
+                                                    <Trash2 size={18} />
                                                 </button>
                                             </div>
                                         </td>
@@ -267,24 +283,25 @@ const ReportsManagement = () => {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-                <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "20px" }}>
-                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
-                        <button
-                            key={p}
-                            onClick={() => loadReports(p, filterStatus, filterType)}
-                            style={{
-                                width: "36px", height: "36px", borderRadius: "8px",
-                                border: p === pagination.currentPage ? "2px solid #3b82f6" : "1px solid #e2e8f0",
-                                background: p === pagination.currentPage ? "#eff6ff" : "#fff",
-                                color: p === pagination.currentPage ? "#3b82f6" : "#374151",
-                                fontWeight: "700", cursor: "pointer", fontSize: "14px"
-                            }}
-                        >
-                            {p}
-                        </button>
-                    ))}
+                <div className="pagination">
+                    <button
+                        className="pagination-btn"
+                        disabled={pagination.currentPage === 1}
+                        onClick={() => loadReports(pagination.currentPage - 1, filterStatus, filterType)}
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+                    <span className="pagination-info">{pagination.currentPage} / {pagination.totalPages}</span>
+                    <button
+                        className="pagination-btn"
+                        disabled={pagination.currentPage === pagination.totalPages}
+                        onClick={() => loadReports(pagination.currentPage + 1, filterStatus, filterType)}
+                    >
+                        <ChevronRight size={18} />
+                    </button>
                 </div>
             )}
+
 
             {/* Detail Modal */}
             <ReportsDetailModal

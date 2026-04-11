@@ -45,27 +45,30 @@ const ConfirmDialog = ({
         </div>
 
         <DialogFooter className="flex gap-3 justify-center mt-6">
-          <button
+          <Button
+            variant="ghost"
             onClick={onCancel}
             disabled={loading}
             className="btn-ghost px-6 py-2.5 font-bold"
           >
             {cancelText}
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={onConfirm}
+            variant="danager"
             disabled={loading}
-            className={`px-6 py-2.5 rounded-lg font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 ${
+            className={` text-white ${
               type === "danger" 
-                ? "bg-[#ef4444] shadow-red-200" 
+                ? "bg-[#ef4444] shadow-red-200 " 
                 : type === "warning"
                 ? "bg-[#f5a623] shadow-orange-200"
                 : "bg-[#6366f1] shadow-indigo-200"
             }`}
+            style={{padding:".3rem"}}
           >
             {loading ? "..." : confirmText}
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

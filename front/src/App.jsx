@@ -13,6 +13,8 @@ import { Logincontext } from "./Components/context/Contextprovider";
 import "./App.css";
 import "./i18n/i18n";
 import { useTranslation } from "react-i18next";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Lazy Load Components
 const Navbaar = lazy(() => import("./Components/header/Navbaar"));
@@ -242,6 +244,18 @@ function App() {
           <h2>{t("common.craftingExperience")}</h2>
         </div>
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={i18n.language === "ar"}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

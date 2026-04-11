@@ -1,6 +1,28 @@
 const User = require("../models/userSchema");
 const products = require("../models/productsSchema");
+const mongoose = require("mongoose");
 const { asyncHandler } = require("../middleware/errorMiddleware");
+
+// Safe user projection — never return passwords or tokens
+const SAFE_SELECT = "-password -tokens -cpassword";
+
+// Sanitize user output for admin views
+const toPublicUser = (user) => ({
+    _id: user._id,
+    fname: user.fname,
+    email: user.email,
+    mobile: user.mobile,
+    role: user.role || "user",
+    country: user.country || "",
+    cartsCount: Array.isArray(user.carts) ? user.carts.length : 0,
+    wishlistCount: Array.isArray(user.wishlist) ? user.wishlist.length : 0,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    isBanned: user.isBanned || false,
+    banReason: user.banReason || "",
+    bannedAt: user.bannedAt || null,
+    isVerified: user.isVerified || false,
+});
 
 /**
  * Get user wishlist
@@ -19,6 +41,11 @@ exports.getWishlist = asyncHandler(async (req, res) => {
 exports.toggleWishlist = asyncHandler(async (req, res) => {
     const { productId } = req.body;
 
+    // Validate productId is a valid ObjectId
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+        return res.status(400).json({ error: "Invalid product ID" });
+    }
+
     // Check if product exists
     const product = await products.findById(productId);
     if (!product) {
@@ -33,15 +60,15 @@ exports.toggleWishlist = asyncHandler(async (req, res) => {
     // Initialize wishlist if it doesn't exist
     if (!user.wishlist) user.wishlist = [];
 
-    const index = user.wishlist.indexOf(productId);
+    const index = user.wishlist.findIndex(
+        (id) => id.toString() === productId.toString()
+    );
     let saved = false;
 
     if (index > -1) {
-        // Remove from wishlist
         user.wishlist.splice(index, 1);
         saved = false;
     } else {
-        // Add to wishlist
         user.wishlist.push(productId);
         saved = true;
     }
@@ -50,7 +77,7 @@ exports.toggleWishlist = asyncHandler(async (req, res) => {
     res.status(200).json({
         saved,
         wishlistCount: user.wishlist.length,
-        message: saved ? "Added to wishlist" : "Removed from wishlist"
+        message: saved ? "Added to wishlist" : "Removed from wishlist",
     });
 });
 
@@ -72,25 +99,42 @@ exports.clearWishlist = asyncHandler(async (req, res) => {
  * Admin: Get all users
  */
 exports.getUsers = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 20, role, search } = req.query;
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    let { page = 1, limit = 20, role, search } = req.query;
+
+    // Enforce pagination bounds
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
     const skip = (pageNum - 1) * limitNum;
 
     let query = {};
-    if (role) query.role = role;
+
+    // Validate role filter against allowed values
+    if (role) {
+        if (!["user", "admin"].includes(role)) {
+            return res.status(400).json({ error: "Invalid role filter" });
+        }
+        query.role = role;
+    }
+
     if (search) {
-        const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+        const searchRegex = new RegExp(
+            search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+            "i"
+        );
         query.$or = [{ fname: searchRegex }, { email: searchRegex }];
     }
 
     const [users, totalItems] = await Promise.all([
-        User.find(query).select("-password -tokens -cpassword").sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+        User.find(query)
+            .select(SAFE_SELECT)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNum),
         User.countDocuments(query),
     ]);
 
     res.status(200).json({
-        data: users,
+        data: users.map(toPublicUser),
         pagination: {
             totalItems,
             totalPages: Math.ceil(totalItems / limitNum),
@@ -104,9 +148,12 @@ exports.getUsers = asyncHandler(async (req, res) => {
  * Admin: Get user by ID
  */
 exports.getUserById = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id).select("-password -tokens -cpassword");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+    }
+    const user = await User.findById(req.params.id).select(SAFE_SELECT);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.status(200).json(user);
+    res.status(200).json(toPublicUser(user));
 });
 
 /**
@@ -114,77 +161,158 @@ exports.getUserById = asyncHandler(async (req, res) => {
  */
 exports.createUser = asyncHandler(async (req, res) => {
     const { fname, email, mobile, password, cpassword, role, country } = req.body;
+    const validator = require("validator");
 
     if (!fname || !email || !mobile || !password || !cpassword) {
         return res.status(422).json({ error: "Please fill all details" });
     }
 
-    const preuser = await User.findOne({ email });
+    if (!validator.isEmail(email)) {
+        return res.status(422).json({ error: "Invalid email address" });
+    }
+
+    if (fname.trim().length < 2 || fname.trim().length > 100) {
+        return res.status(422).json({ error: "Name must be 2–100 characters" });
+    }
+
+    if (password.length < 6 || password.length > 128) {
+        return res.status(422).json({ error: "Password must be 6–128 characters" });
+    }
+
+    if (password !== cpassword) {
+        return res.status(422).json({ error: "Passwords do not match" });
+    }
+
+    if (!/^\+?[\d\s\-()]{7,20}$/.test(mobile.toString())) {
+        return res.status(422).json({ error: "Invalid mobile number" });
+    }
+
+    // Restrict role assignment: only "user" or "admin"
+    const allowedRoles = ["user", "admin"];
+    const assignedRole = role && allowedRoles.includes(role) ? role : "user";
+
+    const preuser = await User.findOne({ email: email.toLowerCase().trim() });
     if (preuser) return res.status(422).json({ error: "This email already exists" });
 
-    const premobile = await User.findOne({ mobile });
+    const premobile = await User.findOne({ mobile: mobile.toString().trim() });
     if (premobile) return res.status(422).json({ error: "This mobile already exists" });
 
-    if (password !== cpassword) return res.status(422).json({ error: "Passwords do not match" });
-
     const user = new User({
-        fname,
-        email,
-        mobile,
+        fname: fname.trim(),
+        email: email.toLowerCase().trim(),
+        mobile: mobile.toString().trim(),
         password,
         cpassword,
-        role: role || "user",
-        country
+        role: assignedRole,
+        country: country ? country.trim() : undefined,
     });
 
     await user.save();
-    res.status(201).json({ success: true, data: user });
+    // Return only safe fields
+    res.status(201).json({ success: true, data: toPublicUser(user) });
 });
 
 /**
  * Admin: Update user
  */
 exports.updateUser = asyncHandler(async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+    }
+
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const updates = req.body;
-    delete updates.password; // Don't allow password update through this route
-    delete updates.tokens;
+    // Strict whitelist — only allow specific safe fields to be updated
+    const { fname, role, country, mobile } = req.body;
 
-    Object.assign(user, updates);
+    if (fname !== undefined) {
+        const trimmed = fname.trim();
+        if (trimmed.length < 2 || trimmed.length > 100) {
+            return res.status(422).json({ error: "Name must be 2–100 characters" });
+        }
+        user.fname = trimmed;
+    }
+
+    if (role !== undefined) {
+        if (!["user", "admin"].includes(role)) {
+            return res.status(400).json({ error: "Invalid role" });
+        }
+        user.role = role;
+    }
+
+    if (country !== undefined) {
+        user.country = country.trim().substring(0, 100);
+    }
+
+    if (mobile !== undefined) {
+        const trimmedMobile = mobile.toString().trim();
+        if (!/^\+?[\d\s\-()]{7,20}$/.test(trimmedMobile)) {
+            return res.status(422).json({ error: "Invalid mobile number" });
+        }
+        const existingMobile = await User.findOne({ mobile: trimmedMobile, _id: { $ne: user._id } });
+        if (existingMobile) {
+            return res.status(422).json({ error: "This mobile number is already in use" });
+        }
+        user.mobile = trimmedMobile;
+    }
+
     await user.save();
-
-    res.status(200).json({ success: true, data: user });
+    res.status(200).json({ success: true, data: toPublicUser(user) });
 });
 
 /**
  * Admin: Delete user
  */
 exports.deleteUser = asyncHandler(async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    // Prevent self-deletion
+    if (req.params.id === req.userID.toString()) {
+        return res.status(400).json({ error: "Cannot delete your own account" });
+    }
+
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.status(200).json({ success: true, deletedUserId: user._id });
 });
 
 /**
- * Admin: Ban user
+ * Admin: Ban / Unban user
  */
 exports.banUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    // Prevent self-banning
+    if (id === req.userID.toString()) {
+        return res.status(400).json({ error: "Cannot ban your own account" });
+    }
+
     const { isBanned, banReason } = req.body;
+
+    if (typeof isBanned !== "boolean") {
+        return res.status(422).json({ error: "isBanned must be a boolean" });
+    }
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     user.isBanned = isBanned;
-    user.banReason = isBanned ? banReason : "";
+    user.banReason = isBanned ? (banReason ? banReason.toString().trim().substring(0, 500) : "Violation of terms of service") : "";
     user.bannedAt = isBanned ? new Date() : null;
 
+    // Revoke all sessions when banning
     if (isBanned) {
         user.tokens = [];
     }
 
     await user.save();
-    res.status(200).json({ success: true, data: user });
+    // Return only safe fields — never return tokens/password
+    res.status(200).json({ success: true, data: toPublicUser(user) });
 });

@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
+import { toast } from "react-toastify";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
@@ -15,7 +16,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import AddIcon from "@mui/icons-material/Add";
 import PhoneIcon from "@mui/icons-material/Phone";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import PublicIcon from "@mui/icons-material/Public";
+
 import { useLocalize } from "../context/LocalizeContext";
 import { getLocalPhonePlaceholder } from "../../utils/localizeUtils";
 
@@ -24,7 +25,7 @@ const ProfilePage = () => {
   const { activeCountry } = useLocalize();
   const navigate = useNavigate();
   const { account, setAccount } = useContext(Logincontext);
-  const [form, setForm] = useState({ fname: "", email: "", mobile: "", country: "" });
+  const [form, setForm] = useState({ fname: "", email: "", mobile: "", country: "N/A" });
   const [myProducts, setMyProducts] = useState([]);
   const [prodPage, setProdPage] = useState(1);
   const [prodTotalPages, setProdTotalPages] = useState(1);
@@ -46,7 +47,7 @@ const ProfilePage = () => {
           fname: profileData.fname || "",
           email: profileData.email || "",
           mobile: profileData.mobile || "",
-          country: profileData.country || "",
+          country: profileData.country || "N/A",
         });
 
         const productsRes = await axiosInstance.get("/profile/products");
@@ -89,9 +90,12 @@ const ProfilePage = () => {
       const response = await axiosInstance.put("/profile", form);
       const payload = response.data;
       setAccount(payload);
+      toast.success(t("profile.updateSuccess") || "Profile updated successfully!");
       setMessage(t("profile.updateSuccess"));
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      const errorMsg = err.response?.data?.error || err.message;
+      toast.error(errorMsg);
+      setError(errorMsg);
     } finally {
       setSaving(false);
     }
@@ -111,12 +115,15 @@ const ProfilePage = () => {
     try {
       const response = await axiosInstance.delete(`/products/${productToDelete}`);
       if (response.status === 200) {
+        toast.success(t("profile.deleteSuccess") || "Product deleted.");
         setMyProducts((prev) => prev.filter((product) => (product.id || product._id) !== productToDelete));
         setMessage(t("profile.deleteSuccess", { defaultValue: "Product deleted." }));
         setIsConfirmOpen(false);
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      const errorMsg = err.response?.data?.error || err.message;
+      toast.error(errorMsg);
+      setError(errorMsg);
     } finally {
       setDeletingId(null);
       setProductToDelete(null);
@@ -154,10 +161,7 @@ const ProfilePage = () => {
                 <PhoneIcon fontSize="small" />{" "}
                 <span dir="ltr">{account?.mobile || "No phone added"}</span>
               </div>
-              <div className="info_item">
-                <PublicIcon fontSize="small" />{" "}
-                <span>{account?.country || t("auth.countryPlaceholder", "No country added")}</span>
-              </div>
+
             </div>
           </div>
         </aside>
@@ -204,15 +208,7 @@ const ProfilePage = () => {
                 />
               </div>
 
-              <div className="input_box">
-                <label>{t("auth.country")}</label>
-                <input
-                  name="country"
-                  value={form.country}
-                  onChange={updateField}
-                  placeholder={t("auth.countryPlaceholder")}
-                />
-              </div>
+
 
               <div className="form_footer">
                 <button type="submit" className="save_btn" disabled={saving}>

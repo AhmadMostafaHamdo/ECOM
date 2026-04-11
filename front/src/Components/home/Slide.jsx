@@ -74,7 +74,7 @@ const Slide = React.memo(({ title, products, category }) => {
                     removeArrowOnDeviceType={["tablet", "mobile"]}
                     itemClass="carousel-item-padding-40-px"
                     containerClass="carousel-container"
-                >
+                >   
                     {items.map((e) => (
                         <NavLink to={`/getproductsone/${e.id}`} key={e.id} className="product_link" onClick={(evt) => handleProductClick(evt, e.id)}>
                             <div className="products_items">

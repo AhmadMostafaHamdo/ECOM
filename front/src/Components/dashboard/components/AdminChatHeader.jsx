@@ -1,11 +1,11 @@
-import React from 'react';
-import ChatIcon from '@mui/icons-material/Chat';
+import { MessageSquare } from 'lucide-react';
 
 const AdminChatHeader = ({ conversations, account }) => {
     return (
         <div className="admin-chat-header">
             <div className="admin-chat-header-left">
-                <ChatIcon />
+                <MessageSquare size={28} color="#ff9d00" />
+
                 <div>
                     <h1>Live Chat</h1>
                     <p>التواصل مع أصحاب المنتجات</p>

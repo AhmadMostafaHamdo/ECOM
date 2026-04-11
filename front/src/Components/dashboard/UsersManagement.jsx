@@ -56,25 +56,34 @@ const UsersManagement = () => {
   const [adminConfirmOpen, setAdminConfirmOpen] = useState(false);
   const [roleUpdating, setRoleUpdating] = useState(false);
 
+  const [roleFilter, setRoleFilter] = useState("");
+
   const isEditing = Boolean(editingUserId);
 
   useEffect(() => {
-    loadUsers(1, "", 10);
-  }, [loadUsers]);
+    loadUsers(1, "", 10, roleFilter);
+  }, [loadUsers, roleFilter]);
 
   // Data Actions
   const handleSearch = useCallback(
-    (term) => loadUsers(1, term, pagination.limit),
-    [loadUsers, pagination.limit],
+    (term) => loadUsers(1, term, pagination.limit, roleFilter),
+    [loadUsers, pagination.limit, roleFilter],
   );
   const handlePageChange = useCallback(
-    (newPage) => loadUsers(newPage, "", pagination.limit),
-    [loadUsers, pagination.limit],
+    (newPage) => loadUsers(newPage, "", pagination.limit, roleFilter),
+    [loadUsers, pagination.limit, roleFilter],
   );
   const handlePageSizeChange = useCallback(
-    (newSize) => loadUsers(1, "", newSize),
-    [loadUsers],
+    (newSize) => loadUsers(1, "", newSize, roleFilter),
+    [loadUsers, roleFilter],
   );
+
+  const handleFilterChange = useCallback((key, value) => {
+    if (key === "role") {
+      setRoleFilter(value);
+      loadUsers(1, "", pagination.limit, value);
+    }
+  }, [loadUsers, pagination.limit]);
 
   // Form Management
   const resetForm = useCallback(() => {
@@ -335,6 +344,7 @@ const UsersManagement = () => {
             searchDebounceMs={450}
             searchKeys={["fname", "lname", "email", "mobile"]}
             filters={tableFilters}
+            onFilterChange={handleFilterChange}
             columns={tableColumns}
             actions={tableActions}
           />

@@ -3,38 +3,13 @@ import { Flag, Clock, Eye, CheckCircle, Package, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export const StatCard = ({ icon: Icon, label, value, color }) => (
-    <div
-        style={{
-            background: "#fff",
-            borderRadius: "16px",
-            padding: "20px 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-            border: "1px solid #e2e8f0",
-        }}
-    >
-        <div
-            style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "12px",
-                background: color + "20",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color,
-                flexShrink: 0,
-            }}
-        >
-            <Icon size={22} />
+    <div className="report-stat-card">
+        <div className="report-stat-icon" style={{ background: color + "15", color }}>
+            <Icon size={24} />
         </div>
-        <div>
-            <div style={{ fontSize: "26px", fontWeight: "800", color: "#0f172a", lineHeight: 1 }}>
-                {value}
-            </div>
-            <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>{label}</div>
+        <div className="report-stat-info">
+            <span className="stat-value">{value}</span>
+            <span className="stat-label">{label}</span>
         </div>
     </div>
 );
@@ -44,7 +19,7 @@ const ReportsStats = ({ stats }) => {
     if (!stats) return null;
 
     return (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: "16px", marginBottom: "28px" }}>
+        <div className="reports-stats-grid">
             <StatCard icon={Flag} label={t("admin.reports.allTypes")} value={stats.total} color="#6366f1" />
             <StatCard icon={Clock} label={t("admin.reports.status.pending")} value={stats.pending} color="#f59e0b" />
             <StatCard icon={Eye} label={t("admin.reports.status.reviewed")} value={stats.reviewed} color="#3b82f6" />
@@ -56,3 +31,4 @@ const ReportsStats = ({ stats }) => {
 };
 
 export default ReportsStats;
+

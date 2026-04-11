@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { axiosInstance } from '../api';
 import './ContactUs.css';
@@ -82,6 +83,7 @@ const ContactUs = () => {
       const response = await axiosInstance.post('/contact', formData);
 
       if (response.status === 200 || response.status === 201) {
+        toast.success(t('contact.success') || "Message sent successfully!");
         setSubmitStatus('success');
         setFormData({
           name: '',
@@ -93,6 +95,7 @@ const ContactUs = () => {
       } else {
         const data = response.data;
         setSubmitStatus('error');
+        toast.error(data.error || t('contact.error'));
         if (data.details) {
           setErrors(data.details);
         } else {
@@ -100,12 +103,14 @@ const ContactUs = () => {
         }
       }
     } catch (error) {
+      const errorMsg = error.response?.data?.error || t('contact.error') || "Failed to send message";
+      toast.error(errorMsg);
       setSubmitStatus('error');
       const data = error.response?.data || {};
       if (data.details) {
         setErrors(data.details);
       } else {
-        setErrors({ general: data.error || t('errors.serverError') });
+        setErrors({ general: errorMsg });
       }
     } finally {
       setIsSubmitting(false);

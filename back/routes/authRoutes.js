@@ -5,7 +5,8 @@ const authenticate = require("../middleware/authenticate");
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);
-router.get("/logout", authenticate, authController.logout);
+// Logout must be POST to be protected by CSRF and to avoid logout via GET request (CSRF vulnerability)
+router.post("/logout", authenticate, authController.logout);
 router.get("/profile", authenticate, authController.getProfile);
 router.put("/profile", authenticate, authController.updateProfile);
 router.get("/validuser", authenticate, authController.validateUser);

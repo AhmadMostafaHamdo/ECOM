@@ -136,7 +136,7 @@ userSchema.methods.addcartdata = async function (cart) {
 
 
 
-const User = new mongoose.model("USER", userSchema);
+const User = mongoose.model("USER", userSchema);
 
 module.exports = User;
 

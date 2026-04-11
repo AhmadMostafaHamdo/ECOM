@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { axiosInstance } from "../../../api";
+import { toast } from "react-toastify";
 
 export const useUsersManagement = () => {
     const [users, setUsers] = useState([]);
@@ -17,12 +18,17 @@ export const useUsersManagement = () => {
     const [banning, setBanning] = useState(false);
 
     // Load Users function
-    const loadUsers = useCallback(async (page = 1, search = "", limit = 10) => {
+    const loadUsers = useCallback(async (page = 1, search = "", limit = 10, role = "") => {
         setLoading(true);
         setError("");
         try {
+            const params = { page, limit, search };
+            if (role && role !== "all") {
+                params.role = role;
+            }
+            
             const response = await axiosInstance.get("/admin/users", {
-                params: { page, limit, search }
+                params
             });
             if (response.status === 200) {
                 const resData = response.data;
@@ -50,11 +56,14 @@ export const useUsersManagement = () => {
                 : await axiosInstance.post("/admin/users", payload);
 
             if (response.status === 200 || response.status === 201) {
+                toast.success(isEditing ? "تم تحديث المستخدم بنجاح" : "تم إنشاء المستخدم بنجاح");
                 loadUsers(pagination.currentPage, "");
                 return { success: true };
             }
         } catch (err) {
-            return { success: false, error: err.response?.data?.error || err.message };
+            const errorMsg = err.response?.data?.error || err.message;
+            toast.error(errorMsg);
+            return { success: false, error: errorMsg };
         } finally {
             setSaving(false);
         }
@@ -66,10 +75,12 @@ export const useUsersManagement = () => {
         try {
             const response = await axiosInstance.delete(`/admin/users/${userId}`);
             if (response.status === 200) {
+                toast.success("تم حذف المستخدم بنجاح");
                 loadUsers(Math.max(1, pagination.currentPage), "");
             }
         } catch (err) {
             console.error(err);
+            toast.error("فشل حذف المستخدم");
         } finally {
             setDeleting(false);
         }
@@ -83,9 +94,13 @@ export const useUsersManagement = () => {
                 isBanned: true,
                 banReason: reason || "انتهاك شروط الخدمة"
             });
-            if (response.status === 200) loadUsers(pagination.currentPage, "");
+            if (response.status === 200) {
+                toast.success("تم حظر المستخدم");
+                loadUsers(pagination.currentPage, "");
+            }
         } catch (err) {
             console.error(err);
+            toast.error("فشل حظر المستخدم");
         } finally {
             setBanning(false);
         }
@@ -99,9 +114,13 @@ export const useUsersManagement = () => {
                 isBanned: false,
                 banReason: ""
             });
-            if (response.status === 200) loadUsers(pagination.currentPage, "");
+            if (response.status === 200) {
+                toast.success("تم إلغاء حظر المستخدم");
+                loadUsers(pagination.currentPage, "");
+            }
         } catch (err) {
             console.error(err);
+            toast.error("فشل إلغاء حظر المستخدم");
         } finally {
             setBanning(false);
         }
@@ -115,12 +134,14 @@ export const useUsersManagement = () => {
                 role: newRole
             });
             if (response.status === 200) {
+                toast.success(newRole === "admin" ? "تمت الترقية لمدير" : "تمت الإزالة من المدراء");
                 loadUsers(pagination.currentPage, "");
                 return { success: true };
             }
         } catch (err) {
             console.error("Error updating user role:", err);
             const errorMsg = err.response?.data?.error || "حدث خطأ أثناء تحديث الصلاحية";
+            toast.error(errorMsg);
             return { success: false, error: errorMsg };
         }
     };

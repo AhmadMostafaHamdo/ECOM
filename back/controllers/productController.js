@@ -68,8 +68,8 @@ exports.ensureCategoryCatalog = async () => {
  */
 exports.getProducts = asyncHandler(async (req, res) => {
     const { category, search, page = 1, limit = 10 } = req.query;
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
     const skip = (pageNum - 1) * limitNum;
 
     let query = {};
@@ -113,8 +113,8 @@ exports.filterProducts = asyncHandler(async (req, res) => {
         try { activeSelections = JSON.parse(selections); } catch { activeSelections = {}; }
     }
 
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 12));
     const skip = (pageNum - 1) * limitNum;
 
     const clauses = [];
@@ -277,7 +277,7 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
  * @route   GET /api/products/trending
  */
 exports.getTrendingProducts = asyncHandler(async (req, res) => {
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
     const trending = await products.find().sort({ views: -1, createdAt: -1 }).limit(limit);
     res.status(200).json(trending.map(resolveProductCategory));
 });

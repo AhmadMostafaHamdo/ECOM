@@ -1,7 +1,4 @@
-import React from 'react';
-import PersonIcon from '@mui/icons-material/Person';
-import ChatIcon from '@mui/icons-material/Chat';
-import StorefrontIcon from '@mui/icons-material/Storefront';
+import { User, MessageSquare, Store } from 'lucide-react';
 
 const AdminChatSidebar = ({
     conversations,
@@ -14,13 +11,14 @@ const AdminChatSidebar = ({
     return (
         <div className={`admin-chat-sidebar ${activeConversation ? 'mobile-hidden' : ''}`}>
             <div className="admin-chat-sidebar-title">
-                <PersonIcon />
+                <User size={18} />
                 <span>المحادثات</span>
             </div>
 
+
             {conversations.length === 0 ? (
                 <div className="admin-chat-empty">
-                    <ChatIcon className="empty-icon" />
+                    <MessageSquare size={48} className="empty-icon" />
                     <h3>لا توجد محادثات</h3>
                     <p>ستظهر المحادثات هنا عندما يتواصل معك المستخدمون</p>
                 </div>
@@ -52,7 +50,7 @@ const AdminChatSidebar = ({
                                     </p>
                                     {conv.productId && (
                                         <span className="admin-conv-product-tag">
-                                            <StorefrontIcon style={{ fontSize: 10 }} />
+                                            <Store size={10} />
                                             منتج
                                         </span>
                                     )}

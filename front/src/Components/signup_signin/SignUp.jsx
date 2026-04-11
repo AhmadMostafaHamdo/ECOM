@@ -2,8 +2,7 @@ import React, { useState, useContext, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { axiosInstance } from "../../api";
 import { useNavigate } from "react-router-dom";
 import "./signup.css";
@@ -12,7 +11,7 @@ import PhoneInput from "../ui/PhoneInput";
 const Signup = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setAccount } = useContext(Logincontext);
+  const { setAccount, setShowLoginPrompt } = useContext(Logincontext);
   const abortRef = useRef(null);
   const unmountedRef = useRef(false);
   const [loading, setLoading] = useState(false);
@@ -23,7 +22,7 @@ const Signup = () => {
     mobile: "",
     password: "",
     cpassword: "",
-    country: "",
+    country: "N/A",
   });
   const [errors, setErrors] = useState({});
 
@@ -52,7 +51,7 @@ const Signup = () => {
       newErrors.email = t("auth.invalidEmail");
     }
     if (!mobile) newErrors.mobile = t("auth.mobileRequired");
-    if (!country) newErrors.country = t("auth.countryRequired");
+
     if (!password) {
       newErrors.password = t("auth.passwordRequired");
     } else if (password.length < 6) {
@@ -88,7 +87,8 @@ const Signup = () => {
         localStorage.setItem("auth_token", data.token);
       }
       setAccount(data);
-      setUdata({ fname: "", email: "", mobile: "", password: "", cpassword: "", country: "" });
+      setShowLoginPrompt(false);
+      setUdata({ fname: "", email: "", mobile: "", password: "", cpassword: "", country: "N/A" });
       toast.success(t("auth.signupSuccess"), { position: "top-center" });
       setTimeout(() => navigate("/"), 300);
     } catch (error) {
@@ -195,9 +195,7 @@ const Signup = () => {
                   setUdata({ ...udata, mobile: value });
                   if (errors.mobile) setErrors({ ...errors, mobile: null });
                 }}
-                onCountryChange={(c) => {
-                  if (c && !udata.country)
-                    setUdata((prev) => ({ ...prev, country: c.name }));
+                  // Country sync removed
                 }}
                 error={errors.mobile}
                 
@@ -205,15 +203,7 @@ const Signup = () => {
               {errors.mobile && <span className="error_msg">{errors.mobile}</span>}
             </div>
 
-            <div className={`field ${errors.country ? "error" : ""}`}>
-              <label htmlFor="su_country">{t("auth.country")}</label>
-              <input
-                id="su_country" type="text" name="country"
-                placeholder={t("auth.countryPlaceholder")}
-                value={udata.country} onChange={adddata} 
-              />
-              {errors.country && <span className="error_msg">{errors.country}</span>}
-            </div>
+
 
             <div className={`field ${errors.password ? "error" : ""}`}>
               <label htmlFor="su_pass">{t("auth.password")}</label>
@@ -247,7 +237,7 @@ const Signup = () => {
         </div>
       </div>
 
-      <ToastContainer />
+      </div>
     </div>
   );
 };

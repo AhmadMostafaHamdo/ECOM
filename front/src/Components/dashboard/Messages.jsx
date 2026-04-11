@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
+import { 
+  Mail, 
+  Search, 
+  Filter, 
+  Trash2, 
+  Eye, 
+  CheckCircle, 
+  Clock, 
+  Reply, 
+  AlertCircle,
+  X,
+  User,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Info
+} from "lucide-react";
 import "./Messages.css";
+import { toast } from "react-toastify";
 
 const Messages = () => {
   const { t, i18n } = useTranslation();
@@ -34,6 +52,11 @@ const Messages = () => {
         setMessages(data.data || []);
         setTotalPages(data.pagination?.totalPages || 1);
         setCurrentPage(data.pagination?.currentPage || 1);
+        
+        // Auto-select first message on desktop if none selected
+        if (!selectedMessage && data.data?.length > 0 && window.innerWidth > 1024) {
+          setSelectedMessage(data.data[0]);
+        }
       }
     } catch (error) {
       setError(error.response?.data?.error || error.message);
@@ -63,9 +86,11 @@ const Messages = () => {
         if (selectedMessage && selectedMessage._id === messageId) {
           setSelectedMessage((prev) => ({ ...prev, status: newStatus }));
         }
+        toast.success(t("admin.messages.statusUpdated") || "Status updated successfully");
       }
     } catch (error) {
       setError(error.response?.data?.error || error.message);
+      toast.error("Failed to update status");
     } finally {
       setIsUpdating(false);
     }
@@ -84,35 +109,29 @@ const Messages = () => {
         if (selectedMessage && selectedMessage._id === messageToDelete) {
           setSelectedMessage(null);
         }
+        toast.success(t("admin.messages.deleted") || "Message deleted successfully");
       }
     } catch (error) {
       setError(error.response?.data?.error || error.message);
+      toast.error("Failed to delete message");
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "pending":
-        return "status-pending";
-      case "read":
-        return "status-read";
-      case "replied":
-        return "status-replied";
-      default:
-        return "status-pending";
+      case "pending": return "status-pending";
+      case "read": return "status-read";
+      case "replied": return "status-replied";
+      default: return "status-pending";
     }
   };
 
-  const getStatusText = (status) => {
+  const getStatusIcon = (status) => {
     switch (status) {
-      case "pending":
-        return t("admin.messages.status.pending");
-      case "read":
-        return t("admin.messages.status.read");
-      case "replied":
-        return t("admin.messages.status.replied");
-      default:
-        return t("admin.messages.status.pending");
+      case "pending": return <Clock size={14} />;
+      case "read": return <Eye size={14} />;
+      case "replied": return <Reply size={14} />;
+      default: return <Clock size={14} />;
     }
   };
 
@@ -169,13 +188,7 @@ const Messages = () => {
 
       {error && (
         <div className="alert alert-error">
-          <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <AlertCircle className="alert-icon" />
           {error}
         </div>
       )}
@@ -183,19 +196,7 @@ const Messages = () => {
       <div className="messages-controls">
         <div className="search-filter-group">
           <div className="search-box">
-            <svg
-              className="search-icon"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+            <Search className="search-icon" />
             <input
               type="text"
               placeholder={t("admin.messages.search")}
@@ -220,15 +221,14 @@ const Messages = () => {
         </div>
 
         <div className="messages-stats">
-          <span className="stat-item">
-            Total: <strong>{messages.length}</strong>
-          </span>
-          <span className="stat-item pending">
-            Pending:{" "}
-            <strong>
-              {messages.filter((m) => m.status === "pending").length}
-            </strong>
-          </span>
+          <div className="stat-item">
+            <Mail size={18} />
+            <span>Total: <strong>{messages.length}</strong></span>
+          </div>
+          <div className="stat-item pending">
+            <Clock size={18} />
+            <span>Pending: <strong>{messages.filter(m => m.status === 'pending').length}</strong></span>
+          </div>
         </div>
       </div>
 
@@ -236,19 +236,7 @@ const Messages = () => {
         <div className="messages-list">
           {messages.length === 0 ? (
             <div className="empty-state">
-              <svg
-                className="empty-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                />
-              </svg>
+              <Mail className="empty-icon" />
               <h3>No messages found</h3>
               <p>No contact messages match your current filters.</p>
             </div>
@@ -261,27 +249,22 @@ const Messages = () => {
                   onClick={() => setSelectedMessage(message)}
                 >
                   <div className="message-header">
-                    <div className="message-sender">
-                      <h4 className="sender-name">{message.name}</h4>
-                      <span className="sender-email">{message.email}</span>
-                    </div>
-                    <div className="message-meta">
-                      <span
-                        className={`status-badge ${getStatusColor(message.status)}`}
-                      >
-                        {getStatusText(message.status)}
-                      </span>
-                      <span className="message-date">
-                        {formatDate(message.createdAt)}
-                      </span>
-                    </div>
+                    <h4 className="sender-name">{message.name}</h4>
+                    <span className="sender-email">{message.email}</span>
                   </div>
-                  <div className="message-preview">
-                    <h5 className="message-subject">{message.subject}</h5>
-                    <p className="message-excerpt">
-                      {message.message.substring(0, 100)}
-                      {message.message.length > 100 ? "..." : ""}
-                    </p>
+                  
+                  <h5 className="message-subject">{message.subject}</h5>
+                  <p className="message-excerpt">
+                    {message.message.substring(0, 80)}
+                    {message.message.length > 80 ? "..." : ""}
+                  </p>
+
+                  <div className="message-meta">
+                    <span className={`status-badge ${getStatusColor(message.status)}`}>
+                        {getStatusIcon(message.status)}
+                        <span style={{marginLeft: '6px'}}>{t(`admin.messages.status.${message.status}`)}</span>
+                    </span>
+                    <span className="message-date">{formatDate(message.createdAt)}</span>
                   </div>
                 </div>
               ))}
@@ -295,10 +278,10 @@ const Messages = () => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               >
-                Previous
+                <ChevronLeft size={18} />
               </button>
               <span className="pagination-info">
-                Page {currentPage} of {totalPages}
+                {currentPage} / {totalPages}
               </span>
               <button
                 className="pagination-btn"
@@ -307,7 +290,7 @@ const Messages = () => {
                   setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                 }
               >
-                Next
+                <ChevronRight size={18} />
               </button>
             </div>
           )}
@@ -334,14 +317,7 @@ const Messages = () => {
                   className="delete-btn"
                   onClick={() => openDeleteModal(selectedMessage._id)}
                 >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
+                  <Trash2 size={18} />
                   Delete
                 </button>
               </div>
@@ -350,43 +326,35 @@ const Messages = () => {
             <div className="detail-content">
               <div className="sender-info">
                 <div className="info-row">
-                  <span className="info-label">Name:</span>
+                  <span className="info-label">Name</span>
                   <span className="info-value">{selectedMessage.name}</span>
                 </div>
                 <div className="info-row">
-                  <span className="info-label">Email:</span>
+                  <span className="info-label">Email</span>
                   <span className="info-value">{selectedMessage.email}</span>
                 </div>
                 <div className="info-row">
-                  <span className="info-label">Date:</span>
+                  <span className="info-label">Date</span>
                   <span className="info-value">
                     {formatDate(selectedMessage.createdAt)}
-                  </span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">Status:</span>
-                  <span
-                    className={`status-badge ${getStatusColor(selectedMessage.status)}`}
-                  >
-                    {getStatusText(selectedMessage.status)}
                   </span>
                 </div>
               </div>
 
               <div className="message-content">
                 <div className="subject-section">
-                  <h4>Subject</h4>
+                  <h4><Info size={16} /> Subject</h4>
                   <p>{selectedMessage.subject}</p>
                 </div>
 
                 <div className="message-section">
-                  <h4>Message</h4>
+                  <h4><Mail size={16} /> Message Body</h4>
                   <div className="message-text">{selectedMessage.message}</div>
                 </div>
 
                 {selectedMessage.adminNotes && (
                   <div className="admin-notes">
-                    <h4>Admin Notes</h4>
+                    <h4><CheckCircle size={16} /> Admin Notes</h4>
                     <p>{selectedMessage.adminNotes}</p>
                   </div>
                 )}
@@ -402,18 +370,11 @@ const Messages = () => {
             <div className="modal-header">
               <h3>Delete Message</h3>
               <button className="modal-close" onClick={closeDeleteModal}>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X size={20} />
               </button>
             </div>
             <div className="modal-body">
-              <p>
+              <p style={{fontSize: '1.1rem', fontWeight: '500', color: '#475569'}}>
                 Are you sure you want to delete this message? This action cannot
                 be undone.
               </p>
@@ -423,7 +384,7 @@ const Messages = () => {
                 Cancel
               </button>
               <button className="btn-delete" onClick={handleDeleteMessage}>
-                Delete Message
+                Delete Permanently
               </button>
             </div>
           </div>
@@ -434,3 +395,4 @@ const Messages = () => {
 };
 
 export default Messages;
+

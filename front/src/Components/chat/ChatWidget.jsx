@@ -28,7 +28,8 @@ const ChatWidget = () => {
     // Initialize Global Socket
     useEffect(() => {
         socketRef.current = io(ROOT_URL, {
-            withCredentials: true
+            withCredentials: true,
+            transports: ['websocket', 'polling']
         });
         if (accountId) {
             socketRef.current.emit("user_online", accountId);

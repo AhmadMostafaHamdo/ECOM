@@ -1,19 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { Logincontext } from '../context/Contextprovider';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import './LoginPrompt.css';
 
 const LoginPrompt = ({ onCancel }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [seconds, setSeconds] = useState(2); // Set to 2 as requested
+    const { account, setShowLoginPrompt } = useContext(Logincontext);
+    const [seconds, setSeconds] = useState(3);
 
     useEffect(() => {
+        if (account) {
+            setShowLoginPrompt(false);
+            return;
+        }
+
         const interval = setInterval(() => {
             setSeconds((prev) => {
                 if (prev <= 1) {
                     clearInterval(interval);
+                    setShowLoginPrompt(false); // Close prompt before navigating
                     navigate('/login');
                     return 0;
                 }
@@ -22,7 +30,7 @@ const LoginPrompt = ({ onCancel }) => {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [navigate]);
+    }, [navigate, account, setShowLoginPrompt]);
 
     return (
         <div className="login_prompt_overlay">

@@ -2,16 +2,23 @@ import React, { useState, useEffect, useContext, useRef, useCallback } from 'rea
 import { io } from 'socket.io-client';
 import { Logincontext } from '../context/Contextprovider';
 import { axiosInstance } from '../../api';
-import ChatIcon from '@mui/icons-material/Chat';
-import SendIcon from '@mui/icons-material/Send';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PersonIcon from '@mui/icons-material/Person';
-import StorefrontIcon from '@mui/icons-material/Storefront';
+import { 
+    MessageSquare, 
+    Send, 
+    ChevronLeft, 
+    User, 
+    Store,
+    Clock,
+    Search,
+    MoreVertical,
+    Activity
+} from 'lucide-react';
 import './admin-chat.css';
 import AdminChatHeader from './components/AdminChatHeader';
 import AdminChatSidebar from './components/AdminChatSidebar';
 import AdminMessagesPanel from './components/AdminMessagesPanel';
 import { useTranslation } from 'react-i18next';
+
 
 const AdminChat = () => {
     const { t, i18n } = useTranslation();
@@ -27,8 +34,10 @@ const AdminChat = () => {
 
     // Initialize Global Socket
     useEffect(() => {
-        socketRef.current = io(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5007', {
-            withCredentials: true
+        const socketUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5007').replace(/\/$/, '');
+        socketRef.current = io(socketUrl, {
+            withCredentials: true,
+            transports: ['websocket', 'polling']
         });
         if (account) {
             socketRef.current.emit("user_online", account._id);

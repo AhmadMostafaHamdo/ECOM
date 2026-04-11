@@ -3,6 +3,7 @@ import { axiosInstance } from "../../api";
 import { useTranslation } from "react-i18next";
 import { Users, DollarSign, Package, TrendingUp, RefreshCw, Download } from "lucide-react";
 import "./admin-dashboard.css";
+import { toast } from "react-toastify";
 
 const StatisticsPage = () => {
     const { t } = useTranslation();
@@ -33,6 +34,7 @@ const StatisticsPage = () => {
                     totalCartItems: payload.totalCartItems || 0
                 });
                 setLastUpdated(new Date().toLocaleString());
+                if (!loading) toast.success(t("common.success") || "Updated successfully");
             }
         } catch (statsError) {
             setError(statsError.response?.data?.error || statsError.message);

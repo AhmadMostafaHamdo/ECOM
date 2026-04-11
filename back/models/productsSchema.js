@@ -113,6 +113,6 @@ productSchema.index({
 productSchema.index({ createdAt: -1 });
 productSchema.index({ category: 1, createdAt: -1 });
 
-const Products = new mongoose.model("products", productSchema);
+const Products = mongoose.model("products", productSchema);
 
 module.exports = Products;

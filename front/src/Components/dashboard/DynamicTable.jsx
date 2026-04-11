@@ -9,6 +9,8 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import Pagination from "../common/Pagination";
 import { Button } from "./Button";
+import { RefreshCcw } from "lucide-react";
+import { ROOT_URL } from "../api";
 
 // ─── Cache singleton ───────────────────────────────────────────────────────────
 const tableCache = new Map();
@@ -22,27 +24,6 @@ export const invalidateCache = (cacheKey) => {
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 // ─── Icons ─────────────────────────────────────────────────────────────────────
-const RefreshIcon = ({ spinning }) => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{
-      transition: "transform 0.6s ease",
-      transform: spinning ? "rotate(360deg)" : "rotate(0deg)",
-    }}
-  >
-    <polyline points="23 4 23 10 17 10" />
-    <polyline points="1 20 1 14 7 14" />
-    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-  </svg>
-);
-
 const SearchIcon = () => (
   <svg
     width="15"
@@ -252,6 +233,9 @@ const DynamicTable = ({
         ? (({ [key]: _, ...rest }) => rest)(prev)
         : { ...prev, [key]: value },
     );
+    if (props.onFilterChange) {
+       props.onFilterChange(key, value);
+    }
   };
 
   const activeFilterCount = Object.keys(activeFilters).length;
@@ -325,15 +309,28 @@ const DynamicTable = ({
     const value = item[column.key];
 
     switch (column.type) {
-      case "avatar":
+      case "avatar": {
+        const avatarImage = column.getAvatarImage ? column.getAvatarImage(item) : null;
+        
         return (
           <div className="dt-user-info">
-            <div className="dt-avatar">
-              {column.getAvatarText
-                ? column.getAvatarText(item)
-                : (value?.toString().charAt(0).toUpperCase() ?? "?")}
+            <div className="dt-avatar" style={{ padding: 0, overflow: 'hidden' }}>
+              {avatarImage ? (
+                <img 
+                  src={avatarImage.startsWith('/uploads') ? `${ROOT_URL}${avatarImage}` : avatarImage} 
+                  alt="" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerText = column.getAvatarText ? column.getAvatarText(item) : (value?.toString().charAt(0).toUpperCase() ?? "?");
+                  }}
+                />
+              ) : (
+                column.getAvatarText
+                  ? column.getAvatarText(item)
+                  : (value?.toString().charAt(0).toUpperCase() ?? "?")
+              )}
             </div>
-            {/* FIX: was "dt-avatar-meta" in old file — unified to "dt-avatar-meta" */}
             <div className="dt-avatar-meta">
               <div className="dt-name">
                 {column.getName ? column.getName(item) : value}
@@ -344,6 +341,7 @@ const DynamicTable = ({
             </div>
           </div>
         );
+      }
 
       case "rating":
         return (
@@ -626,23 +624,42 @@ const DynamicTable = ({
 
         /* ── Refresh btn ── */
         .dt-refresh-btn {
-          height: 36px; width: 36px;
-          display: flex; align-items: center; justify-content: center;
-          border: 1.5px solid var(--dt-border);
-          border-radius: 9px;
-          background: #f8fafc;
-          cursor: pointer;
-          color: var(--dt-muted);
-          transition: all 0.2s;
-          flex-shrink: 0;
-        }
-        .dt-refresh-btn:hover:not(:disabled) {
-          border-color: var(--dt-accent);
-          color: var(--dt-accent);
-          background: var(--dt-accent-light);
-          transform: rotate(30deg);
-        }
-        .dt-refresh-btn:disabled { opacity: 0.45; cursor: default; }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: #f8fafc;
+  padding: 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.dt-refresh-btn:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dt-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dt-refresh-icon {
+  transition: transform 0.3s ease;
+}
+
+.dt-refresh-icon.is-spinning {
+  animation: dt-spin 0.8s linear infinite;
+}
+
+@keyframes dt-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
         /* ── Table wrapper ── */
         .dt-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -999,7 +1016,7 @@ const DynamicTable = ({
                   disabled={refreshing || loading}
                   title="Refresh data"
                 >
-                  <RefreshIcon spinning={refreshing || loading} />
+                  <RefreshCcw spinning={refreshing || loading} />
                 </button>
               )}
             </div>

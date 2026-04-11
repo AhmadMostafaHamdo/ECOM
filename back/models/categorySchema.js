@@ -26,15 +26,14 @@ const categorySchema = new mongoose.Schema(
     }
 );
 
-categorySchema.pre("validate", function (next) {
+categorySchema.pre("validate", function () {
     if (typeof this.name === "string") {
         this.name = this.name.trim();
         this.normalizedName = this.name.toLowerCase();
     }
-    next();
 });
 
-const Category = new mongoose.model("categories", categorySchema);
+const Category = mongoose.model("categories", categorySchema);
 
 module.exports = Category;
 

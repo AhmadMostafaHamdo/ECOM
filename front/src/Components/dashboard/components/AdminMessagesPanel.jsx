@@ -1,7 +1,4 @@
-import React from 'react';
-import ChatIcon from '@mui/icons-material/Chat';
-import SendIcon from '@mui/icons-material/Send';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { ChevronLeft, Send, MessageSquare } from 'lucide-react';
 
 const AdminMessagesPanel = ({
     activeConversation,
@@ -16,6 +13,8 @@ const AdminMessagesPanel = ({
     formatTime,
     account
 }) => {
+    const isRtl = document.documentElement.dir === 'rtl';
+
     return (
         <div className={`admin-messages-panel ${!activeConversation ? 'mobile-hidden' : ''}`}>
             {activeConversation ? (
@@ -26,7 +25,7 @@ const AdminMessagesPanel = ({
                             className="admin-msg-back"
                             onClick={() => setActiveConversation(null)}
                         >
-                            <ArrowBackIcon fontSize="small" />
+                            <ChevronLeft size={20} style={{transform: isRtl ? 'rotate(180deg)' : 'none'}} />
                         </button>
                         <div className="admin-msg-avatar-large">
                             {getOtherParticipant(activeConversation).fname?.[0]?.toUpperCase() || 'U'}
@@ -41,7 +40,7 @@ const AdminMessagesPanel = ({
                     <div className="admin-messages-area">
                         {messages.length === 0 ? (
                             <div className="admin-messages-empty">
-                                <ChatIcon />
+                                <MessageSquare size={48} color="#cbd5e1" />
                                 <p>ابدأ المحادثة الآن</p>
                             </div>
                         ) : (
@@ -84,13 +83,13 @@ const AdminMessagesPanel = ({
                             className="admin-msg-send-btn"
                             disabled={!newMessage.trim() || sending}
                         >
-                            <SendIcon />
+                            <Send size={20} />
                         </button>
                     </form>
                 </>
             ) : (
                 <div className="admin-messages-placeholder">
-                    <ChatIcon className="placeholder-icon" />
+                    <MessageSquare size={64} className="placeholder-icon" />
                     <h2>اختر محادثة</h2>
                     <p>اختر محادثة من القائمة على اليسار للبدء</p>
                 </div>
@@ -98,5 +97,6 @@ const AdminMessagesPanel = ({
         </div>
     );
 };
+
 
 export default AdminMessagesPanel;
