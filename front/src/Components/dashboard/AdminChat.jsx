@@ -154,10 +154,10 @@ const AdminChat = () => {
         const diff = now - d;
         const locale = i18n.language === "ar" ? "ar" : "en";
 
-        if (diff < 60000) return i18n.language === "ar" ? 'الآن' : 'Now';
+        if (diff < 60000) return t('adminChat.now');
         if (diff < 3600000) {
             const mins = Math.floor(diff / 60000);
-            return i18n.language === "ar" ? `${mins} د` : `${mins}m`;
+            return t('adminChat.minutes', { count: mins });
         }
         if (diff < 86400000) return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
         return d.toLocaleDateString(locale);
@@ -167,7 +167,7 @@ const AdminChat = () => {
         return (
             <div className="admin-chat-loading">
                 <div className="admin-chat-spinner" />
-                <p>{i18n.language === 'ar' ? 'جاري تحميل المحادثات...' : 'Loading conversations...'}</p>
+                <p>{t('adminChat.loadingConversations')}</p>
             </div>
         );
     }

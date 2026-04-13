@@ -1,6 +1,6 @@
 .card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     overflow: hidden;
     transition: all var(--transition-base);
@@ -12,7 +12,8 @@
 
 .card-hoverable:hover {
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    border-color: var(--primary);
 }
 
 .card-clickable {
@@ -21,8 +22,8 @@
 
 .card-clickable:hover {
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-    border-color: var(--color-primary);
+    transform: translateY(-4px);
+    border-color: var(--primary);
 }
 
 .card-clickable:active {
@@ -30,23 +31,23 @@
 }
 
 .card-clickable:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
 }
 
 .card-header {
-    padding: var(--space-4) var(--space-5);
-    border-bottom: 1px solid var(--color-border);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
 }
 
 .card-body {
-    padding: var(--space-5);
+    padding: 20px;
 }
 
 .card-footer {
-    padding: var(--space-4) var(--space-5);
-    border-top: 1px solid var(--color-border);
-    background: var(--color-background);
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
 }
 
 /* Responsive */

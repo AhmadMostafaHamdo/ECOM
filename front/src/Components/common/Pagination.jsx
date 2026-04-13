@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./Pagination.css";
 
 const Pagination = ({
@@ -47,9 +48,9 @@ const Pagination = ({
       {showItemsInfo && totalItems > 0 && (
         <div className="pagination_info">
           <span className="pagination_text">
-            {t("pagination.showing", "Showing")} {startItem}{" "}
-            {t("pagination.to", "to")} {endItem} {t("pagination.of", "of")}{" "}
-            {totalItems} {t("pagination.items", "items")}
+            {t("pagination.showing", "Showing")} <span className="highlight">{startItem}</span>{" "}
+            {t("pagination.to", "to")} <span className="highlight">{endItem}</span> {t("pagination.of", "of")}{" "}
+            <span className="highlight">{totalItems}</span> {t("pagination.items", "items")}
           </span>
         </div>
       )}
@@ -77,12 +78,13 @@ const Pagination = ({
       {/* Pagination Controls */}
       <div className="pagination_container">
         <button
-          className="pagination_btn"
+          className="pagination_btn nav_btn"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
           aria-label={t("pagination.previous", "Previous")}
         >
-          &laquo; {t("pagination.prev", "Prev")}
+          <ChevronLeft size={18} />
+          <span className="btn_text">{t("pagination.prev", "Prev")}</span>
         </button>
 
         {startPage > 1 && (
@@ -126,12 +128,13 @@ const Pagination = ({
         )}
 
         <button
-          className="pagination_btn"
+          className="pagination_btn nav_btn"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           aria-label={t("pagination.next", "Next")}
         >
-          {t("pagination.next", "Next")} &raquo;
+          <span className="btn_text">{t("pagination.next", "Next")}</span>
+          <ChevronRight size={18} />
         </button>
       </div>
     </div>

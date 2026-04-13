@@ -249,8 +249,8 @@ const ProfilePage = () => {
                     </div>
                     <div className="p_info">
                       <div className="p_title_wrap">
-                        <strong>{product?.title?.shortTitle || 'Untitled Product'}</strong>
-                        <span className="p_category_tag">{product.category || 'Uncategorized'}</span>
+                        <strong>{product?.title?.shortTitle || t('profile.untitledProduct')}</strong>
+                        <span className="p_category_tag">{product.category || t('admin.uncategorized')}</span>
                       </div>
                       <div className="p_price_meta">
                         {product?.price?.currency || "SYP"} {product?.price?.cost || 0}
@@ -260,14 +260,14 @@ const ProfilePage = () => {
                       <NavLink
                         to={`/getproductsone/${product.id || product._id}`}
                         className="view_link"
-                        title={t('common.view', 'View')}
+                        title={t('common.view')}
                       >
                         <VisibilityIcon fontSize="small" />
                       </NavLink>
                       <NavLink
                         to={`/products/edit/${product.id || product._id}`}
                         className="view_link edit"
-                        title={t('common.edit', 'Edit')}
+                        title={t('common.edit')}
                       >
                         <EditIcon fontSize="small" />
                       </NavLink>
@@ -276,7 +276,7 @@ const ProfilePage = () => {
                         className="delete_btn"
                         onClick={() => deleteProduct(product.id || product._id)}
                         disabled={deletingId === product.id || deletingId === product._id}
-                        title={t("profile.delete", { defaultValue: "Delete" })}
+                        title={t("common.delete")}
                       >
                         {deletingId === product.id || deletingId === product._id ? "..." : <DeleteIcon fontSize="small" />}
                       </button>
@@ -303,10 +303,10 @@ const ProfilePage = () => {
 
       <ConfirmDialog
         open={isConfirmOpen}
-        title={t("profile.deleteProductTitle") || "Delete Product"}
-        message={t("profile.confirmDelete") || "Are you sure you want to delete this product? This action cannot be undone."}
-        confirmText={t("common.delete") || "Delete"}
-        cancelText={t("common.cancel") || "Cancel"}
+        title={t("profile.deleteProductTitle")}
+        message={t("profile.confirmDelete")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
         onConfirm={confirmDeleteProduct}
         onCancel={() => {
           setIsConfirmOpen(false);

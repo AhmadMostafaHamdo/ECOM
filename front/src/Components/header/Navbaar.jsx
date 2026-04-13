@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useCallback } from "react";
 import "./navbaar.css";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { axiosInstance } from "../../api";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchWishlist } from "../redux/features/wishlistSlice";
@@ -115,7 +115,7 @@ const Navbaar = React.memo(({ onSearch }) => {
 
           <NavLink to="/" className="navlogo">
             <img src="/kik-2.png" alt="logo" />
-            <span className="logo_badge">Studio Commerce</span>
+            <span className="logo_badge">{t('navigation.logoText', 'Studio Commerce')}</span>
           </NavLink>
         </div>
 
@@ -302,7 +302,6 @@ const Navbaar = React.memo(({ onSearch }) => {
           </Menu>
         </div>
       </nav>
-      <ToastContainer position="bottom-right" />
     </header>
   );
 });

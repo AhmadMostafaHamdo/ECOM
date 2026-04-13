@@ -62,7 +62,7 @@ const StatisticsPage = () => {
                         onClick={fetchStats}
                         disabled={loading}
                         className="filter-btn"
-                        title={lastUpdated ? `Last updated: ${lastUpdated}` : "Refresh statistics"}
+                        title={lastUpdated ? `${t('admin.refreshStats')}: ${lastUpdated}` : t('admin.refreshStats')}
                     >
                         <RefreshCw className={`btn-icon-sm ${loading ? 'animate-spin' : ''}`} />
                         {t("common.refresh")}
@@ -90,10 +90,10 @@ const StatisticsPage = () => {
             </section>
 
             <section className="admin_stats_grid">
-                <h2 className="dashboard-title" style={{ gridColumn: '1 / -1', marginBottom: 'var(--space-6)' }}>Derived Metrics</h2>
+                <h2 className="dashboard-title" style={{ gridColumn: '1 / -1', marginBottom: 'var(--space-6)' }}>{t('admin.derivedMetrics')}</h2>
                 {[
-                    { label: 'Products per Category', value: derivedMetrics.productsPerCategory, color: '#06b6d4', icon: Package },
-                    { label: 'Cart Items per User', value: derivedMetrics.cartsPerUser, color: '#8b5cf6', icon: Users }
+                    { label: t('admin.productsPerCategory'), value: derivedMetrics.productsPerCategory, color: '#06b6d4', icon: Package },
+                    { label: t('admin.cartItemsPerUser'), value: derivedMetrics.cartsPerUser, color: '#8b5cf6', icon: Users }
                 ].map((metric, i) => (
                     <article key={i} className="admin_stat_card">
                         <div className="admin_stat_icon_row">
@@ -103,7 +103,7 @@ const StatisticsPage = () => {
                         </div>
                         <h3>{metric.label}</h3>
                         <p>{loading ? "..." : metric.value}</p>
-                        <span className="admin_badge" style={{ background: `${metric.color}20`, color: metric.color }}>Calculated</span>
+                        <span className="admin_badge" style={{ background: `${metric.color}20`, color: metric.color }}>{t('admin.calculated')}</span>
                     </article>
                 ))}
             </section>
@@ -111,19 +111,19 @@ const StatisticsPage = () => {
             <div className="dashboard-grid-two">
                 <section className="dashboard-section">
                     <div className="dashboard-controls">
-                        <h2 className="dashboard-title">Global Resource Allocation</h2>
+                        <h2 className="dashboard-title">{t('admin.resourceAllocation')}</h2>
                         <select className="filter-btn">
-                            <option>Last 30 Days</option>
-                            <option>Last 6 Months</option>
+                            <option>{t('admin.last30Days')}</option>
+                            <option>{t('admin.last6Months')}</option>
                         </select>
                     </div>
 
                     <div className="progress-list">
                         {[
-                            { label: 'Cloud Infrastructure', value: stats.totalUsers, total: 1000, color: '#3b82f6' },
-                            { label: 'Stock Capacity', value: stats.totalProducts, total: 500, color: '#8b5cf6' },
-                            { label: 'Logical Clusters', value: stats.totalCategories, total: 50, color: '#10b981' },
-                            { label: 'Transactional Flow', value: stats.totalCartItems, total: 2000, color: '#f59e0b' },
+                            { label: t('admin.cloudInfra'), value: stats.totalUsers, total: 1000, color: '#3b82f6' },
+                            { label: t('admin.stockCapacity'), value: stats.totalProducts, total: 500, color: '#8b5cf6' },
+                            { label: t('admin.logicalClusters'), value: stats.totalCategories, total: 50, color: '#10b981' },
+                            { label: t('admin.transactionalFlow'), value: stats.totalCartItems, total: 2000, color: '#f59e0b' },
                         ].map((item, idx) => (
                             <div key={idx} className="progress-item">
                                 <div className="progress-header">
@@ -145,14 +145,14 @@ const StatisticsPage = () => {
                 </section>
 
                 <section className="dashboard-section status-section">
-                    <h2 className="dashboard-title">Operational Status</h2>
-                    <p className="dashboard-subtitle">Real-time health of core system modules.</p>
+                    <h2 className="dashboard-title">{t('admin.operationalStatus')}</h2>
+                    <p className="dashboard-subtitle">{t('admin.healthStatus')}</p>
 
                     <div className="status-list">
                         {[
-                            { name: 'Core Engine', status: t("common.success"), color: '#10b981' },
-                            { name: 'Edge Database', status: t("common.success"), color: '#10b981' },
-                            { name: 'Media Hub', status: t("common.success"), color: '#10b981' }
+                            { name: t('admin.coreEngine'), status: t("common.success"), color: '#10b981' },
+                            { name: t('admin.edgeDb'), status: t("common.success"), color: '#10b981' },
+                            { name: t('admin.mediaHub'), status: t("common.success"), color: '#10b981' }
                         ].map((srv, i) => (
                             <div key={i} className="status-item">
                                 <span className="status-name">{srv.name}</span>

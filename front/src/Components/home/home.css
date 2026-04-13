@@ -15,7 +15,7 @@
   position: absolute;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
   top: -200px;
   right: -200px;
   z-index: 0;
@@ -52,20 +52,20 @@
 
 /* Territory Banner Refinement */
 .territory_banner {
-  background: rgba(35, 47, 62, 0.95) !important;
+  background: var(--surface) !important;
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
   z-index: 10;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   margin-bottom: 24px;
-  color: white;
+  color: var(--text-1);
 }
 
 .territory_info h3 {
@@ -78,7 +78,7 @@
 .territory_info p {
   margin: 4px 0 0;
   font-size: 0.85rem;
-  opacity: 0.8;
+  color: var(--text-2);
   font-weight: 500;
 }
 
@@ -91,13 +91,14 @@
 }
 
 .market_tag {
-  background: var(--gold);
-  color: #131921;
+  background: var(--primary);
+  color: #0f172a;
   padding: 6px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-weight: 800;
   font-size: 0.8rem;
-  box-shadow: 0 4px 12px rgba(240, 165, 0, 0.3);
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
 }
 
 .tax_note {

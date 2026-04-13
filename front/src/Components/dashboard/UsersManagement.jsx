@@ -408,10 +408,10 @@ const UsersManagement = () => {
 
       <ConfirmDialog
         open={unbanDialogOpen}
-        title="إلغاء حظر المستخدم"
-        message={`هل تريد إلغاء حظر ${unbanTarget?.fname || "هذا المستخدم"}؟ سيتمكن من تسجيل الدخول مجدداً.`}
-        confirmText={banning ? "جاري الإلغاء..." : "إلغاء الحظر"}
-        cancelText="إلغاء"
+        title={t("admin.unbanTitle")}
+        message={t("admin.unbanMessage", { name: unbanTarget?.fname || t("admin.userRole") })}
+        confirmText={banning ? t("admin.unbanning") : t("admin.unban")}
+        cancelText={t("common.cancel")}
         onConfirm={handleUnbanUser}
         onCancel={() => {
           if (!banning) {
@@ -427,16 +427,16 @@ const UsersManagement = () => {
         open={adminConfirmOpen}
         title={
           adminTarget?.role === "admin"
-            ? t("admin.demoteAdminTitle") || "إزالة صلاحية الإدارة"
-            : t("admin.promoteAdminTitle") || "ترقية لمدير"
+            ? t("admin.demoteAdminTitle")
+            : t("admin.promoteAdminTitle")
         }
         message={
           adminTarget?.role === "admin"
-            ? `هل تريد إزالة صلاحية الإدارة من ${adminTarget?.fname || "المستخدم"} وتقليصه إلى مستخدم عادي؟`
-            : `هل أنت متأكد من ترقية ${adminTarget?.fname || "المستخدم"} إلى مدير (Admin)؟`
+            ? t("admin.demoteAdminMessage", { name: adminTarget?.fname || t("common.user") })
+            : t("admin.promoteAdminMessage", { name: adminTarget?.fname || t("common.user") })
         }
-        confirmText={roleUpdating ? "جاري التحديث..." : "تأكيد"}
-        cancelText="إلغاء"
+        confirmText={roleUpdating ? t("admin.updating") : t("admin.confirmAction")}
+        cancelText={t("common.cancel")}
         onConfirm={confirmToggleAdmin}
         onCancel={() => {
           if (!roleUpdating) {

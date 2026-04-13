@@ -17,7 +17,7 @@ footer::before {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(240, 165, 0, 0.4), transparent);
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
 }
 
 .footer_content {
@@ -37,7 +37,7 @@ footer::before {
 .footer_logo {
     width: 12rem;
     height: auto;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-base);
 }
 
 .footer_logo:hover {
@@ -48,10 +48,7 @@ footer::before {
     font-size: 1.4rem;
     font-weight: 700;
     margin-bottom: 12px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary);
 }
 
 .footer_intro p {
@@ -83,7 +80,7 @@ footer::before {
     left: 0;
     width: 36px;
     height: 2px;
-    background: linear-gradient(90deg, var(--gold), var(--gold-deep));
+    background: var(--primary);
     border-radius: 1px;
 }
 :dir(rtl) .footer_column h3::after {
@@ -103,33 +100,45 @@ footer::before {
 .footer_links a {
     color: var(--text-2);
     text-decoration: none;
-    font-size: 0.86rem;
-    transition: color 0.2s, transform 0.2s;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
     display: inline-block;
 }
 
 .footer_links a:hover {
-    color: var(--gold);
-    transform: translateX(3px);
+    color: var(--primary);
+    transform: translateX(4px);
 }
 
 .footer_bottom {
-    border-top: 1px solid var(--border);
-    padding: 28px 20px 0;
-    text-align: center;
     max-width: 1440px;
     margin: 0 auto;
+    padding: 30px 20px 0;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
 }
 
 .footer_bottom p {
+    font-size: 0.85rem;
     color: var(--text-3);
-    font-size: 0.82rem;
-    margin: 0 0 8px;
 }
 
-.footer_bottom small {
+.footer_legal {
+    display: flex;
+    gap: 24px;
+}
+
+.footer_legal a {
+    font-size: 0.82rem;
     color: var(--text-3);
-    font-size: 0.78rem;
+    transition: color var(--transition-fast);
+}
+
+.footer_legal a:hover {
+    color: var(--primary);
 }
 
 .social_links {

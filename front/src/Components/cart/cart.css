@@ -13,9 +13,9 @@
     display: grid;
     grid-template-columns: 460px 1fr;
     background: var(--surface);
-    border-radius: 24px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
     animation: fadeInUp 0.5s ease;
     transition: background 0.3s ease;
@@ -49,10 +49,10 @@
 .product_image_wrapper {
     position: relative;
     width: 100%;
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     background: var(--surface);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-md);
     aspect-ratio: 1 / 1;
 }
 
@@ -62,7 +62,7 @@
     object-fit: contain;
     display: block;
     transition: transform 0.5s ease;
-    padding: 16px;
+    padding: 24px;
 }
 
 .product_image_wrapper:hover img {
@@ -72,19 +72,19 @@
 /* ─── Discount Badge ─────────────────────────────────────── */
 .product_discount_badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    top: 16px;
+    left: 16px;
+    background: var(--error);
     color: white;
-    padding: 5px 12px;
-    border-radius: 20px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
     font-size: 0.76rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     gap: 4px;
     z-index: 2;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .offer_icon_small {
@@ -94,32 +94,33 @@
 /* ─── Like Overlay ───────────────────────────────────────── */
 .product-like-overlay {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 16px;
+    right: 16px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 7px 12px;
+    border-radius: var(--radius-full);
+    padding: 8px 16px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     cursor: pointer;
     color: var(--text-2);
     font-size: 0.8rem;
     font-weight: 600;
     font-family: var(--font);
-    transition: all 0.25s;
+    transition: all var(--transition-base);
     z-index: 2;
     backdrop-filter: blur(8px);
 }
 
 .product-like-overlay:hover {
     transform: scale(1.05);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-md);
+    border-color: var(--error);
 }
 
 .product-like-overlay.liked {
-    color: #ef4444;
+    color: var(--error);
     background: rgba(239, 68, 68, 0.08);
     border-color: rgba(239, 68, 68, 0.2);
 }
@@ -127,33 +128,33 @@
 /* ─── Thumbnails ─────────────────────────────────────────── */
 .product-thumbnails {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     width: 100%;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .product-thumb {
-    width: 60px;
-    height: 60px;
-    border-radius: 10px;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-md);
     overflow: hidden;
     border: 2px solid var(--border);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     padding: 0;
     background: var(--surface);
     flex-shrink: 0;
 }
 
 .product-thumb.active {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px var(--gold-glow);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .product-thumb:hover {
-    border-color: var(--gold);
-    transform: scale(1.06);
+    border-color: var(--primary);
+    transform: scale(1.08);
 }
 
 .product-thumb img {
@@ -181,12 +182,12 @@
     gap: 10px;
     width: 100%;
     padding: 14px 24px;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     font-size: 0.95rem;
     font-weight: 700;
     font-family: var(--font);
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--transition-base);
     border: 1.5px solid transparent;
 }
 
@@ -197,16 +198,14 @@
 
 /* Buy Now Button */
 .cart_btn_buy {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #ffffff;
-    border: none;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    background: var(--primary);
+    color: #0f172a;
 }
 
 .cart_btn_buy:hover:not(:disabled) {
-    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    background: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    box-shadow: 0 6px 18px var(--primary-glow);
 }
 
 .cart_btn_buy:active:not(:disabled) {
@@ -222,16 +221,14 @@
 
 /* Chat Button */
 .cart_btn_chat {
-    background: var(--gold, #f59e0b);
-    color: #fff;
-    border-color: var(--gold, #f59e0b);
-    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
+    background: var(--surface);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .cart_btn_chat:hover {
-    filter: brightness(1.08);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    background: var(--primary-glow);
+    transform: translateY(-2px);
 }
 
 .cart_btn_chat:active {
@@ -242,15 +239,14 @@
 /* Wishlist Button */
 .cart_btn_wishlist {
     background: var(--surface);
-    color: var(--text-2);
     border-color: var(--border);
+    color: var(--text-1);
 }
 
 .cart_btn_wishlist:hover {
-    border-color: #f87171;
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.05);
-    transform: translateY(-1px);
+    background: var(--surface-2);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .cart_btn_wishlist--saved {
@@ -272,17 +268,15 @@
 
 /* Report Button */
 .cart_btn_report {
-    background: #fff5f5;
-    color: #ef4444;
-    border-color: #fecaca;
-    font-size: 0.83rem;
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-3);
+    font-size: 0.85rem;
+    padding: 8px;
 }
 
 .cart_btn_report:hover {
-    background: #fee2e2;
-    border-color: #fca5a5;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.12);
+    color: var(--error);
 }
 
 .cart_btn_report:active {
@@ -304,37 +298,37 @@
 .product-category-tag {
     display: inline-flex;
     padding: 4px 14px;
-    background: rgba(240, 165, 0, 0.1);
-    color: var(--gold-deep);
-    border-radius: 20px;
+    background: var(--primary-glow);
+    color: var(--primary-hover);
+    border-radius: var(--radius-full);
     font-size: 0.73rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    border: 1px solid var(--gold-glow);
+    border: 1px solid var(--primary-glow);
     margin-bottom: 6px;
 }
 
 .product_header h3 {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 800;
     color: var(--text-1);
     margin: 0 0 8px;
-    line-height: 1.22;
-    letter-spacing: -0.4px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
     font-family: var(--font);
 }
 
 .product_header h4 {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text-2);
     margin: 0 0 14px;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .product_meta {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 
@@ -343,28 +337,29 @@
 .like_chip {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 5px 12px;
-    border-radius: 20px;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
     font-size: 0.76rem;
     font-weight: 600;
-    transition: transform 0.2s;
+    transition: all var(--transition-fast);
 }
 
 .rating_chip:hover,
 .views_chip:hover,
 .like_chip:hover {
-    transform: scale(1.04);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 .rating_chip {
-    background: rgba(240, 165, 0, 0.1);
-    color: var(--gold-deep);
-    border: 1px solid var(--gold-glow);
+    background: var(--primary-glow);
+    color: var(--primary-hover);
+    border: 1px solid var(--primary-glow);
 }
 
 .rating_chip svg {
-    color: var(--gold) !important;
+    color: var(--primary) !important;
 }
 
 .views_chip {
@@ -375,7 +370,7 @@
 
 .like_chip {
     background: rgba(239, 68, 68, 0.08);
-    color: #ef4444;
+    color: var(--error);
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -387,8 +382,8 @@
 /* Price */
 .price_section_cart {
     background: var(--surface-2);
-    padding: 22px 26px;
-    border-radius: 16px;
+    padding: 24px 30px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     transition: background 0.3s;
 }
@@ -396,12 +391,36 @@
 .mrp {
     font-size: 0.82rem;
     color: var(--text-3);
-    margin: 0 0 8px;
+    margin: 0 0 10px;
 }
 
 .mrp del {
-    color: #ef4444;
+    color: var(--error);
     font-weight: 500;
+    margin-left: 4px;
+}
+
+.price_row_cart {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.actual_price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-1);
+    letter-spacing: -1px;
+}
+
+.discount_pill {
+    background: var(--error);
+    color: white;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
 .deal_price {

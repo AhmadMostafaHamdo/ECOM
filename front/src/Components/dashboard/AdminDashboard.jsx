@@ -55,7 +55,7 @@ const getNavItems = (t) => [
   { key: "products", label: t("admin.manageProducts"), icon: Inventory2Icon, path: "/products" },
   { key: "categories", label: t("admin.manageCategories"), icon: CategoryIcon, path: "/categories" },
   { key: "messages", label: t("admin.messages.title"), icon: MailIcon, path: "/messages" },
-  { key: "chat", label: "Live Chat", icon: ChatIcon, path: "/chat" },
+  { key: "chat", label: t("admin.liveChat"), icon: ChatIcon, path: "/chat" },
   { key: "reports", label: t("report.title"), icon: FlagIcon, path: "/reports" },
   { key: "stats", label: t("admin.statistics"), icon: QueryStatsIcon, path: "/statistics" },
 ];
@@ -205,7 +205,7 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
       <DialogComponent
         open={confirmLogoutOpen}
         title={t("navigation.logout") || "Logout"}
-        description="You are about to end your admin session. Continue?"
+        description={t("admin.logoutConfirm")}
         confirmLabel={t("navigation.logout") || "Logout"}
         cancelLabel={t("common.cancel") || "Cancel"}
         tone="logout"

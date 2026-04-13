@@ -12,7 +12,8 @@
     "search": "بحث",
     "allCategories": "جميع الفئات",
     "contact": "اتصل بنا",
-    "wishlist": "المحفوظات"
+    "wishlist": "المحفوظات",
+    "logoText": "ستوديو التجارة"
   },
   "home": {
     "title": "مرحباً بك في متجرنا",
@@ -246,8 +247,13 @@
     "manageAccount": "إدارة تفاصيلك الشخصية وإعدادات الحساب.",
     "saveProfile": "حفظ الملف الشخصي",
     "saving": "جاري الحفظ...",
+    "customer": "عميل",
+    "noPhoneAdded": "لم يتم إضافة هاتف",
+    "untitledProduct": "منتج بدون عنوان",
     "yourProducts": "منتجاتك",
-    "noProducts": "لم تقم بإنشاء أي منتجات بعد.",
+    "noProducts": "لم تقم بإضافة أي منتجات بعد.",
+    "deleteProductTitle": "حذف المنتج",
+    "confirmDelete": "هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.",
     "loading": "جاري تحميل الملف الشخصي..."
   },
   "allProducts": {
@@ -536,7 +542,39 @@
         "resolved": "تم الحل",
         "dismissed": "مرفوض"
       }
-    }
+    },
+    "liveChat": "الدردشة المباشرة",
+    "logoutConfirm": "أنت على وشك إنهاء جلسة المسؤول الخاصة بك. هل تريد الاستمرار؟",
+    "derivedMetrics": "المقاييس المشتقة",
+    "productsPerCategory": "المنتجات لكل فئة",
+    "cartItemsPerUser": "عناصر السلة لكل مستخدم",
+    "calculated": "محسوب",
+    "resourceAllocation": "تخصيص الموارد العالمي",
+    "last30Days": "آخر 30 يوم",
+    "last6Months": "آخر 6 أشهر",
+    "cloudInfra": "البنية التحتية السحابية",
+    "stockCapacity": "سعة المخزون",
+    "logicalClusters": "العناقيد المنطقية",
+    "transactionalFlow": "التدفق المعاملاتي",
+    "operationalStatus": "الحالة التشغيلية",
+    "healthStatus": "حالة النظام الأساسي في الوقت الفعلي.",
+    "coreEngine": "المحرك الأساسي",
+    "edgeDb": "قاعدة بيانات الطرف",
+    "mediaHub": "مركز الوسائط",
+    "refreshStats": "تحديث الإحصائيات",
+    "unbanTitle": "إلغاء حظر المستخدم",
+    "unbanMessage": "هل تريد إلغاء حظر {{name}}؟ سيتمكن من تسجيل الدخول مجدداً.",
+    "unbanning": "جاري الإلغاء...",
+    "unban": "إلغاء الحظر",
+    "promoteAdminTitle": "ترقية لمدير",
+    "promoteAdminMessage": "هل أنت متأكد من ترقية {{name}} إلى مدير (Admin)؟",
+    "demoteAdminTitle": "إزالة صلاحية الإدارة",
+    "demoteAdminMessage": "هل تريد إزالة صلاحية الإدارة من {{name}} وتقليصه إلى مستخدم عادي؟",
+    "updating": "جاري التحديث...",
+    "confirmAction": "تأكيد",
+    "live": "مباشر",
+    "inventoryStatus": "حالة المخزون",
+    "searchProducts": "البحث عن المنتجات..."
   },
   "table": {
     "noDataFound": "لم يتم العثور على بيانات",
@@ -668,5 +706,23 @@
     "eg": "جمهورية مصر العربية",
     "us": "الولايات المتحدة",
     "gb": "المملكة المتحدة"
+  },
+  "adminChat": {
+    "customerSupport": "دعم العملاء",
+    "supportSub": "إدارة والرد على استفسارات العملاء في الوقت الفعلي",
+    "activeThreads": "محادثات نشطة",
+    "unreadMessages": "رسائل غير مقروءة",
+    "searchConversations": "البحث في المحادثات...",
+    "noConversations": "لا توجد محادثات",
+    "noMatches": "لم يتم العثور على نتائج لبحثك",
+    "noMessages": "لا توجد رسائل بعد",
+    "activeNow": "متصل الآن",
+    "startConversation": "ابدأ محادثتك مع {{name}}",
+    "writeMessage": "اكتب رسالة...",
+    "noChatSelected": "لم يتم اختيار محادثة",
+    "chooseConversation": "اختر محادثة من الشريط الجانبي لبدء المراسلة مع عملائك.",
+    "loadingConversations": "جاري تحميل المحادثات...",
+    "now": "الآن",
+    "minutes": "{{count}} د"
   }
 }

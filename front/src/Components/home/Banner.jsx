@@ -49,7 +49,13 @@ const Banner = React.memo(() => {
             >
                 {data.map((imag, i) => (
                     <div key={i} className="banner_slide">
-                        <img src={imag} alt={`Banner ${i + 1}`} className="banner_img" loading="lazy" />
+                        <img 
+                            src={imag} 
+                            alt={`Banner ${i + 1}`} 
+                            className="banner_img" 
+                            loading={i === 0 ? "eager" : "lazy"} 
+                            fetchpriority={i === 0 ? "high" : "low"}
+                        />
                         <div className="banner_overlay">
                             <p>{t('home.premiumExperience')}</p>
                             <h2>{t('home.heroDesignTitle')}</h2>

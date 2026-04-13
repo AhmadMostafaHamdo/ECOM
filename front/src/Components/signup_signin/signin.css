@@ -4,29 +4,29 @@
 
 /* ─── Tokens ─────────────────────────────────────────────── */
 :root {
-  --ink:       #fcfcfc;
-  --ink-2:     #f8f8f8;
-  --ink-3:     #f0f0f0;
-  --gold:      #af8b35;
-  --gold-lt:   #8a6d2b;
-  --gold-dim:  rgba(175,139,53,0.08);
-  --gold-glow: rgba(175,139,53,0.12);
-  --cream:     #ffffff;
-  --cream-2:   #fcfaf7;
-  --text-1:    #1a1a1a;
-  --text-2:    #4a4a4a;
-  --text-3:    #757575;
-  --border:    rgba(175,139,53,0.15);
-  --border-2:  rgba(0,0,0,0.05);
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body:    'DM Sans', sans-serif;
-  --red:          #ff4d4f;
+  --ink:       var(--bg);
+  --ink-2:     var(--surface-2);
+  --ink-3:     var(--border);
+  --gold:      var(--primary);
+  --gold-lt:   var(--primary-hover);
+  --gold-dim:  var(--primary-glow);
+  --gold-glow: var(--primary-glow);
+  --cream:     var(--surface);
+  --cream-2:   var(--surface-2);
+  --text-1:    var(--text-1);
+  --text-2:    var(--text-2);
+  --text-3:    var(--text-3);
+  --border:    var(--border);
+  --border-2:  var(--border);
+  --font-display: var(--font);
+  --font-body:    var(--font);
+  --red:          var(--error);
 
   /* UI Component Aliases */
-  --surface:   var(--ink);
-  --surface-2: var(--ink-2);
-  --surface-3: var(--ink-3);
-  --gold-soft: var(--gold-dim);
+  --surface:   var(--bg);
+  --surface-2: var(--surface-2);
+  --surface-3: var(--border);
+  --gold-soft: var(--primary-glow);
 }
 
 /* ─── Wrapper ─────────────────────────────────────────────── */

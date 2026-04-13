@@ -7,13 +7,19 @@ export default defineConfig({
   build: {
     target: 'esnext',
     minify: 'esbuild',
+    cssCodeSplit: true,
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'axios', 'framer-motion'],
-          ui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
-          charts: ['recharts'],
-          carousel: ['react-material-ui-carousel', 'react-multi-carousel']
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('@mui')) return 'mui';
+            if (id.includes('framer-motion')) return 'motion';
+            if (id.includes('recharts')) return 'charts';
+            if (id.includes('react-router-dom') || id.includes('react-redux')) return 'vendor-core';
+            return 'vendor';
+          }
         }
       }
     }

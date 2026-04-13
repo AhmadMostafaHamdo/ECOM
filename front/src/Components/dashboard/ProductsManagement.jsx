@@ -323,8 +323,8 @@ const ProductsManagement = () => {
             <Activity size={24} />
           </div>
           <div className="stat-info">
-            <div className="stat-value">Live</div>
-            <div className="stat-label">Inventory Status</div>
+            <div className="stat-value">{t('admin.live')}</div>
+            <div className="stat-label">{t('admin.inventoryStatus')}</div>
           </div>
         </div>
       </div>
@@ -399,7 +399,7 @@ const ProductsManagement = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={t('admin.searchProducts')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="search-input"
@@ -461,12 +461,12 @@ const ProductsManagement = () => {
         open={confirmOpen}
         title={
           deleteTarget
-            ? `Delete ${deleteTarget?.title?.shortTitle || "this product"}?`
-            : "Delete product?"
+            ? `${t('admin.deleteProductTitle')} ${deleteTarget?.title?.shortTitle || ""}?`
+            : t('admin.deleteProductTitle')
         }
-        message="Deleting this product will remove it from listings and purchase flows. This action cannot be undone. Continue?"
-        confirmText="Delete"
-        cancelText="Cancel"
+        message={t('admin.deleteProductConfirm')}
+        confirmText={deleting ? t('admin.deleting') : t('dialog.delete')}
+        cancelText={t('dialog.cancel')}
         onConfirm={handleDeleteProduct}
         onCancel={() => {
           if (!deleting) {

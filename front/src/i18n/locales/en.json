@@ -12,7 +12,8 @@
     "search": "Search",
     "allCategories": "All Categories",
     "contact": "Contact Us",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "logoText": "Studio Commerce"
   },
   "home": {
     "title": "Welcome to Our Store",
@@ -492,6 +493,12 @@
       "deleteTitle": "Delete Message?",
       "deleteConfirm": "Are you sure you want to delete this message? This action cannot be undone."
     },
+    "profile": {
+      "customer": "Customer",
+      "noPhoneAdded": "No phone added",
+      "saving": "Saving...",
+      "untitledProduct": "Untitled Product"
+    },
     "reports": {
       "title": "Reports Management",
       "subtitle": "Review and handle reports submitted by users",
@@ -526,7 +533,39 @@
         "resolved": "Resolved",
         "dismissed": "Dismissed"
       }
-    }
+    },
+    "liveChat": "Live Chat",
+    "logoutConfirm": "You are about to end your admin session. Continue?",
+    "derivedMetrics": "Derived Metrics",
+    "productsPerCategory": "Products per Category",
+    "cartItemsPerUser": "Cart Items per User",
+    "calculated": "Calculated",
+    "resourceAllocation": "Global Resource Allocation",
+    "last30Days": "Last 30 Days",
+    "last6Months": "Last 6 Months",
+    "cloudInfra": "Cloud Infrastructure",
+    "stockCapacity": "Stock Capacity",
+    "logicalClusters": "Logical Clusters",
+    "transactionalFlow": "Transactional Flow",
+    "operationalStatus": "Operational Status",
+    "healthStatus": "Real-time health of core system modules.",
+    "coreEngine": "Core Engine",
+    "edgeDb": "Edge Database",
+    "mediaHub": "Media Hub",
+    "refreshStats": "Refresh statistics",
+    "unbanTitle": "Unban User",
+    "unbanMessage": "Do you want to unban {{name}}? They will be able to log in again.",
+    "unbanning": "Unbanning...",
+    "unban": "Unban",
+    "promoteAdminTitle": "Promote to Admin",
+    "promoteAdminMessage": "Are you sure you want to promote {{name}} to Admin?",
+    "demoteAdminTitle": "Demote Admin",
+    "demoteAdminMessage": "Do you want to remove admin access from {{name}} and demote them to a regular user?",
+    "updating": "Updating...",
+    "confirmAction": "Confirm",
+    "live": "Live",
+    "inventoryStatus": "Inventory Status",
+    "searchProducts": "Search products..."
   },
   "table": {
     "noDataFound": "No data found",
@@ -658,5 +697,23 @@
     "eg": "Egypt",
     "us": "United States",
     "gb": "United Kingdom"
+  },
+  "adminChat": {
+    "customerSupport": "Customer Support",
+    "supportSub": "Manage and respond to customer inquiries in real-time",
+    "activeThreads": "Active Threads",
+    "unreadMessages": "Unread Messages",
+    "searchConversations": "Search conversations...",
+    "noConversations": "No conversations",
+    "noMatches": "No matches found for your search",
+    "noMessages": "No messages yet",
+    "activeNow": "Active Now",
+    "startConversation": "Start your conversation with {{name}}",
+    "writeMessage": "Write a message...",
+    "noChatSelected": "No Chat Selected",
+    "chooseConversation": "Choose a conversation from the sidebar to start corresponding with your customers.",
+    "loadingConversations": "Loading conversations...",
+    "now": "Now",
+    "minutes": "{{count}}m"
   }
 }

@@ -1,4 +1,6 @@
-import { User, MessageSquare, Store } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { User, MessageSquare, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const AdminChatSidebar = ({
     conversations,
@@ -8,26 +10,56 @@ const AdminChatSidebar = ({
     getOtherParticipant,
     formatTime
 }) => {
+    const { t } = useTranslation();
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredConversations = useMemo(() => {
+        if (!searchQuery.trim()) return conversations;
+        return conversations.filter(conv => {
+            const other = getOtherParticipant(conv);
+            const fullName = `${other.fname} ${other.lname || ''}`.toLowerCase();
+            return fullName.includes(searchQuery.toLowerCase());
+        });
+    }, [conversations, searchQuery, getOtherParticipant]);
+
     return (
         <div className={`admin-chat-sidebar ${activeConversation ? 'mobile-hidden' : ''}`}>
-            <div className="admin-chat-sidebar-title">
-                <User size={18} />
-                <span>المحادثات</span>
+            <div className="admin-chat-search-wrap">
+                <div style={{ position: 'relative' }}>
+                    <Search
+                        size={16}
+                        style={{
+                            position: 'absolute',
+                            left: '14px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: 'var(--text-3)'
+                        }}
+                    />
+                    <input
+                        type="text"
+                        placeholder={t('adminChat.searchConversations')}
+                        className="admin-chat-search"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
             </div>
 
 
-            {conversations.length === 0 ? (
-                <div className="admin-chat-empty">
-                    <MessageSquare size={48} className="empty-icon" />
-                    <h3>لا توجد محادثات</h3>
-                    <p>ستظهر المحادثات هنا عندما يتواصل معك المستخدمون</p>
+            {filteredConversations.length === 0 ? (
+                <div className="admin-chat-empty" style={{ padding: '40px 20px', textAlign: 'center', opacity: 0.6 }}>
+                    <MessageSquare size={48} style={{ marginBottom: '1rem', color: 'var(--border-strong)' }} />
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-1)' }}>{t('adminChat.noConversations')}</h3>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-2)' }}>{t('adminChat.noMatches')}</p>
                 </div>
             ) : (
                 <div className="admin-conv-list">
-                    {conversations.map((conv) => {
+                    {filteredConversations.map((conv) => {
                         const other = getOtherParticipant(conv);
                         const myUnread = conv.unreadCount?.[account?._id] || 0;
                         const isActive = activeConversation?._id === conv._id;
+                        const lastMsg = conv.lastMessage;
 
                         return (
                             <button
@@ -35,29 +67,28 @@ const AdminChatSidebar = ({
                                 className={`admin-conv-item ${isActive ? 'active' : ''}`}
                                 onClick={() => openConversation(conv)}
                             >
-                                <div className="admin-conv-avatar">
-                                    {other.fname?.[0]?.toUpperCase() || 'U'}
+                                <div className="admin-conv-avatar-wrap">
+                                    <div className="admin-conv-avatar">
+                                        {other.fname?.[0]?.toUpperCase() || <User size={20} />}
+                                    </div>
+                                    <div className="online-dot" />
                                 </div>
                                 <div className="admin-conv-info">
-                                    <div className="admin-conv-name-row">
-                                        <span className="admin-conv-name">{other.fname}</span>
+                                    <div className="admin-conv-header">
+                                        <span className="admin-conv-name">{other.fname} {other.lname}</span>
                                         <span className="admin-conv-time">
-                                            {conv.lastMessage?.createdAt && formatTime(conv.lastMessage.createdAt)}
+                                            {lastMsg?.createdAt && formatTime(lastMsg.createdAt)}
                                         </span>
                                     </div>
-                                    <p className="admin-conv-preview">
-                                        {conv.lastMessage?.text || 'لا توجد رسائل'}
-                                    </p>
-                                    {conv.productId && (
-                                        <span className="admin-conv-product-tag">
-                                            <Store size={10} />
-                                            منتج
-                                        </span>
-                                    )}
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                        <p className="admin-conv-preview">
+                                            {lastMsg?.text || t('adminChat.noMessages')}
+                                        </p>
+                                        {myUnread > 0 && (
+                                            <span className="unread-badge">{myUnread > 9 ? '9+' : myUnread}</span>
+                                        )}
+                                    </div>
                                 </div>
-                                {myUnread > 0 && (
-                                    <span className="admin-conv-badge">{myUnread > 9 ? '9+' : myUnread}</span>
-                                )}
                             </button>
                         );
                     })}
