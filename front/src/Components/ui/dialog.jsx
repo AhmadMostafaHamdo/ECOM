@@ -1,9 +1,8 @@
-"use client";
-
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
+import "./dialog.css";
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
@@ -21,7 +20,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   />
 ));
 
-export  const DialogContent = React.forwardRef(
+export const DialogContent = React.forwardRef(
   ({ className, children, ...props }, ref) => {
     return (
       <DialogPortal>

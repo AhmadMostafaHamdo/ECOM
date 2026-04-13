@@ -56,8 +56,8 @@ const ConfirmDialog = ({
 
           <Button
             onClick={onConfirm}
-            variant="danager"
-            disabled={loading}
+            variant="danger"
+            loading={loading}
             className={` text-white ${
               type === "danger" 
                 ? "bg-[#ef4444] shadow-red-200 " 
@@ -67,7 +67,7 @@ const ConfirmDialog = ({
             }`}
             style={{padding:".3rem"}}
           >
-            {loading ? "..." : confirmText}
+            {confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

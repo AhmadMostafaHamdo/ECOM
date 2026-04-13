@@ -82,7 +82,7 @@ app.use(helmet({
     contentSecurityPolicy: process.env.NODE_ENV === "production" ? undefined : false,
 }));
 app.use(compression());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
 
 app.use(cors({

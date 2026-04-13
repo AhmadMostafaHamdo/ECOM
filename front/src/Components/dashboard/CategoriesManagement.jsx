@@ -363,13 +363,15 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
       <ConfirmDialog
         open={isConfirmOpen}
         title={t("admin.deleteCategoryTitle") || "Delete Category"}
-        message={`${t("admin.deleteCategoryConfirm")} "${categoryToDelete?.name}"? ${t("admin.thisActionCannotBeUndone") || "This action cannot be undone."}`}
-        confirmText={t("common.delete")}
-        cancelText={t("common.cancel")}
+        message={t("admin.deleteCategoryConfirm") || "This will permanently delete the category. You cannot undo this action."}
+        confirmText="Delete"
+        cancelText="Cancel"
         onConfirm={confirmDelete}
         onCancel={() => {
-          setIsConfirmOpen(false);
-          setCategoryToDelete(null);
+          if (!isDeleting) {
+            setIsConfirmOpen(false);
+            setCategoryToDelete(null);
+          }
         }}
         loading={isDeleting}
         type="danger"

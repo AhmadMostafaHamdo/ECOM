@@ -301,7 +301,7 @@ const ProductsManagement = () => {
       {/* Stats Summary */}
       <div className="categories-stats" style={{ marginBottom: '32px' }}>
         <div className="stat-card">
-          <div className="stat-icon" style={{background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb'}}>
+          <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb' }}>
             <Package size={24} />
           </div>
           <div className="stat-info">
@@ -319,7 +319,7 @@ const ProductsManagement = () => {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{background: 'rgba(16, 185, 129, 0.1)', color: '#10b981'}}>
+          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
             <Activity size={24} />
           </div>
           <div className="stat-info">
@@ -354,7 +354,7 @@ const ProductsManagement = () => {
             {t("admin.productsTotal")}: {totalProducts}
           </p>
         </div>
-        <button className="submit-btn-premium" style={{width: 'auto', padding: '10px 24px'}} onClick={() => setShowForm(true)}>
+        <button className="submit-btn-premium" style={{ width: 'auto', padding: '10px 24px' }} onClick={() => setShowForm(true)}>
           <Plus size={18} />
           {t("admin.createProduct")}
         </button>
@@ -465,7 +465,7 @@ const ProductsManagement = () => {
             : "Delete product?"
         }
         message="Deleting this product will remove it from listings and purchase flows. This action cannot be undone. Continue?"
-        confirmText={deleting ? "Deleting..." : "Delete"}
+        confirmText="Delete"
         cancelText="Cancel"
         onConfirm={handleDeleteProduct}
         onCancel={() => {

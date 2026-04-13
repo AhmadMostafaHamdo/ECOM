@@ -168,8 +168,8 @@ const buildProductPayload = (body = {}, fallback = {}) => {
         .toString()
         .trim();
 
-    const cost = Number(body.cost ?? fallback?.price?.cost ?? 0);
-    const mrp = Number(body.mrp ?? fallback?.price?.mrp ?? cost);
+    const cost = Number(body.cost || fallback?.price?.cost || 0);
+    const mrp = Number(body.mrp || fallback?.price?.mrp || cost);
     const priceDiscount = (body.priceDiscount || fallback?.price?.discount || "")
         .toString()
         .trim();
@@ -188,6 +188,14 @@ const buildProductPayload = (body = {}, fallback = {}) => {
         .toString()
         .trim();
 
+    const calculatedDiscount = (Number.isFinite(mrp) && mrp > 0 && Number.isFinite(cost)
+        ? `${Math.max(0, Math.round(((mrp - cost) / mrp) * 100))}%`
+        : "0%");
+
+    const discountValue = (body.offerText || body.discount || fallback.discount || "")
+        .toString()
+        .trim();
+
     return {
         category: category || UNCATEGORIZED,
         url: primaryImage,
@@ -202,26 +210,23 @@ const buildProductPayload = (body = {}, fallback = {}) => {
         description: (body.description || fallback.description || "")
             .toString()
             .trim(),
-        discount: (body.offerText || body.discount || fallback.discount || "")
-            .toString()
-            .trim(),
+        // Root discount field should prioritize offerText but fallback to percentage discount if empty
+        discount: discountValue || priceDiscount || calculatedDiscount,
         tagline: (body.tagline || fallback.tagline || "").toString().trim(),
         price: {
             mrp: Number.isFinite(mrp) ? mrp : 0,
             cost: Number.isFinite(cost) ? cost : 0,
             currency: body.currency || fallback?.price?.currency || "SYP",
-            discount:
-                priceDiscount ||
-                (Number.isFinite(mrp) && mrp > 0 && Number.isFinite(cost)
-                    ? `${Math.max(0, Math.round(((mrp - cost) / mrp) * 100))}%`
-                    : "0%"),
+            discount: priceDiscount || calculatedDiscount,
         },
         locationDetail: {
             country: body.country || fallback?.locationDetail?.country || "",
             province: body.province || fallback?.locationDetail?.province || "",
             city: body.city || fallback?.locationDetail?.city || "",
         },
-        mobile: body.mobile || fallback?.mobile || ""
+        mobile: body.mobile || fallback?.mobile || "",
+        tags: body.tags || fallback.tags || [],
+        location: body.location || fallback.location || ""
     };
 };
 

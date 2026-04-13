@@ -79,6 +79,16 @@ exports.register = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Get an admin user (Public)
+ * @route   GET /api/getadmin
+ */
+exports.getAdmin = asyncHandler(async (req, res) => {
+    const admin = await User.findOne({ role: "admin" }).select("_id fname email");
+    if (!admin) return res.status(404).json({ error: "No admin found" });
+    res.status(200).json(admin);
+});
+
+/**
  * @desc    Login user
  * @route   POST /api/login
  */

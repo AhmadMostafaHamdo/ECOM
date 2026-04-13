@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { axiosInstance } from "../../api";
+import { axiosInstance, ROOT_URL } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
 import "./profile.css";
 import BackButton from "../common/BackButton";
@@ -16,6 +16,9 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import AddIcon from "@mui/icons-material/Add";
 import PhoneIcon from "@mui/icons-material/Phone";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
 
 import { useLocalize } from "../context/LocalizeContext";
 import { getLocalPhonePlaceholder } from "../../utils/localizeUtils";
@@ -52,9 +55,9 @@ const ProfilePage = () => {
 
         const productsRes = await axiosInstance.get("/profile/products");
         if (productsRes.status === 200) {
-          const productsData = productsRes.data;
-          setMyProducts(Array.isArray(productsData) ? productsData : []);
-          setProdTotalPages(productsData.total_pages || 1);
+          const resData = productsRes.data;
+          setMyProducts(resData.data || []);
+          setProdTotalPages(resData.pagination?.totalPages || 1);
         }
       } catch (err) {
         if (err.response?.status === 401) return navigate("/login");
@@ -73,7 +76,7 @@ const ProfilePage = () => {
       if (response.status === 200) {
         const resData = response.data;
         setMyProducts(resData.data || []);
-        setProdTotalPages(resData.total_pages || 1);
+        setProdTotalPages(resData.pagination?.totalPages || 1);
       }
     } catch (e) { }
   };
@@ -116,7 +119,7 @@ const ProfilePage = () => {
       const response = await axiosInstance.delete(`/products/${productToDelete}`);
       if (response.status === 200) {
         toast.success(t("profile.deleteSuccess") || "Product deleted.");
-        setMyProducts((prev) => prev.filter((product) => (product.id || product._id) !== productToDelete));
+        setMyProducts((prev) => prev.filter((product) => product.id !== productToDelete && product._id !== productToDelete));
         setMessage(t("profile.deleteSuccess", { defaultValue: "Product deleted." }));
         setIsConfirmOpen(false);
       }
@@ -237,35 +240,45 @@ const ProfilePage = () => {
               {myProducts.length > 0 ? (
                 myProducts.map((product) => (
                   <div key={product._id} className="product_row">
+                    <div className="p_image">
+                       <img 
+                          src={product.url && (product.url.startsWith('http') || product.url.startsWith('blob:')) ? product.url : (product.url ? `${ROOT_URL}${product.url}` : '')} 
+                          alt={product?.title?.shortTitle || 'Product'} 
+                          style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }}
+                       />
+                    </div>
                     <div className="p_info">
                       <div className="p_title_wrap">
-                        <strong>{product?.title?.shortTitle}</strong>
-                        <span className="p_category_tag">{product.category}</span>
+                        <strong>{product?.title?.shortTitle || 'Untitled Product'}</strong>
+                        <span className="p_category_tag">{product.category || 'Uncategorized'}</span>
                       </div>
                       <div className="p_price_meta">
-                        {product.price?.currency || "SYP"} {product.price?.cost}
+                        {product?.price?.currency || "SYP"} {product?.price?.cost || 0}
                       </div>
                     </div>
                     <div className="product_actions">
                       <NavLink
                         to={`/getproductsone/${product.id || product._id}`}
                         className="view_link"
+                        title={t('common.view', 'View')}
                       >
-                        {t('common.view', 'View')}
+                        <VisibilityIcon fontSize="small" />
                       </NavLink>
                       <NavLink
                         to={`/products/edit/${product.id || product._id}`}
                         className="view_link edit"
+                        title={t('common.edit', 'Edit')}
                       >
-                        {t('common.edit', 'Edit')}
+                        <EditIcon fontSize="small" />
                       </NavLink>
                       <button
                         type="button"
                         className="delete_btn"
                         onClick={() => deleteProduct(product.id || product._id)}
-                        disabled={deletingId === (product.id || product._id)}
+                        disabled={deletingId === product.id || deletingId === product._id}
+                        title={t("profile.delete", { defaultValue: "Delete" })}
                       >
-                        {deletingId === (product.id || product._id) ? "..." : t("profile.delete", { defaultValue: "Delete" })}
+                        {deletingId === product.id || deletingId === product._id ? "..." : <DeleteIcon fontSize="small" />}
                       </button>
                     </div>
                   </div>

@@ -52,6 +52,26 @@
   --gold-soft: rgba(240, 165, 0, 0.08);
 }
 
+/* Ensure text is visible in colored theme by overriding background if necessary, 
+   or just making sure the container is large enough */
+.Toastify__toast--success,
+.Toastify__toast--error,
+.Toastify__toast--info,
+.Toastify__toast--warning {
+  background: #ffffff !important;
+  border-inline-start: 6px solid currentColor !important;
+}
+
+.Toastify__toast--success { color: #22c55e !important; }
+.Toastify__toast--error { color: #ef4444 !important; }
+.Toastify__toast--info { color: #3b82f6 !important; }
+.Toastify__toast--warning { color: #f59e0b !important; }
+
+.Toastify__close-button {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
 /* ─── Base Reset ─────────────────────────────────────────── */
 *,
 *::before,

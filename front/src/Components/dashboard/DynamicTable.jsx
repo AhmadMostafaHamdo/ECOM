@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import Pagination from "../common/Pagination";
 import { Button } from "./Button";
 import { RefreshCcw } from "lucide-react";
-import { ROOT_URL } from "../api";
+import { ROOT_URL } from "../../api";
 
 // ─── Cache singleton ───────────────────────────────────────────────────────────
 const tableCache = new Map();

@@ -62,10 +62,6 @@ exports.ensureCategoryCatalog = async () => {
     }
 };
 
-/**
- * @desc    Get all products with filtering and pagination
- * @route   GET /api/products
- */
 exports.getProducts = asyncHandler(async (req, res) => {
     const { category, search, page = 1, limit = 10 } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
@@ -167,7 +163,16 @@ exports.filterProducts = asyncHandler(async (req, res) => {
  */
 exports.getProductById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const product = await products.findOne({ id }).populate("createdBy", "fname email _id");
+    
+    // Find product by custom ID or MongoDB _id
+    const query = {
+        $or: [
+            { id: id },
+            ...(id.match(/^[0-9a-fA-F]{24}$/) ? [{ _id: id }] : [])
+        ]
+    };
+
+    const product = await products.findOne(query).populate("createdBy", "fname email _id");
     if (!product) return res.status(404).json({ error: "Product not found" });
 
     const viewer = getViewerIdentity(req, res);
@@ -206,6 +211,16 @@ exports.getProductById = asyncHandler(async (req, res) => {
  * @route   POST /api/products
  */
 exports.createProduct = asyncHandler(async (req, res) => {
+    let finalImages = [];
+    if (req.files && req.files.length > 0) {
+        finalImages = req.files.map(file => `/uploads/${file.filename}`);
+    }
+    
+    const existingImages = Array.isArray(req.body.images) ? req.body.images : (typeof req.body.images === 'string' ? req.body.images.split(',') : []);
+    finalImages = [...finalImages, ...existingImages.filter(img => img.startsWith('http') || img.startsWith('/uploads'))];
+    
+    req.body.images = finalImages;
+
     const payload = buildProductPayload(req.body);
 
     if (!payload?.title?.shortTitle || !payload?.title?.longTitle) {
@@ -231,19 +246,40 @@ exports.createProduct = asyncHandler(async (req, res) => {
  * @route   PATCH /api/products/:id
  */
 exports.updateProduct = asyncHandler(async (req, res) => {
-    const product = await products.findOne({ id: req.params.id });
+    const { id } = req.params;
+    
+    // Find product by custom ID or MongoDB _id
+    const query = {
+        $or: [
+            { id: id },
+            ...(id.match(/^[0-9a-fA-F]{24}$/) ? [{ _id: id }] : [])
+        ]
+    };
+
+    const product = await products.findOne(query);
     if (!product) return res.status(404).json({ error: "Product not found" });
 
     const canModify = req.rootUser.role === "admin" || (product.createdBy && product.createdBy.toString() === req.userID.toString());
     if (!canModify) return res.status(403).json({ error: "Not allowed to update this product" });
 
+    let finalImages = [];
+    if (req.files && req.files.length > 0) {
+        finalImages = req.files.map(file => `/uploads/${file.filename}`);
+    }
+    
+    const existingImages = Array.isArray(req.body.images) ? req.body.images : (typeof req.body.images === 'string' ? req.body.images.split(',') : []);
+    finalImages = [...finalImages, ...existingImages.filter(img => img.startsWith('http') || img.startsWith('/uploads'))];
+    
+    req.body.images = finalImages;
+
     const payload = buildProductPayload(req.body, product);
+
     Object.assign(product, payload);
     await product.save();
 
     // Clear caches
     clearCache("/api/getproducts");
-    clearCache(`/api/getproductsone/${req.params.id}`);
+    clearCache(`/api/getproductsone/${id}`);
     clearCache("/api/products/trending");
 
     const populated = await products.findById(product._id).populate("createdBy", "fname email");
@@ -255,7 +291,17 @@ exports.updateProduct = asyncHandler(async (req, res) => {
  * @route   DELETE /api/products/:id
  */
 exports.deleteProduct = asyncHandler(async (req, res) => {
-    const product = await products.findOne({ id: req.params.id });
+    const { id } = req.params;
+    
+    // Find product by custom ID or MongoDB _id
+    const query = {
+        $or: [
+            { id: id },
+            ...(id.match(/^[0-9a-fA-F]{24}$/) ? [{ _id: id }] : [])
+        ]
+    };
+
+    const product = await products.findOne(query);
     if (!product) return res.status(404).json({ error: "Product not found" });
 
     const canModify = req.rootUser.role === "admin" || (product.createdBy && product.createdBy.toString() === req.userID.toString());
@@ -266,10 +312,37 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
 
     // Clear caches
     clearCache("/api/getproducts");
-    clearCache(`/api/getproductsone/${req.params.id}`);
+    clearCache(`/api/getproductsone/${id}`);
     clearCache("/api/products/trending");
 
-    res.status(200).json({ success: true, deletedProductId: product.id });
+    res.status(200).json({ success: true, deletedProductId: product.id || product._id });
+});
+
+/**
+ * @desc    Get current user's products
+ * @route   GET /api/products/mine
+ */
+exports.getMyProducts = asyncHandler(async (req, res) => {
+    const userId = req.userID;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const myProducts = await products.find({ createdBy: userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+    const total = await products.countDocuments({ createdBy: userId });
+
+    res.status(200).json({
+        data: myProducts.map(resolveProductCategory),
+        pagination: {
+            total,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages: Math.ceil(total / limit)
+        }
+    });
 });
 
 /**
@@ -280,4 +353,58 @@ exports.getTrendingProducts = asyncHandler(async (req, res) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
     const trending = await products.find().sort({ views: -1, createdAt: -1 }).limit(limit);
     res.status(200).json(trending.map(resolveProductCategory));
+});
+
+/**
+ * @desc    Get top rated products
+ * @route   GET /api/products/top-rated
+ */
+exports.getTopRatedProducts = asyncHandler(async (req, res) => {
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const topRated = await products.find().sort({ rating: -1, views: -1 }).limit(limit);
+    res.status(200).json(topRated.map(resolveProductCategory));
+});
+
+/**
+ * @desc    Get discounted products
+ * @route   GET /api/products/discounted
+ */
+exports.getDiscountedProducts = asyncHandler(async (req, res) => {
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    // Find products where discount is not null or "0"
+    const discounted = await products.find({ 
+        discount: { $exists: true, $ne: "0", $not: /0%/ } 
+    }).sort({ createdAt: -1 }).limit(limit);
+    res.status(200).json(discounted.map(resolveProductCategory));
+});
+
+/**
+ * @desc    Like or unlike a product
+ * @route   POST /api/products/:id/like
+ */
+exports.likeProduct = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.userID;
+
+    const product = await products.findOne({ id });
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    // Initialize likes array if it doesn't exist
+    if (!product.likes) product.likes = [];
+
+    const index = product.likes.indexOf(userId);
+    if (index === -1) {
+        // Like the product
+        product.likes.push(userId);
+    } else {
+        // Unlike the product
+        product.likes.splice(index, 1);
+    }
+
+    await product.save();
+    res.status(200).json({ 
+        success: true, 
+        likesCount: product.likes.length,
+        isLiked: index === -1 
+    });
 });

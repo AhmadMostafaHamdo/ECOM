@@ -179,7 +179,6 @@ const Sign_in = () => {
           </p>
         </div>
       </div>
-      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { ROOT_URL, axiosInstance } from "../../api";
 import { useLocalize } from "../context/LocalizeContext";
@@ -129,16 +130,6 @@ const CreateProduct = ({ mode = "create" }) => {
     bootstrap();
   }, [editId, isEdit, navigate, t]);
 
-  // Sync form.url and form.detailUrl with images state if they are empty
-  useEffect(() => {
-    if (images.length > 0) {
-      setForm(prev => ({
-        ...prev,
-        url: prev.url || images[0].url,
-        detailUrl: prev.detailUrl || (images[1] ? images[1].url : (images[0] ? images[0].url : ""))
-      }));
-    }
-  }, [images]);
 
   const updateField = useCallback((event) => {
     const { name, value } = event.target;
@@ -150,35 +141,97 @@ const CreateProduct = ({ mode = "create" }) => {
 
   const submitProduct = useCallback(async (event) => {
     event.preventDefault();
+
+    // Validation
+    if (images.length === 0) {
+      toast.error(t("productCreator.errorNoImages", "At least one image is required"));
+      return;
+    }
+
+    if (Number(form.mrp) < Number(form.cost)) {
+      toast.error(t("productCreator.errorPriceRelation", "MRP cannot be less than selling price"));
+      return;
+    }
+
+    if (Number(form.cost) <= 0) {
+      toast.error(t("productCreator.errorPositivePrice", "Selling price must be greater than zero"));
+      return;
+    }
+
+    if (!form.category) {
+      toast.error(t("productCreator.errorNoCategory", "Please select a category"));
+      return;
+    }
+
     setSaving(true);
     setError("");
     setMessage("");
 
     try {
-      const processedImages = images.map((image) => image.url);
+      const formData = new FormData();
+      
+      // Basic fields
+      formData.append("shortTitle", form.shortTitle);
+      formData.append("longTitle", form.longTitle);
+      formData.append("description", form.description);
+      formData.append("category", form.category);
+      formData.append("mrp", form.mrp);
+      formData.append("cost", form.cost);
+      formData.append("currency", form.currency);
+      formData.append("priceDiscount", form.priceDiscount);
+      formData.append("offerText", form.offerText);
+      formData.append("tagline", form.tagline);
+      formData.append("country", form.country);
+      formData.append("province", form.province);
+      formData.append("city", form.city);
+      formData.append("mobile", form.mobile);
 
-      const payload = {
-        ...form,
-        mrp: Number(form.mrp),
-        cost: Number(form.cost),
-        images: processedImages,
-        url: form.url || (processedImages.length > 0 ? processedImages[0] : ""),
-        detailUrl:
-          form.detailUrl ||
-          (processedImages.length > 1
-            ? processedImages[1]
-            : processedImages[0] || ""),
-      };
+      // Handle images
+      const existingUrls = [];
+      images.forEach((image) => {
+        if (image.file) {
+          // New file to upload
+          formData.append("images", image.file);
+        } else if (image.url) {
+          // Existing remote URL or relative path
+          // If it's a blob URL (from current session), we skip it as it should have a 'file' property
+          if (!image.url.startsWith('blob:')) {
+            const urlToSend = image.url.startsWith(ROOT_URL) 
+              ? image.url.replace(ROOT_URL, "") 
+              : image.url;
+            existingUrls.push(urlToSend);
+          }
+        }
+      });
+      
+      // Send existing URLs as well
+      existingUrls.forEach(url => formData.append("images", url));
+
+      // Append primary and detail URLs if they were manually set
+      if (form.url) {
+        formData.append("url", form.url.startsWith(ROOT_URL) ? form.url.replace(ROOT_URL, "") : form.url);
+      }
+      if (form.detailUrl) {
+        formData.append("detailUrl", form.detailUrl.startsWith(ROOT_URL) ? form.detailUrl.replace(ROOT_URL, "") : form.detailUrl);
+      }
 
       const endpoint = isEdit ? `/products/${editId}` : "/products";
-      const res = await (isEdit ? axiosInstance.put(endpoint, payload) : axiosInstance.post(endpoint, payload));
+      const config = {
+        headers: { "Content-Type": "multipart/form-data" },
+      };
 
-      setMessage(
-        isEdit ? t("productCreator.updateSuccess") : t("productCreator.success"),
-      );
+      const res = await (isEdit 
+        ? axiosInstance.put(endpoint, formData, config) 
+        : axiosInstance.post(endpoint, formData, config));
+
+      const successMsg = isEdit ? t("productCreator.updateSuccess") : t("productCreator.success");
+      setMessage(successMsg);
+      toast.success(successMsg);
       setTimeout(() => navigate("/profile"), 900);
     } catch (submitError) {
-      setError(submitError.response?.data?.error || submitError.message);
+      const errorMsg = submitError.response?.data?.error || submitError.message;
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setSaving(false);
     }

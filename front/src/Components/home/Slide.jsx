@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useLocalize } from "../context/LocalizeContext";
 import { Logincontext } from "../context/Contextprovider";
 import { formatCurrency } from "../../utils/localizeUtils";
+import { ROOT_URL } from "../../api";
 import "../home/slide.css";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
@@ -79,7 +80,11 @@ const Slide = React.memo(({ title, products, category }) => {
                         <NavLink to={`/getproductsone/${e.id}`} key={e.id} className="product_link" onClick={(evt) => handleProductClick(evt, e.id)}>
                             <div className="products_items">
                                 <div className="product_img">
-                                    <img src={e.url} alt={e.title.shortTitle} loading="lazy" />
+                                    <img 
+                                        src={e.url && (e.url.startsWith('http') || e.url.startsWith('blob:')) ? e.url : `${ROOT_URL}${e.url}`} 
+                                        alt={e.title.shortTitle} 
+                                        loading="lazy" 
+                                    />
                                     {e.discount && (
                                         <div className="discount_badge">
                                             <LocalOffer className="offer_icon" />

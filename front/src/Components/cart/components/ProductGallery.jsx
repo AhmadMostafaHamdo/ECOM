@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CircularProgress } from '@mui/material';
 import { Favorite, FavoriteBorder, ChatBubbleOutline, LocalOffer } from '@mui/icons-material';
 import { AlertCircle } from 'lucide-react';
+import { ROOT_URL } from '../../../api';
 
 const ProductGallery = ({
     images,
@@ -28,7 +29,11 @@ const ProductGallery = ({
         <div className="left_cart">
             <div className="product_image_wrapper">
                 <img
-                    src={images[selectedImage] || product.detailUrl}
+                    src={(() => {
+                        const baseUrl = images[selectedImage] || product.detailUrl;
+                        if (!baseUrl) return '';
+                        return (baseUrl.startsWith('http') || baseUrl.startsWith('blob:')) ? baseUrl : `${ROOT_URL}${baseUrl}`;
+                    })()}
                     alt={product.title?.shortTitle || 'product'}
                 />
                 {product.discount && (
@@ -51,7 +56,7 @@ const ProductGallery = ({
                             className={`product-thumb ${selectedImage === idx ? 'active' : ''}`}
                             onClick={() => setSelectedImage(idx)}
                         >
-                            <img src={img} alt={`view ${idx + 1}`} />
+                            <img src={img && (img.startsWith('http') || img.startsWith('blob:')) ? img : `${ROOT_URL}${img}`} alt={`view ${idx + 1}`} />
                         </button>
                     ))}
                 </div>

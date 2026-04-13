@@ -46,7 +46,7 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
         }
     };
 
-    const handleFiles = async (files) => {
+    const handleFiles = (files) => {
         const fileArray = Array.from(files);
         const validFiles = fileArray.filter(file =>
             file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
@@ -62,40 +62,16 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
             return;
         }
 
-        setUploading(true);
+        const newImages = validFiles.map((file) => ({
+            url: URL.createObjectURL(file),
+            file: file, // Keep the original file object for later upload
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            isLocal: true
+        }));
 
-        try {
-            // Upload files to server using axiosInstance (handles CSRF already)
-            const formData = new FormData();
-            validFiles.forEach(file => {
-                formData.append('images', file);
-            });
-
-            const response = await axiosInstance.post("/upload/images", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            const result = response.data;
-
-            // Create image objects with server URLs
-            const newImages = result.images.map((url, index) => ({
-                url: url.startsWith('http') ? url : (url.startsWith('/') ? `${ROOT_URL}${url}` : `${ROOT_URL}/${url}`),
-                base64: null,
-                name: validFiles[index].name,
-                size: validFiles[index].size,
-                type: validFiles[index].type
-            }));
-
-            onChange([...images, ...newImages]);
-        } catch (error) {
-            console.error('Error uploading files:', error);
-            const errorMsg = error.response?.data?.error || error.message;
-            alert(t('productCreator.uploadError', 'Error uploading images: ') + errorMsg);
-        } finally {
-            setUploading(false);
-        }
+        onChange([...images, ...newImages]);
     };
 
     const fileToBase64 = (file) => {

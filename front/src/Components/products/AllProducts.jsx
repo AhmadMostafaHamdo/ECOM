@@ -20,7 +20,7 @@ import {
     AddShoppingCart,
     CalendarMonth
 } from "@mui/icons-material";
-import { axiosInstance } from "../../api";
+import { axiosInstance, ROOT_URL } from "../../api";
 import "./AllProducts.css";
 import Pagination from "../common/Pagination";
 import BackButton from "../common/BackButton";
@@ -163,7 +163,7 @@ const AllProducts = () => {
                 case "rating":
                     return (b.rating || 0) - (a.rating || 0);
                 case "name":
-                    return a.title.shortTitle.localeCompare(b.title.shortTitle);
+                    return (a?.title?.shortTitle || "").localeCompare(b?.title?.shortTitle || "");
                 case "newest":
                 default:
                     const dateA = new Date(a.createdAt || 0).getTime();
@@ -351,7 +351,11 @@ const AllProducts = () => {
                                             onClick={() => handleProductClick(product.id)}
                                         >
                                             <div className="card_image_wrapper">
-                                                <img src={product.url} alt={product.title.shortTitle} loading="lazy" />
+                                                <img 
+                                                    src={product.url && (product.url.startsWith('http') || product.url.startsWith('blob:')) ? product.url : (product.url ? `${ROOT_URL}${product.url}` : '')} 
+                                                    alt={product?.title?.shortTitle || 'Product'} 
+                                                    loading="lazy" 
+                                                />
                                                 <div className="card_overlay">
                                                     <div className="overlay_actions">
                                                         <Tooltip title={t('product.addToCart')} placement="top">
@@ -406,8 +410,8 @@ const AllProducts = () => {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <h3 className="product_title">{product.title.shortTitle}</h3>
-                                                <p className="product_tagline">{product.tagline}</p>
+                                                <h3 className="product_title">{product?.title?.shortTitle || 'Untitled Product'}</h3>
+                                                <p className="product_tagline">{product?.tagline || ''}</p>
 
                                                 <div className="product_meta">
                                                     <div className="rating_badge">
@@ -428,8 +432,8 @@ const AllProducts = () => {
 
                                                 <div className="price_footer">
                                                     <div className="price_info">
-                                                        <span className="cost">{formatCurrency(product.price.cost, activeCountry.locale, product.price.currency || activeCountry.currency)}</span>
-                                                        <span className="mrp">{formatCurrency(product.price.mrp, activeCountry.locale, product.price.currency || activeCountry.currency)}</span>
+                                                        <span className="cost">{formatCurrency(product?.price?.cost || 0, activeCountry.locale, product?.price?.currency || activeCountry.currency)}</span>
+                                                        <span className="mrp">{formatCurrency(product?.price?.mrp || 0, activeCountry.locale, product?.price?.currency || activeCountry.currency)}</span>
                                                     </div>
                                                 </div>
                                             </div>

@@ -195,8 +195,6 @@ const Signup = () => {
                   setUdata({ ...udata, mobile: value });
                   if (errors.mobile) setErrors({ ...errors, mobile: null });
                 }}
-                  // Country sync removed
-                }}
                 error={errors.mobile}
                 
               />
@@ -235,8 +233,6 @@ const Signup = () => {
             <NavLink to="/login">{t("auth.login")}</NavLink>
           </div>
         </div>
-      </div>
-
       </div>
     </div>
   );
