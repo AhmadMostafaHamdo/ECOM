@@ -4,6 +4,9 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom', 'framer-motion']
+  },
   build: {
     target: 'esnext',
     minify: 'esbuild',
@@ -15,9 +18,8 @@ export default defineConfig({
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
             if (id.includes('@mui')) return 'mui';
-            if (id.includes('framer-motion')) return 'motion';
-            if (id.includes('recharts')) return 'charts';
-            if (id.includes('react-router-dom') || id.includes('react-redux')) return 'vendor-core';
+            // All other core libs (React, Router, Redux, Motion) should stay together 
+            // in the vendor chunk to avoid circular dependencies and undefined references.
             return 'vendor';
           }
         }
