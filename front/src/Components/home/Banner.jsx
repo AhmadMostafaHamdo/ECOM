@@ -1,5 +1,4 @@
 import React from "react";
-import Carousel from "react-material-ui-carousel";
 import "../home/banner.css";
 import { useTranslation } from "react-i18next";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -36,52 +35,34 @@ const slides = [
 ];
 
 const Banner = React.memo(({ onExplore }) => {
+  const [activeIndex, setActiveIndex] = React.useState(0);
   const { t } = useTranslation();
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="banner_wrapper">
-      <Carousel
-        className="carasousel"
-        autoPlay={true}
-        animation="slide"
-        indicators={true}
-        navButtonsAlwaysVisible={true}
-        cycleNavigation={true}
-        duration={600}
-        interval={5000}
-        indicatorIconButtonProps={{
-          style: {
-            color: "rgba(255, 255, 255, 0.4)",
-            margin: "0 4px",
-            transform: "scale(0.75)",
-          },
-        }}
-        activeIndicatorIconButtonProps={{
-          style: {
-            color: "var(--primary)",
-            transform: "scale(1.1)",
-          },
-        }}
-        navButtonsProps={{
-          style: {
-            background: "rgba(0, 0, 0, 0.35)",
-            backdropFilter: "blur(6px)",
-            color: "#ffffff",
-            borderRadius: "50%",
-            width: "44px",
-            height: "44px",
-            margin: "0 10px",
-          },
-        }}
-      >
+      <div className="banner_custom_slider">
         {slides.map((slide, i) => (
-          <div key={i} className="banner_slide">
+          <div
+            key={i}
+            className={`banner_slide ${i === activeIndex ? "active" : ""}`}
+            style={{ 
+              opacity: i === activeIndex ? 1 : 0,
+              visibility: i === activeIndex ? "visible" : "hidden",
+              transition: "opacity 0.6s ease-in-out"
+            }}
+          >
             <img
               src={slide.src}
               alt={`Banner ${i + 1}`}
               className="banner_img"
               loading={i === 0 ? "eager" : "lazy"}
-              fetchpriority={i === 0 ? "high" : "low"}
             />
             <div className="banner_overlay">
               <p>{t(slide.labelKey, slide.defaultLabel)}</p>
@@ -97,7 +78,18 @@ const Banner = React.memo(({ onExplore }) => {
             </div>
           </div>
         ))}
-      </Carousel>
+        
+        <div className="banner_indicators">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              className={`indicator ${i === activeIndex ? "active" : ""}`}
+              onClick={() => setActiveIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 });

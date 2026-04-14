@@ -8,15 +8,71 @@
   line-height: 0;
 }
 
-.carasousel {
-  z-index: 1;
+/* Banner Custom Slider */
+.banner_custom_slider {
+  position: relative;
+  width: 100%;
+  height: 380px;
 }
 
+.banner_custom_slider .banner_slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.banner_indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.indicator.active {
+  background: var(--primary);
+  transform: scale(1.2);
+}
+
+/* Base Banner Slide */
 .banner_slide {
   position: relative;
-  height: 380px;
-  width: 100%;
   overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+  .banner_custom_slider {
+    height: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner_custom_slider {
+    height: 240px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner_custom_slider {
+    height: 200px;
+  }
 }
 
 .banner_img {
