@@ -1,4 +1,4 @@
-const User = require("../models/userSchema");
+ const User = require("../models/userSchema");
 const products = require("../models/productsSchema");
 const mongoose = require("mongoose");
 const { asyncHandler } = require("../middleware/errorMiddleware");
@@ -28,11 +28,40 @@ const toPublicUser = (user) => ({
  * Get user wishlist
  */
 exports.getWishlist = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.userID).populate("wishlist");
+    // Populate with explicit model reference
+    let user = await User.findById(req.userID).populate({
+        path: "wishlist",
+        model: "products"
+    });
+
     if (!user) {
+        console.error(`[WishlistTrace] User not found: ${req.userID}`);
         return res.status(404).json({ error: "User not found" });
     }
-    res.status(200).json(user.wishlist || []);
+
+    // Identify successfully populated items
+    let wishlistItems = (user.wishlist || []).filter(item => item && typeof item === 'object' && (item._id || item.id));
+    
+    // FALLBACK: If population failed but user has wishlist IDs, fetch them manually
+    if (wishlistItems.length === 0 && user.wishlist.length > 0) {
+        console.warn(`[WishlistTrace] Populate failed, attempting manual fetch for ${user.wishlist.length} IDs`);
+        // Re-fetch user without populate to get raw IDs
+        const rawUser = await User.findById(req.userID).lean();
+        if (rawUser && rawUser.wishlist && rawUser.wishlist.length > 0) {
+            wishlistItems = await products.find({ 
+                _id: { $in: rawUser.wishlist } 
+            }).lean();
+            console.log(`[WishlistTrace] Manual fetch found ${wishlistItems.length} items`);
+        }
+    }
+
+    console.log(`[WishlistTrace] Final items count: ${wishlistItems.length}`);
+    
+    res.status(200).json({ 
+        wishlist: wishlistItems, 
+        data: wishlistItems, 
+        count: wishlistItems.length 
+    });
 });
 
 /**
@@ -40,12 +69,12 @@ exports.getWishlist = asyncHandler(async (req, res) => {
  */
 exports.toggleWishlist = asyncHandler(async (req, res) => {
     const productId = req.params.id || req.body.productId;
+    console.log(`[WishlistTrace] Toggling product: ${productId} for user: ${req.userID}`);
 
     if (!productId) {
         return res.status(400).json({ error: "Product ID is missing" });
     }
 
-    // Check if product exists - support both custom 'id' string and standard '_id' ObjectId
     let product;
     if (mongoose.Types.ObjectId.isValid(productId)) {
         product = await products.findById(productId);
@@ -54,34 +83,36 @@ exports.toggleWishlist = asyncHandler(async (req, res) => {
     }
 
     if (!product) {
+        console.error(`[WishlistTrace] Product not found in DB: ${productId}`);
         return res.status(404).json({ error: "Product not found" });
     }
 
-    // ALWAYS store the MongoDB ObjectId (_id) in the user wishlist for consistency
     const targetIdToStore = product._id;
+    console.log(`[WishlistTrace] Resolved Database _id: ${targetIdToStore}`);
 
     const user = await User.findById(req.userID);
-    if (!user) {
-        return res.status(404).json({ error: "User not found" });
-    }
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Initialize wishlist if it doesn't exist
     if (!user.wishlist) user.wishlist = [];
 
     const index = user.wishlist.findIndex(
-        (id) => id.toString() === targetIdToStore.toString()
+        (id) => id && id.toString() === targetIdToStore.toString()
     );
     let saved = false;
 
     if (index > -1) {
         user.wishlist.splice(index, 1);
         saved = false;
+        console.log(`[WishlistTrace] Removed product from wishlist`);
     } else {
         user.wishlist.push(targetIdToStore);
         saved = true;
+        console.log(`[WishlistTrace] Added product to wishlist`);
     }
 
     await user.save();
+    console.log(`[WishlistTrace] Final wishlist IDs:`, user.wishlist);
+
     res.status(200).json({
         saved,
         wishlistCount: user.wishlist.length,

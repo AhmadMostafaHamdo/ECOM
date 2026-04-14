@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { axiosInstance, ROOT_URL } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
 import { useLocalize } from "../context/LocalizeContext";
@@ -23,31 +24,42 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 
 const WishlistPage = () => {
+    const { t } = useTranslation();
     const { account } = useContext(Logincontext);
     const { activeCountry } = useLocalize();
     const navigate = useNavigate();
     const [wishlist, setWishlist] = useState([]);
     const [wlPage, setWlPage] = useState(1);
     const [wlTotalPages, setWlTotalPages] = useState(1);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [removingId, setRemovingId] = useState(null);
     const [clearing, setClearing] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const dispatch = useDispatch();
 
     const loadWishlist = useCallback(async () => {
-        setLoading(true);
+        if (!account) return;
+        setIsLoading(true);
+        setError(null);
         try {
+            console.log("Fetching wishlist...");
             const res = await axiosInstance.get("/wishlist");
             if (res.status === 200) {
-                setWishlist(res.data.wishlist || []);
+                // Support both { wishlist: [...] } and raw [...] responses
+                const items = Array.isArray(res.data) ? res.data : (res.data.wishlist || res.data.data || []);
+                console.log("Wishlist items received:", items.length);
+                setWishlist(items);
+                // Also update Redux if needed
+                // dispatch(fetchWishlist()); 
             }
         } catch (e) {
             console.error("Wishlist load error:", e);
+            setError(t("errors.somethingWentWrong"));
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
-    }, []);
+    }, [account, t]);
 
     useEffect(() => {
         if (!account) {
@@ -94,7 +106,7 @@ const WishlistPage = () => {
         }
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="wishlist_loader">
                 <div className="wishlist_loader_inner">
@@ -182,12 +194,18 @@ const WishlistPage = () => {
                                         <div className="wishlist_card_img">
                                             <img
                                                 src={ (() => {
-                                                    const img = product.url || product.detailUrl;
-                                                    if (!img) return '';
-                                                    return img.startsWith('http') || img.startsWith('blob:') ? img : `${ROOT_URL}${img}`;
+                                                    // Unified image resolution: images array first, then url, then detailUrl
+                                                    if (Array.isArray(product.images) && product.images.length > 0) {
+                                                        const img = product.images[0];
+                                                        if (img) return img.startsWith('http') || img.startsWith('blob:') ? img : `${ROOT_URL}${img}`;
+                                                    }
+                                                    const fallback = product.url || product.detailUrl;
+                                                    if (!fallback) return '';
+                                                    return fallback.startsWith('http') || fallback.startsWith('blob:') ? fallback : `${ROOT_URL}${fallback}`;
                                                 })() }
                                                 alt={product.title?.shortTitle || 'Product'}
                                                 loading="lazy"
+                                                onError={(e) => { e.target.style.opacity = '0.3'; }}
                                             />
                                             {product.discount && (
                                                 <span className="wishlist_discount_badge">

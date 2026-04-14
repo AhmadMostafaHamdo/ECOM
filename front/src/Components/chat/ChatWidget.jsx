@@ -82,8 +82,8 @@ const ChatWidget = () => {
             const res = await axiosInstance.get(`/conversations/${convId}/messages`);
             if (res.status === 200) {
                 const data = res.data;
-                const messagesArray = Array.isArray(data.messages) ? data.messages : [];
-                setMessages(messagesArray.slice().reverse());
+                const messagesArray = Array.isArray(data.data) ? data.data : [];
+                setMessages(messagesArray);
                 setTimeout(scrollToBottom, 100);
             }
         } catch (err) {
@@ -185,7 +185,7 @@ const ChatWidget = () => {
             });
 
             if (res.status === 200 || res.status === 201) {
-                const msg = res.data;
+                const msg = res.data.message;
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
 
@@ -211,7 +211,10 @@ const ChatWidget = () => {
     };
 
     const getTimeLabel = (dateStr) => {
+        if (!dateStr) return '';
         const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '';
+        
         const now = new Date();
         const diff = now - d;
         if (diff < 60000) return 'الآن';

@@ -57,11 +57,12 @@ const Cart = () => {
           try {
             const wRes = await axiosInstance.get("/wishlist");
             if (wRes.status === 200) {
-              const wData = wRes.data;
-              const isInWishlist = (wData.data || []).some(
-                (p) => (p._id || p.id)?.toString() === data._id?.toString()
-              );
-              setInitialSaved(isInWishlist);
+            const wData = wRes.data;
+            const wishlistItems = wData.wishlist || wData.data || (Array.isArray(wData) ? wData : []);
+            const isInWishlist = wishlistItems.some(
+              (p) => (p._id || p.id)?.toString() === data._id?.toString()
+            );
+            setInitialSaved(isInWishlist);
             }
           } catch { }
         }
