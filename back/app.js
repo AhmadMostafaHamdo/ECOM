@@ -108,8 +108,8 @@ app.use(limiter);
 // Auth Limiter
 const authLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // 10 attempts
-    message: "Too many login/registration attempts from this IP, please try again after an hour",
+    max: 100, // 100 attempts
+    message: { error: "Too many login/registration attempts from this IP, please try again after an hour" },
     standardHeaders: true,
     legacyHeaders: false,
 });

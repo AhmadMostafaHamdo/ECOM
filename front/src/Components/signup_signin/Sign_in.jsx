@@ -26,9 +26,10 @@ const Sign_in = () => {
     const { email, password } = logdata;
     const newErrors = {};
 
-    if (!email) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       newErrors.email = t("auth.emailRequired");
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       newErrors.email = t("auth.invalidEmail");
     }
 
@@ -46,25 +47,30 @@ const Sign_in = () => {
     setErrors({});
     setLoading(true);
     try {
-      const res = await axiosInstance.post("/login", { email, password });
+      const res = await axiosInstance.post("/login", { email: trimmedEmail, password });
 
       const data = res.data;
-      if (res.status === 400 || !data) {
-        toast.error(t("auth.invalidCredentials"), { position: "top-center" });
-      } else {
-        if (data.token) {
-          localStorage.setItem("auth_token", data.token);
-        }
-        setAccount(data);
-        setShowLoginPrompt(false);
-        setData({ email: "", password: "" });
-        toast.success(t("auth.loginSuccess"), { position: "top-center" });
-        const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
-        setTimeout(() => navigate(nextRoute), 300);
+      if (data && data.token) {
+        localStorage.setItem("auth_token", data.token);
       }
+      setAccount(data);
+      setShowLoginPrompt(false);
+      setData({ email: "", password: "" });
+      toast.success(t("auth.loginSuccess"), { position: "top-center" });
+      const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
+      setTimeout(() => navigate(nextRoute), 300);
     } catch (error) {
       console.log("Login error:", error.message);
-      toast.error(t("auth.invalidCredentials"), { position: "top-center" });
+      let errData = error.response?.data;
+      if (typeof errData === "string") errData = { error: errData };
+
+      if (!error.response) {
+        toast.error("Cannot connect to server. Please make sure the backend is running.", { position: "top-center" });
+      } else if (errData?.error) {
+        toast.error(errData.message || errData.error, { position: "top-center" });
+      } else {
+        toast.error(t("auth.invalidCredentials"), { position: "top-center" });
+      }
     } finally {
       setLoading(false);
     }

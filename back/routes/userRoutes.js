@@ -6,7 +6,8 @@ const requireAdmin = require("../middleware/admin");
 
 // Wishlist operations
 router.get("/wishlist", authenticate, userController.getWishlist);
-router.post("/wishlist", authenticate, userController.toggleWishlist);
+router.post("/wishlist", authenticate, userController.toggleWishlist); // legacy format
+router.post("/wishlist/toggle/:id", authenticate, userController.toggleWishlist); // new format
 router.delete("/wishlist", authenticate, userController.clearWishlist);
 
 // All admin operations

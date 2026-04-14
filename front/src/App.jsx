@@ -35,6 +35,7 @@ const ContactUs = lazy(() => import("./Components/ContactUs"));
 const ChatWidget = lazy(() => import("./Components/chat/ChatWidget"));
 const WishlistPage = lazy(() => import("./Components/wishlist/WishlistPage"));
 const LoginPrompt = lazy(() => import("./Components/common/LoginPrompt"));
+const FloatingNavButton = lazy(() => import("./Components/common/FloatingNavButton"));
 
 const CATEGORY_ALL = "All Categories";
 
@@ -232,6 +233,7 @@ function App() {
               )}
               {!isDashboardRoute && <Footer />}
               {!isDashboardRoute && !isAuthRoute && <ChatWidget />}
+              {!isDashboardRoute && !isAuthRoute && <FloatingNavButton />}
               {showLoginPrompt && (
                 <LoginPrompt onCancel={() => setShowLoginPrompt(false)} />
               )}

@@ -22,7 +22,7 @@ const Signup = () => {
     mobile: "",
     password: "",
     cpassword: "",
-    country: "N/A",
+    country: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -45,9 +45,11 @@ const Signup = () => {
     const newErrors = {};
 
     if (!fname) newErrors.fname = t("auth.firstNameRequired");
-    if (!email) {
+    if (!country || country.trim() === "") newErrors.country = t("auth.countryRequired");
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       newErrors.email = t("auth.emailRequired");
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       newErrors.email = t("auth.invalidEmail");
     }
     if (!mobile) newErrors.mobile = t("auth.mobileRequired");
@@ -76,7 +78,7 @@ const Signup = () => {
 
       const res = await axiosInstance.post(
         "/register",
-        { fname, email, mobile, password, cpassword, country },
+        { fname: fname.trim(), email: trimmedEmail, mobile: mobile.trim(), password, cpassword, country: country.trim() },
         { signal: abortRef.current.signal }
       );
 
@@ -88,15 +90,20 @@ const Signup = () => {
       }
       setAccount(data);
       setShowLoginPrompt(false);
-      setUdata({ fname: "", email: "", mobile: "", password: "", cpassword: "", country: "N/A" });
+      setUdata({ fname: "", email: "", mobile: "", password: "", cpassword: "", country: "" });
       toast.success(t("auth.signupSuccess"), { position: "top-center" });
-      setTimeout(() => navigate("/"), 300);
+      const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
+      setTimeout(() => navigate(nextRoute), 300);
     } catch (error) {
       if (error.name === "CanceledError" || error.name === "AbortError") return;
       console.log("Signup error:", error.message);
-      const data = error.response?.data || {};
+      let data = error.response?.data || {};
+      if (typeof data === "string") data = { error: data };
       let msg = t("auth.signupError");
-      if (data.error) {
+
+      if (!error.response) {
+        msg = "Cannot connect to server. Please make sure the backend is running.";
+      } else if (data.error) {
         if (data.error.includes("mobile already exists")) msg = t("auth.mobileExists");
         else if (data.error.includes("email already exists")) msg = t("auth.emailExists");
         else if (data.error.includes("password")) msg = t("auth.passwordMismatch");
@@ -201,7 +208,15 @@ const Signup = () => {
               {errors.mobile && <span className="error_msg">{errors.mobile}</span>}
             </div>
 
-
+            <div className={`field ${errors.country ? "error" : ""}`}>
+              <label htmlFor="su_country">{t("auth.country")}</label>
+              <input
+                id="su_country" type="text" name="country"
+                placeholder={t("auth.countryPlaceholder")}
+                value={udata.country} onChange={adddata} required
+              />
+              {errors.country && <span className="error_msg">{errors.country}</span>}
+            </div>
 
             <div className={`field ${errors.password ? "error" : ""}`}>
               <label htmlFor="su_pass">{t("auth.password")}</label>

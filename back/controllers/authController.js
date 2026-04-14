@@ -19,7 +19,11 @@ const buildCookieOptions = () => ({
  * @route   POST /api/register
  */
 exports.register = asyncHandler(async (req, res) => {
-    const { fname, email, mobile, password, cpassword, country } = req.body;
+    let { fname, email, mobile, password, cpassword, country } = req.body;
+    fname = fname?.trim();
+    email = email?.toLowerCase().trim();
+    mobile = mobile?.toString().trim();
+    country = country?.trim();
 
     // Basic presence check
     if (!fname || !email || !mobile || !password || !cpassword) {
@@ -75,7 +79,7 @@ exports.register = asyncHandler(async (req, res) => {
     const token = await storedata.generatAuthtoken();
 
     res.cookie("eccomerce", token, buildCookieOptions());
-    return res.status(201).json(toSessionUser(storedata, token));
+    return res.status(201).json({ success: true, ...toSessionUser(storedata, token) });
 });
 
 /**
@@ -93,7 +97,8 @@ exports.getAdmin = asyncHandler(async (req, res) => {
  * @route   POST /api/login
  */
 exports.login = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    email = email?.toLowerCase().trim();
 
     if (!email || !password) {
         return res.status(400).json({ error: "Please fill the details" });
@@ -125,7 +130,7 @@ exports.login = asyncHandler(async (req, res) => {
 
     const token = await userlogin.generatAuthtoken();
     res.cookie("eccomerce", token, buildCookieOptions());
-    res.status(200).json(toSessionUser(userlogin, token));
+    res.status(200).json({ success: true, ...toSessionUser(userlogin, token) });
 });
 
 /**

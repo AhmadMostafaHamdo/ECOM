@@ -27,10 +27,11 @@ const ContactUs = () => {
     }
 
     // Email validation
-    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-    if (!formData.email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const trimmedEmail = formData.email.trim();
+    if (!trimmedEmail) {
       newErrors.email = t('contact.emailRequired');
-    } else if (!emailRegex.test(formData.email)) {
+    } else if (!emailRegex.test(trimmedEmail)) {
       newErrors.email = t('contact.invalidEmail');
     }
 
@@ -80,7 +81,13 @@ const ContactUs = () => {
     setSubmitStatus('');
 
     try {
-      const response = await axiosInstance.post('/contact', formData);
+      const trimmedData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim()
+      };
+      const response = await axiosInstance.post('/contact', trimmedData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success(t('contact.success') || "Message sent successfully!");
@@ -118,19 +125,72 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="contact-us-container">
-      <div className="contact-us-header">
-        <h1 className="contact-us-title">{t('contact.title')}</h1>
-        <p className="contact-us-subtitle">
-          {t('contact.subtitle')}
-        </p>
-      </div>
+    <div className="contact-section">
+      <div className="contact-wrapper">
+        
+        {/* Left Panel - Premium Info Presentation */}
+        <div className="contact-info-panel">
+          <div className="contact-badge">
+            <span className="badge-dot"></span> 
+            {t('contact.getInTouch') || "Get in Touch"}
+          </div>
+          
+          <h1 className="contact-heading">
+            {t('contact.title') || "Let's build something"}{' '}
+            <span className="text-highlight">great</span> together.
+          </h1>
+          
+          <p className="contact-description">
+            {t('contact.subtitle')}
+          </p>
 
-      <div className="contact-us-content">
-        <div className="contact-form-wrapper">
-          <form onSubmit={handleSubmit} className="contact-form">
+          <div className="contact-methods">
+            <div className="method-item">
+              <div className="method-icon-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="method-content">
+                <h4>{t('contact.emailUs')}</h4>
+                <p>support@ecommerce.com</p>
+              </div>
+            </div>
+
+            <div className="method-item">
+              <div className="method-icon-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
+              <div className="method-content">
+                <h4>{t('contact.callUs')}</h4>
+                <p>+1 (555) 123-4567</p>
+              </div>
+            </div>
+
+            <div className="method-item">
+              <div className="method-icon-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div className="method-content">
+                <h4>{t('contact.visitUs')}</h4>
+                <p>123 Commerce Street, New York, NY</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Flowing Form Component */}
+        <div className="contact-form-panel">
+          <form onSubmit={handleSubmit} className="premium-form">
+            <h3 className="form-title">{t('contact.sendmessage') || "Send a message"}</h3>
+            
             {submitStatus === 'success' && (
-              <div className="alert alert-success">
+              <div className="premium-alert success">
                 <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
@@ -139,7 +199,7 @@ const ContactUs = () => {
             )}
 
             {submitStatus === 'error' && !errors.general && (
-              <div className="alert alert-error">
+              <div className="premium-alert error">
                 <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
@@ -148,7 +208,7 @@ const ContactUs = () => {
             )}
 
             {errors.general && (
-              <div className="alert alert-error">
+              <div className="premium-alert error">
                 <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
@@ -156,136 +216,89 @@ const ContactUs = () => {
               </div>
             )}
 
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                {t('contact.nameLabel')}
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className={`form-input ${errors.name ? 'error' : ''}`}
-                placeholder={t('contact.namePlaceholder')}
-                disabled={isSubmitting}
-              />
-              {errors.name && <span className="error-message">{errors.name}</span>}
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="name">{t('contact.nameLabel')}</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`modern-input ${errors.name ? 'input-error' : ''}`}
+                  placeholder={t('contact.namePlaceholder') || "John Doe"}
+                  disabled={isSubmitting}
+                />
+                {errors.name && <span className="error-text">{errors.name}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">{t('contact.emailLabel')}</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`modern-input ${errors.email ? 'input-error' : ''}`}
+                  placeholder={t('contact.emailPlaceholder') || "john@example.com"}
+                  disabled={isSubmitting}
+                />
+                {errors.email && <span className="error-text">{errors.email}</span>}
+              </div>
             </div>
 
             <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                {t('contact.emailLabel')}
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`form-input ${errors.email ? 'error' : ''}`}
-                placeholder={t('contact.emailPlaceholder')}
-                disabled={isSubmitting}
-              />
-              {errors.email && <span className="error-message">{errors.email}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="subject" className="form-label">
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-                {t('contact.subjectLabel')}
-              </label>
+              <label htmlFor="subject">{t('contact.subjectLabel')}</label>
               <input
                 type="text"
                 id="subject"
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                className={`form-input ${errors.subject ? 'error' : ''}`}
-                placeholder={t('contact.subjectPlaceholder')}
+                className={`modern-input ${errors.subject ? 'input-error' : ''}`}
+                placeholder={t('contact.subjectPlaceholder') || "How can we help?"}
                 disabled={isSubmitting}
               />
-              {errors.subject && <span className="error-message">{errors.subject}</span>}
+              {errors.subject && <span className="error-text">{errors.subject}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="message" className="form-label">
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                {t('contact.messageLabel')}
-              </label>
+              <label htmlFor="message">{t('contact.messageLabel')}</label>
               <textarea
                 id="message"
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                className={`form-textarea ${errors.message ? 'error' : ''}`}
-                placeholder={t('contact.messagePlaceholder')}
-                rows="6"
+                className={`modern-textarea ${errors.message ? 'input-error' : ''}`}
+                placeholder={t('contact.messagePlaceholder') || "Tell us more about your inquiry..."}
+                rows="5"
                 maxLength="1000"
                 disabled={isSubmitting}
               />
-              <div className="character-count">
-                {formData.message.length}/1000
+              <div className="textarea-footer">
+                <span className="char-count">{formData.message.length}/1000</span>
               </div>
-              {errors.message && <span className="error-message">{errors.message}</span>}
+              {errors.message && <span className="error-text">{errors.message}</span>}
             </div>
 
             <button
               type="submit"
-              className="submit-btn"
+              className="modern-submit-btn"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <svg className="spinner" viewBox="0 0 24 24">
-                    <circle className="spinner-circle" cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="4" />
-                  </svg>
-                  {t('contact.sending')}
+                  <div className="btn-spinner"></div>
+                  {t('contact.sending') || "Sending..."}
                 </>
               ) : (
-                t('contact.send')
+                t('contact.send') || "Send Message"
               )}
             </button>
           </form>
         </div>
 
-        <div className="contact-info">
-          <div className="info-card">
-            <div className="info-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3>{t('contact.emailUs')}</h3>
-            <p>support@ecommerce.com</p>
-            <p className="info-description">{t('contact.respond')}</p>
-          </div>
-
-          <div className="info-card">
-            <div className="info-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-            <h3>{t('contact.callUs')}</h3>
-            <p>+1 (555) 123-4567</p>
-            <p className="info-description">{t('contact.hours')}</p>
-          </div>
-
-          <div className="info-card">
-            <div className="info-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <h3>{t('contact.visitUs')}</h3>
-            <p>123 Commerce Street</p>
-            <p>New York, NY 10001</p>
-          </div>
-        </div>
       </div>
     </div>
   );

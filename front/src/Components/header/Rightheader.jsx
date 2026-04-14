@@ -61,9 +61,6 @@ const Rightheader = ({ userlog, logclose }) => {
             <NavLink to="/wishlist" onClick={logclose}>
               <FavoriteIcon /> {t('navigation.wishlist', 'My Wishlist')}
             </NavLink>
-            <NavLink to="/buynow" onClick={logclose}>
-              <ShoppingCartIcon /> {t('cart.title', 'My Bag')}
-            </NavLink>
           </>
         )}
 

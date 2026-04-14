@@ -1,7 +1,9 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { axiosInstance } from "../../api";
+import { axiosInstance, ROOT_URL } from "../../api";
 import { Logincontext } from "../context/Contextprovider";
+import { useLocalize } from "../context/LocalizeContext";
+import { formatCurrency } from "../../utils/localizeUtils";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { removeFromWishlistLocal, clearWishlistLocal } from "../redux/features/wishlistSlice";
@@ -22,6 +24,7 @@ import ClearAllIcon from "@mui/icons-material/ClearAll";
 
 const WishlistPage = () => {
     const { account } = useContext(Logincontext);
+    const { activeCountry } = useLocalize();
     const navigate = useNavigate();
     const [wishlist, setWishlist] = useState([]);
     const [wlPage, setWlPage] = useState(1);
@@ -178,8 +181,12 @@ const WishlistPage = () => {
                                     >
                                         <div className="wishlist_card_img">
                                             <img
-                                                src={product.url || product.detailUrl}
-                                                alt={product.title?.shortTitle}
+                                                src={ (() => {
+                                                    const img = product.url || product.detailUrl;
+                                                    if (!img) return '';
+                                                    return img.startsWith('http') || img.startsWith('blob:') ? img : `${ROOT_URL}${img}`;
+                                                })() }
+                                                alt={product.title?.shortTitle || 'Product'}
                                                 loading="lazy"
                                             />
                                             {product.discount && (
@@ -221,11 +228,11 @@ const WishlistPage = () => {
 
                                         <div className="wishlist_card_price">
                                             <span className="wishlist_price_current">
-                                                Rs. {product.price?.cost}
+                                                {formatCurrency(product.price?.cost || 0, activeCountry.locale, product.price?.currency || activeCountry.currency)}
                                             </span>
                                             {product.price?.mrp > product.price?.cost && (
                                                 <span className="wishlist_price_original">
-                                                    Rs. {product.price?.mrp}
+                                                    {formatCurrency(product.price?.mrp || 0, activeCountry.locale, product.price?.currency || activeCountry.currency)}
                                                 </span>
                                             )}
                                         </div>

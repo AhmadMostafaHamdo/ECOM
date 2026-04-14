@@ -218,27 +218,27 @@
 }
 
 .theme_toggle:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-  background: var(--gold-soft);
+  border-color: var(--primary);
+  color: var(--primary-hover);
+  background: var(--primary-light);
 }
 
 /* Avatar */
 .user_avatar {
-  background: linear-gradient(135deg, var(--gold), var(--gold-deep)) !important;
-  color: #0d0d14 !important;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
+  color: #fff !important;
   cursor: pointer;
   width: 36px !important;
   height: 36px !important;
   font-weight: 700;
   font-size: 15px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px var(--gold-glow);
+  box-shadow: 0 2px 8px var(--primary-glow);
 }
 
 .user_avatar:hover {
   transform: scale(1.06);
-  box-shadow: 0 4px 14px var(--gold-glow);
+  box-shadow: 0 4px 14px var(--primary-glow);
 }
 
 /* Profile Menu */
@@ -278,7 +278,7 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -290,7 +290,7 @@
 }
 
 .menu_item_icon svg {
-  color: #0d0d14 !important;
+  color: #fff !important;
   font-size: 16px !important;
 }
 
@@ -334,7 +334,7 @@
 }
 
 .suggestion_item:hover a {
-  color: var(--gold);
+  color: var(--primary);
 }
 
 .searching_status {
@@ -350,11 +350,11 @@
   padding: 8px !important;
   border-radius: 8px !important;
   background: var(--surface-2) !important;
-  color: var(--gold) !important;
+  color: var(--primary) !important;
 }
 
 .hamburgur:hover {
-  background: var(--gold-soft) !important;
+  background: var(--primary-light) !important;
 }
 
 /* Mobile search toggle */
@@ -363,11 +363,11 @@
   padding: 8px !important;
   border-radius: 8px !important;
   background: var(--surface-2) !important;
-  color: var(--gold) !important;
+  color: var(--primary) !important;
 }
 
 .mobile_search_toggle:hover {
-  background: var(--gold-soft) !important;
+  background: var(--primary-light) !important;
 }
 
 /* Mobile visible search */
@@ -446,8 +446,8 @@
 
 .drawer_nav a:hover,
 .drawer_nav a.active {
-  background: var(--gold-soft);
-  color: var(--gold-deep);
+  background: var(--primary-light);
+  color: var(--primary-hover);
 }
 
 .divider_custom {
@@ -475,8 +475,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-  color: #0d0d14;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #0f172a;
   padding: 10px 16px;
   border-radius: 10px;
   font-weight: 700;

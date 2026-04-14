@@ -39,18 +39,26 @@ exports.getWishlist = asyncHandler(async (req, res) => {
  * Add or remove from wishlist
  */
 exports.toggleWishlist = asyncHandler(async (req, res) => {
-    const { productId } = req.body;
+    const productId = req.params.id || req.body.productId;
 
-    // Validate productId is a valid ObjectId
-    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
-        return res.status(400).json({ error: "Invalid product ID" });
+    if (!productId) {
+        return res.status(400).json({ error: "Product ID is missing" });
     }
 
-    // Check if product exists
-    const product = await products.findById(productId);
+    // Check if product exists - support both custom 'id' string and standard '_id' ObjectId
+    let product;
+    if (mongoose.Types.ObjectId.isValid(productId)) {
+        product = await products.findById(productId);
+    } else {
+        product = await products.findOne({ id: productId });
+    }
+
     if (!product) {
         return res.status(404).json({ error: "Product not found" });
     }
+
+    // ALWAYS store the MongoDB ObjectId (_id) in the user wishlist for consistency
+    const targetIdToStore = product._id;
 
     const user = await User.findById(req.userID);
     if (!user) {
@@ -61,7 +69,7 @@ exports.toggleWishlist = asyncHandler(async (req, res) => {
     if (!user.wishlist) user.wishlist = [];
 
     const index = user.wishlist.findIndex(
-        (id) => id.toString() === productId.toString()
+        (id) => id.toString() === targetIdToStore.toString()
     );
     let saved = false;
 
@@ -69,7 +77,7 @@ exports.toggleWishlist = asyncHandler(async (req, res) => {
         user.wishlist.splice(index, 1);
         saved = false;
     } else {
-        user.wishlist.push(productId);
+        user.wishlist.push(targetIdToStore);
         saved = true;
     }
 

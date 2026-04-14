@@ -76,14 +76,26 @@ const Slide = React.memo(({ title, products, category }) => {
                     itemClass="carousel-item-padding-40-px"
                     containerClass="carousel-container"
                 >   
-                    {items.map((e) => (
+                    {items.map((e) => {
+                        // Resolve image: prefer images[] array first, then url field
+                        const resolveImg = (p) => {
+                            if (Array.isArray(p.images) && p.images.length > 0) {
+                                const img = p.images[0];
+                                if (img) return img.startsWith('http') || img.startsWith('blob:') ? img : `${ROOT_URL}${img}`;
+                            }
+                            if (p.url) return p.url.startsWith('http') || p.url.startsWith('blob:') ? p.url : `${ROOT_URL}${p.url}`;
+                            return '';
+                        };
+                        const imgSrc = resolveImg(e);
+                        return (
                         <NavLink to={`/getproductsone/${e.id}`} key={e.id} className="product_link" onClick={(evt) => handleProductClick(evt, e.id)}>
                             <div className="products_items">
                                 <div className="product_img">
                                     <img 
-                                        src={e.url && (e.url.startsWith('http') || e.url.startsWith('blob:')) ? e.url : `${ROOT_URL}${e.url}`} 
+                                        src={imgSrc}
                                         alt={e.title.shortTitle} 
-                                        loading="lazy" 
+                                        loading="lazy"
+                                        onError={(ev) => { ev.target.style.opacity = '0.3'; }}
                                     />
                                     {e.discount && (
                                         <div className="discount_badge">
@@ -124,7 +136,8 @@ const Slide = React.memo(({ title, products, category }) => {
                                 </div>
                             </div>
                         </NavLink>
-                    ))}
+                        );
+                    })}
                 </Carousel>
             ) : (
                 <div className="empty_products">{t('home.loadingProducts')}</div>

@@ -162,11 +162,11 @@ footer::before {
 }
 
 .social_link:hover {
-    background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-    color: #0d0d14;
+    background: var(--primary);
+    color: #fff;
     border-color: transparent;
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px var(--gold-glow);
+    box-shadow: 0 8px 20px var(--primary-glow);
 }
 
 @media (max-width: 1024px) {

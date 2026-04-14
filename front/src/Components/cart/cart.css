@@ -196,16 +196,16 @@
     flex-shrink: 0;
 }
 
-/* Buy Now Button */
+/* Inquire Now Button (primary CTA) */
 .cart_btn_buy {
-    background: var(--primary);
-    color: #0f172a;
+    background: linear-gradient(135deg, #1a237e, #1976d2);
+    color: #fff;
 }
 
 .cart_btn_buy:hover:not(:disabled) {
-    background: var(--primary-hover);
+    background: linear-gradient(135deg, #283593, #1e88e5);
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px var(--primary-glow);
+    box-shadow: 0 6px 18px rgba(25, 118, 210, 0.3);
 }
 
 .cart_btn_buy:active:not(:disabled) {
@@ -217,6 +217,32 @@
     color: var(--text-3);
     cursor: not-allowed;
     box-shadow: none;
+}
+
+/* Phone Call Button */
+.cart_btn_call {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border: 1.5px solid #22c55e;
+    background: rgba(34, 197, 94, 0.08);
+    color: #16a34a;
+    text-decoration: none;
+}
+
+.cart_btn_call:hover {
+    background: rgba(34, 197, 94, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(34,197,94,0.2);
 }
 
 /* Chat Button */
@@ -379,81 +405,135 @@
     opacity: 1 !important;
 }
 
-/* Price */
+/* Price Section — Reference Only */
 .price_section_cart {
     background: var(--surface-2);
-    padding: 24px 30px;
+    padding: 20px 24px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     transition: background 0.3s;
 }
 
-.mrp {
-    font-size: 0.82rem;
-    color: var(--text-3);
-    margin: 0 0 10px;
+.price_label_row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
-.mrp del {
-    color: var(--error);
-    font-weight: 500;
-    margin-left: 4px;
+.price_label_text {
+    font-size: 0.78rem;
+    color: var(--text-2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.price_row_cart {
+.price_value_row {
     display: flex;
     align-items: baseline;
     gap: 12px;
+    margin-bottom: 10px;
 }
 
 .actual_price {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 800;
     color: var(--text-1);
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
+}
+
+.mrp_strike {
+    font-size: 0.9rem;
+    color: var(--text-3);
+    text-decoration: line-through;
 }
 
 .discount_pill {
     background: var(--error);
     color: white;
-    padding: 4px 10px;
+    padding: 3px 10px;
     border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    font-size: 0.78rem;
+    font-weight: 700;
 }
 
-.deal_price {
+.price_note {
+    font-size: 0.75rem;
+    color: var(--text-2);
+    margin: 0;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    line-height: 1.5;
+}
+
+/* Location Box */
+.product_location_box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+
+.location_header {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary-hover);
+    font-weight: 700;
+    font-size: 0.85rem;
     margin-bottom: 12px;
 }
 
-.deal_label {
-    font-size: 0.82rem;
-    color: var(--text-2);
-    font-weight: 500;
+.location_header svg {
+    color: var(--primary) !important;
+    font-size: 1rem !important;
 }
 
-.price_value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #22c55e;
-    letter-spacing: -0.4px;
+.location_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 10px;
 }
 
-.savings {
+.location_item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.loc_label {
+    font-size: 0.7rem;
+    color: var(--text-3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.loc_value {
+    font-size: 0.88rem;
+    color: var(--text-1);
+    font-weight: 600;
+}
+
+/* Date chip */
+.date_chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 12px;
-    background: rgba(34, 197, 94, 0.08);
-    border-radius: 8px;
-    font-size: 0.78rem;
-    color: #22c55e;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 0.76rem;
     font-weight: 600;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: var(--surface-2);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    transition: all var(--transition-fast);
+}
+
+.date_chip svg {
+    font-size: 0.9rem !important;
+    color: var(--text-3);
 }
 
 /* Offers */
@@ -468,9 +548,9 @@
     align-items: flex-start;
     gap: 12px;
     padding: 14px 16px;
-    background: rgba(240, 165, 0, 0.06);
+    background: var(--primary-light);
     border-radius: 12px;
-    border: 1px solid var(--gold-glow);
+    border: 1px solid var(--primary-glow);
     transition: transform 0.2s;
 }
 
@@ -479,7 +559,7 @@
 }
 
 .discount_icon {
-    color: var(--gold) !important;
+    color: var(--primary) !important;
     flex-shrink: 0;
 }
 
@@ -493,7 +573,7 @@
 
 .discount_item h4 span,
 .discount_item h5 span {
-    color: var(--gold);
+    color: var(--primary-hover);
 }
 
 .discount_item p {
@@ -571,12 +651,12 @@
 }
 
 .tab-btn:hover {
-    color: var(--gold);
+    color: var(--primary);
 }
 
 .tab-btn.active {
-    color: var(--gold);
-    border-bottom-color: var(--gold);
+    color: var(--primary-hover);
+    border-bottom-color: var(--primary);
     font-weight: 700;
 }
 
@@ -603,12 +683,12 @@
     padding: 14px 18px;
     background: var(--surface-2);
     border-radius: 12px;
-    border-left: 3px solid var(--gold);
+    border-left: 3px solid var(--primary);
 }
 
 .product-tagline span {
     font-style: italic;
-    color: var(--gold-deep);
+    color: var(--primary-hover);
     font-size: 0.92rem;
 }
 
@@ -623,10 +703,10 @@
     align-items: center;
     gap: 8px;
     padding: 11px 22px;
-    background: rgba(240, 165, 0, 0.1);
-    border: 1px solid var(--gold-glow);
+    background: var(--primary-light);
+    border: 1px solid var(--primary-glow);
     border-radius: 12px;
-    color: var(--gold-deep);
+    color: var(--primary-hover);
     font-weight: 700;
     font-size: 0.88rem;
     font-family: var(--font);
@@ -636,8 +716,8 @@
 }
 
 .write-review-btn:hover {
-    background: var(--gold);
-    color: #0d0d14;
+    background: var(--primary);
+    color: #0f172a;
     transform: translateY(-1px);
 }
 
@@ -660,14 +740,14 @@
 
 .cart_icon_loading {
     font-size: 2.2rem !important;
-    color: var(--gold) !important;
+    color: var(--primary) !important;
 }
 
 .loader_spinner_product {
     width: 38px;
     height: 38px;
     border: 3px solid var(--border);
-    border-top-color: var(--gold);
+    border-top-color: var(--primary);
     border-radius: 50%;
     animation: spinBtn 0.8s linear infinite;
     margin: 0 auto 22px;

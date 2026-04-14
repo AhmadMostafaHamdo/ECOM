@@ -219,17 +219,6 @@ const Navbaar = React.memo(({ onSearch }) => {
                   />
                 </Badge>
               </NavLink>
-
-              <NavLink to="/buynow" className="nav_cart_btn" title={t('cart.title', 'My Bag')}>
-                <Badge badgeContent={account.carts?.length || 0} color="primary" className="cart_badge">
-                  <ShoppingCartIcon
-                    style={{
-                      fontSize: location.pathname === "/buynow" ? 25 : 20,
-                      color: location.pathname === "/buynow" ? "#2563eb" : "currentColor"
-                    }}
-                  />
-                </Badge>
-              </NavLink>
             </div>
           )}
 
@@ -240,12 +229,14 @@ const Navbaar = React.memo(({ onSearch }) => {
 
 
 
-          <Avatar
-            className="user_avatar"
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-          >
-            {account ? account.fname[0].toUpperCase() : ""}
-          </Avatar>
+          {account && (
+            <Avatar
+              className="user_avatar"
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+            >
+              {account.fname?.[0]?.toUpperCase() || "U"}
+            </Avatar>
+          )}
 
           <Menu
             anchorEl={anchorEl}

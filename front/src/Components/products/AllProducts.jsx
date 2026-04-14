@@ -286,11 +286,11 @@ const AllProducts = () => {
                                     max={30000}
                                     step={100}
                                     sx={{
-                                        color: 'var(--gold)',
+                                        color: 'var(--primary)',
                                         '& .MuiSlider-thumb': {
                                             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                                             '&:hover, &.Mui-focusVisible': {
-                                                boxShadow: '0px 0px 0px 8px rgba(240, 165, 0, 0.16)',
+                                                boxShadow: '0px 0px 0px 8px var(--primary-glow)',
                                             },
                                         },
                                         '& .MuiSlider-valueLabel': {
@@ -352,13 +352,22 @@ const AllProducts = () => {
                                         >
                                             <div className="card_image_wrapper">
                                                 <img 
-                                                    src={product.url && (product.url.startsWith('http') || product.url.startsWith('blob:')) ? product.url : (product.url ? `${ROOT_URL}${product.url}` : '')} 
+                                                    src={(() => {
+                                                        const p = product;
+                                                        if (Array.isArray(p.images) && p.images.length > 0) {
+                                                            const img = p.images[0];
+                                                            if (img) return img.startsWith('http') || img.startsWith('blob:') ? img : `${ROOT_URL}${img}`;
+                                                        }
+                                                        if (p.url) return p.url.startsWith('http') || p.url.startsWith('blob:') ? p.url : `${ROOT_URL}${p.url}`;
+                                                        return '';
+                                                    })()} 
                                                     alt={product?.title?.shortTitle || 'Product'} 
-                                                    loading="lazy" 
+                                                    loading="lazy"
+                                                    onError={(e) => { e.target.style.opacity = '0.3'; }}
                                                 />
                                                 <div className="card_overlay">
                                                     <div className="overlay_actions">
-                                                        <Tooltip title={t('product.addToCart')} placement="top">
+                                                        <Tooltip title={t('product.inquireNow', 'Inquire Now')} placement="top">
                                                             <button
                                                                 className="icon_action_btn"
                                                                 onClick={(e) => {
@@ -405,7 +414,7 @@ const AllProducts = () => {
                                                     <span className="product_category">{product.category}</span>
                                                     {product.locationDetail && (product.locationDetail.country || product.locationDetail.city) && (
                                                         <span className="product_location" style={{ fontSize: '11px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                            <LocalOffer style={{ fontSize: '12px', color: 'var(--gold)' }} />
+                                                            <LocalOffer style={{ fontSize: '12px', color: 'var(--primary)' }} />
                                                             {product.locationDetail.city || product.locationDetail.province || product.locationDetail.country}
                                                         </span>
                                                     )}
