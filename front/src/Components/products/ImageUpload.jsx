@@ -49,11 +49,11 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
     const handleFiles = (files) => {
         const fileArray = Array.from(files);
         const validFiles = fileArray.filter(file =>
-            file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024
+            file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024
         );
 
         if (validFiles.length === 0) {
-            alert(t('productCreator.invalidFile', 'Please select valid image files (JPEG, PNG, etc.) under 5MB'));
+            alert(t('productCreator.invalidFile', 'Please select valid image files under 10MB'));
             return;
         }
 
@@ -191,7 +191,7 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
                         <p>{t('productCreator.clickBrowse', 'or click to browse')}</p>
                         <small>
                             {t('productCreator.maxImagesHint', `Maximum ${maxImages} images`)} •
-                            {t('productCreator.maxSizeHint', 'Up to 5MB each')}
+                            {t('productCreator.maxSizeHint', 'Up to 10MB each')}
                         </small>
                     </div>
                 )}
