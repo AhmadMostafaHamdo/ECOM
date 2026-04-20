@@ -92,7 +92,7 @@ const Signup = () => {
       setShowLoginPrompt(false);
       setUdata({ fname: "", email: "", mobile: "", password: "", cpassword: "", country: "" });
       toast.success(t("auth.signupSuccess"), { position: "top-center" });
-      const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
+      const nextRoute = "/";
       setTimeout(() => navigate(nextRoute), 300);
     } catch (error) {
       if (error.name === "CanceledError" || error.name === "AbortError") return;

@@ -78,7 +78,7 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
 
   const logoutuser = useCallback(async () => {
     try {
-      const res = await axiosInstance.get("/logout");
+      const res = await axiosInstance.post("/logout");
 
       if (res.status === 200) {
         setAccount(false);

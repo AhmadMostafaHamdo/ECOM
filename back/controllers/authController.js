@@ -72,7 +72,7 @@ exports.register = asyncHandler(async (req, res) => {
         password,
         cpassword,
         country: country ? country.trim() : undefined,
-        role: totalUsers === 0 ? "admin" : "user",
+        role: "user",
     });
 
     const storedata = await finaluser.save();

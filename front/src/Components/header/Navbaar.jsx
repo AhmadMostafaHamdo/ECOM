@@ -83,7 +83,7 @@ const Navbaar = React.memo(({ onSearch }) => {
 
   const logoutuser = useCallback(async () => {
     try {
-      await axiosInstance.get("/logout");
+      await axiosInstance.post("/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
