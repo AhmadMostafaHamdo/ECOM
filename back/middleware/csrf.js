@@ -23,8 +23,11 @@ module.exports = (req, res, next) => {
     if (exemptPaths.some((path) => req.path.startsWith(path))) {
       return next();
     }
-    // Skip CSRF validation for file uploads (as multipart/form-data doesn't inherently include headers in simple forms without extra logic)
-    // Or if the frontend is fully axios, it sends headers for everything.
+    // Skip CSRF validation for file uploads (multipart/form-data)
+    if (req.headers["content-type"]?.includes("multipart/form-data")) {
+      return next();
+    }
+
     const receivedToken = req.headers["x-csrf-token"];
 
     if (!receivedToken || receivedToken !== req.csrfToken) {
