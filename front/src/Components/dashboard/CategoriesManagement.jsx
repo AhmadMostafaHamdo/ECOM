@@ -104,7 +104,9 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
       });
 
       if (response.status === 200 || response.status === 201) {
-        toast.success(t("admin.categoryAddedSuccess") || "Category added successfully!");
+        toast.success(
+          t("admin.categoryAddedSuccess") || "Category added successfully!",
+        );
         setCategoryName("");
         setCategoryImage("");
         setCategoryFile(null);
@@ -140,10 +142,12 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
       if (response.status === 200) {
-        toast.success(t("admin.categoryUpdatedSuccess") || "Category updated successfully!");
+        toast.success(
+          t("admin.categoryUpdatedSuccess") || "Category updated successfully!",
+        );
         setShowForm(false);
         setEditingId("");
         setEditName("");
@@ -154,7 +158,9 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("admin.categoryUpdateError") || "Failed to update category");
+      toast.error(
+        t("admin.categoryUpdateError") || "Failed to update category",
+      );
     } finally {
       setSaving(false);
     }
@@ -173,21 +179,28 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
         `/admin/categories/${categoryToDelete._id}`,
       );
       if (response.status === 200) {
-        toast.success(t("admin.categoryDeletedSuccess") || "Category deleted successfully!");
+        toast.success(
+          t("admin.categoryDeletedSuccess") || "Category deleted successfully!",
+        );
         loadCategories();
         onCategoriesChanged();
         setIsConfirmOpen(false);
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("admin.categoryDeleteError") || "Failed to delete category");
+      toast.error(
+        t("admin.categoryDeleteError") || "Failed to delete category",
+      );
     } finally {
       setIsDeleting(false);
       setCategoryToDelete(null);
     }
   };
 
-  const totalProducts = categories.reduce((sum, cat) => sum + (cat.productCount || 0), 0);
+  const totalProducts = categories.reduce(
+    (sum, cat) => sum + (cat.productCount || 0),
+    0,
+  );
 
   return (
     <div className="admin_page categories-container">
@@ -203,7 +216,10 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb'}}>
+          <div
+            className="stat-icon"
+            style={{ background: "rgba(255, 149, 0, 0.1)", color: "#FF9500" }}
+          >
             <Package size={24} />
           </div>
           <div className="stat-info">
@@ -212,7 +228,10 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{background: 'rgba(16, 185, 129, 0.1)', color: '#10b981'}}>
+          <div
+            className="stat-icon"
+            style={{ background: "rgba(16, 185, 129, 0.1)", color: "#10b981" }}
+          >
             <Activity size={24} />
           </div>
           <div className="stat-info">
@@ -224,16 +243,29 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
 
       <div className="categories-main-grid">
         <section className="dashboard-section">
-          <div className="dashboard-header" style={{border: 'none', paddingBottom: 0}}>
+          <div
+            className="dashboard-header"
+            style={{ border: "none", paddingBottom: 0 }}
+          >
             <div className="dashboard-title">
-              <span style={{fontSize: '20px', fontWeight: '900'}}>{t("admin.segments")}</span>
-              <span className="user-id" style={{marginLeft: '12px', background: 'var(--brand-light)', color: 'var(--brand)', border: 'none'}}>
+              <span style={{ fontSize: "20px", fontWeight: "900" }}>
+                {t("admin.segments")}
+              </span>
+              <span
+                className="user-id"
+                style={{
+                  marginLeft: "12px",
+                  background: "var(--brand-light)",
+                  color: "var(--brand)",
+                  border: "none",
+                }}
+              >
                 {pagination.totalItems} {t("admin.total")}
               </span>
             </div>
             <button
               className="submit-btn-premium"
-              style={{ width: 'auto', padding: '10px 20px', fontSize: '13px' }}
+              style={{ width: "auto", padding: "10px 20px", fontSize: "13px" }}
               onClick={() => {
                 setShowForm(true);
                 setEditingId("");
@@ -332,7 +364,9 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
           <DialogContent className="admin_dialog_content admin_dialog_large">
             <DialogHeader>
               <DialogTitle>
-                {editingId ? t("admin.editCategory") : t("admin.createCategory")}
+                {editingId
+                  ? t("admin.editCategory")
+                  : t("admin.createCategory")}
               </DialogTitle>
             </DialogHeader>
             <CategoryForm
@@ -363,7 +397,10 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
       <ConfirmDialog
         open={isConfirmOpen}
         title={t("admin.deleteCategoryTitle") || "Delete Category"}
-        message={t("admin.deleteCategoryConfirm") || "This will permanently delete the category. You cannot undo this action."}
+        message={
+          t("admin.deleteCategoryConfirm") ||
+          "This will permanently delete the category. You cannot undo this action."
+        }
         confirmText="Delete"
         cancelText="Cancel"
         onConfirm={confirmDelete}
@@ -381,4 +418,3 @@ const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
 };
 
 export default CategoriesManagement;
-

@@ -1,6 +1,3 @@
-.admin_form label,input {
-    margin-bottom: .3rem;
-}
-.admin_form input {
-    margin-bottom: .5rem;
+.user-form {
+  width: 100%;
 }

@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap");
 
 :root {
   --color-bg: var(--bg);
@@ -68,33 +68,40 @@
 }
 
 .cart-wrapper::before {
-  content: '';
+  content: "";
   position: fixed;
   top: -30%;
   right: -15%;
   width: 60%;
   height: 60%;
-  background: radial-gradient(circle, var(--color-accent-light) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--color-accent-light) 0%,
+    transparent 70%
+  );
   opacity: 0.4;
   animation: float-slow 25s ease-in-out infinite;
   pointer-events: none;
 }
 
 .cart-wrapper::after {
-  content: '';
+  content: "";
   position: fixed;
   bottom: -20%;
   left: -10%;
   width: 50%;
   height: 50%;
-  background: radial-gradient(circle, var(--color-success-light) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    var(--color-success-light) 0%,
+    transparent 70%
+  );
   opacity: 0.3;
   animation: float-slow 30s ease-in-out infinite reverse;
   pointer-events: none;
 }
 
 @keyframes float-slow {
-
   0%,
   100% {
     transform: translate(0, 0) rotate(0deg) scale(1);
@@ -139,13 +146,17 @@
 }
 
 .cart-main::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
   pointer-events: none;
   z-index: -1;
 }
@@ -155,30 +166,48 @@
    ==================================== */
 .cart-header {
   padding: 56px 56px 40px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 25%, #7c3aed 50%, #5b21b6 75%, #6366f1 100%);
+  background: linear-gradient(
+    135deg,
+    #ff9500 0%,
+    #e68600 25%,
+    #cc7700 50%,
+    #ffbf5c 75%,
+    #ffd08a 100%
+  );
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
 }
 
 .cart-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(circle at 25% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 45% 75%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(
+      circle at 25% 40%,
+      rgba(255, 255, 255, 0.12) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 75% 25%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 45% 75%,
+      rgba(255, 255, 255, 0.06) 0%,
+      transparent 50%
+    ),
     linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
   pointer-events: none;
   animation: shimmer-subtle 4s ease-in-out infinite;
 }
 
 @keyframes shimmer-subtle {
-
   0%,
   100% {
     opacity: 1;
@@ -218,7 +247,11 @@
   right: 48px;
   width: 180px;
   height: 180px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   z-index: 0;
 }
@@ -244,7 +277,11 @@
 }
 
 .cart-item:hover {
-  background: linear-gradient(135deg, var(--color-surface-elevated) 0%, var(--color-surface) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-surface-elevated) 0%,
+    var(--color-surface) 100%
+  );
   margin: 0 -16px;
   padding: 40px 16px;
   border-radius: var(--radius-xl);
@@ -281,13 +318,18 @@
 }
 
 .item-image-wrapper::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
   transition: left var(--transition-slow);
 }
 
@@ -371,13 +413,18 @@
 }
 
 .badge::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
   transition: left var(--transition-slow);
 }
 
@@ -410,17 +457,17 @@
 }
 
 .badge-delivery {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  color: #1e40af;
-  border: 1px solid #93c5fd;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  background: linear-gradient(135deg, #fff8e7 0%, #ffefd6 100%);
+  color: #cc7700;
+  border: 1px solid #ffe0b3;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.15);
 }
 
 .badge-delivery:hover {
-  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+  background: linear-gradient(135deg, #ffefd6 0%, #ffe0b3 100%);
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-  border-color: #60a5fa;
+  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+  border-color: #ffbf5c;
 }
 
 .item-meta {
@@ -431,7 +478,9 @@
   height: 20px;
   width: auto;
   opacity: 0.9;
-  transition: opacity var(--transition-base), transform var(--transition-base);
+  transition:
+    opacity var(--transition-base),
+    transform var(--transition-base);
 }
 
 .prime-badge:hover {
@@ -465,13 +514,18 @@
 }
 
 .item-price-tag::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
   transition: left var(--transition-slow);
 }
 
@@ -558,7 +612,11 @@
   align-items: center;
   gap: 8px;
   padding: 16px 32px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-hover) 100%
+  );
   color: white;
   text-decoration: none;
   border-radius: var(--radius-md);
@@ -737,19 +795,24 @@ a:focus {
 }
 
 .right_buy::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-success), var(--color-warning), var(--color-accent));
+  background: linear-gradient(
+    90deg,
+    var(--color-accent),
+    var(--color-success),
+    var(--color-warning),
+    var(--color-accent)
+  );
   background-size: 300% 100%;
   animation: gradient-flow 4s ease-in-out infinite;
 }
 
 @keyframes gradient-flow {
-
   0%,
   100% {
     background-position: 0% 50%;
@@ -771,7 +834,9 @@ a:focus {
   margin-bottom: 32px;
   border-radius: var(--radius-md);
   opacity: 0.9;
-  transition: opacity var(--transition-base), transform var(--transition-base);
+  transition:
+    opacity var(--transition-base),
+    transform var(--transition-base);
 }
 
 .right_buy img:hover {
@@ -785,7 +850,7 @@ a:focus {
   gap: 24px;
 }
 
-.cost_right>p {
+.cost_right > p {
   font-size: 14px;
   color: var(--color-text-secondary);
   line-height: 1.6;
@@ -798,8 +863,8 @@ a:focus {
   overflow: hidden;
 }
 
-.cost_right>p::before {
-  content: '✓';
+.cost_right > p::before {
+  content: "✓";
   position: absolute;
   top: 16px;
   left: 16px;
@@ -815,7 +880,7 @@ a:focus {
   font-weight: bold;
 }
 
-.cost_right>p span {
+.cost_right > p span {
   display: block;
   margin-top: 4px;
   font-weight: 600;
@@ -857,7 +922,12 @@ a:focus {
 .rightbuy_btn {
   width: 100%;
   padding: 20px 28px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 50%, #4338ca 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-hover) 50%,
+    #cc7700 100%
+  );
   color: white;
   border: none;
   border-radius: var(--radius-lg);
@@ -876,13 +946,18 @@ a:focus {
 }
 
 .rightbuy_btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
   transition: left var(--transition-slow);
 }
 
@@ -891,7 +966,12 @@ a:focus {
 }
 
 .rightbuy_btn:hover {
-  background: linear-gradient(135deg, var(--color-accent-hover) 0%, #1d4ed8 50%, #1e40af 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-hover) 0%,
+    #e68600 50%,
+    #cc7700 100%
+  );
   transform: translateY(-4px) scale(1.02);
   box-shadow: var(--shadow-2xl);
   border-color: rgba(255, 255, 255, 0.3);
@@ -1000,7 +1080,7 @@ a:focus {
     margin-bottom: 24px;
   }
 
-  .cost_right>p {
+  .cost_right > p {
     font-size: 13px;
     padding-left: 48px;
   }

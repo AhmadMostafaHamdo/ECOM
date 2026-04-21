@@ -51,16 +51,46 @@ const ReportsManagement = lazy(() => import("./ReportsManagement"));
 
 const getNavItems = (t) => [
   { key: "home", label: t("admin.dashboard"), icon: DashboardIcon, path: "" },
-  { key: "users", label: t("admin.manageUsers"), icon: GroupIcon, path: "/users" },
-  { key: "products", label: t("admin.manageProducts"), icon: Inventory2Icon, path: "/products" },
-  { key: "categories", label: t("admin.manageCategories"), icon: CategoryIcon, path: "/categories" },
-  { key: "messages", label: t("admin.messages.title"), icon: MailIcon, path: "/messages" },
+  {
+    key: "users",
+    label: t("admin.manageUsers"),
+    icon: GroupIcon,
+    path: "/users",
+  },
+  {
+    key: "products",
+    label: t("admin.manageProducts"),
+    icon: Inventory2Icon,
+    path: "/products",
+  },
+  {
+    key: "categories",
+    label: t("admin.manageCategories"),
+    icon: CategoryIcon,
+    path: "/categories",
+  },
+  {
+    key: "messages",
+    label: t("admin.messages.title"),
+    icon: MailIcon,
+    path: "/messages",
+  },
   { key: "chat", label: t("admin.liveChat"), icon: ChatIcon, path: "/chat" },
-  { key: "reports", label: t("report.title"), icon: FlagIcon, path: "/reports" },
-  { key: "stats", label: t("admin.statistics"), icon: QueryStatsIcon, path: "/statistics" },
+  {
+    key: "reports",
+    label: t("report.title"),
+    icon: FlagIcon,
+    path: "/reports",
+  },
+  {
+    key: "stats",
+    label: t("admin.statistics"),
+    icon: QueryStatsIcon,
+    path: "/statistics",
+  },
 ];
 
-const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
+const AdminDashboard = ({ onCategoriesChanged = () => {} }) => {
   const url = "/dashboard";
   const navigate = useNavigate();
 
@@ -148,9 +178,9 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
 
                     height: "48px",
 
-                    border: "4px solid var(--color-primary-light)",
+                    border: "4px solid #f3f4f6",
 
-                    borderTopColor: "var(--color-primary)",
+                    borderTopColor: "#FF9500",
 
                     borderRadius: "50%",
 
@@ -181,9 +211,14 @@ const AdminDashboard = ({ onCategoriesChanged = () => { } }) => {
 
               <Route path="products" element={<ProductsManagement />} />
 
-              <Route path="categories" element={
-                <CategoriesManagement onCategoriesChanged={onCategoriesChanged} />
-              } />
+              <Route
+                path="categories"
+                element={
+                  <CategoriesManagement
+                    onCategoriesChanged={onCategoriesChanged}
+                  />
+                }
+              />
 
               <Route path="messages" element={<Messages />} />
 

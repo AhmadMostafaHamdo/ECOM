@@ -218,7 +218,7 @@ const Messages = () => {
   };
 
   return (
-    <div className="messages-container" style={{ direction: i18n.dir() }}>
+    <div className="messages-container">
       <div className="messages-header">
         <h1 className="messages-title">{t("admin.messages.title")}</h1>
         <p className="messages-subtitle">
@@ -227,7 +227,7 @@ const Messages = () => {
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px' }}>
+        <div className="alert alert-error">
           <AlertCircle size={20} />
           {error}
         </div>
@@ -265,59 +265,47 @@ const Messages = () => {
           </DialogHeader>
           
           {selectedMessage && (
-            <div className="message-detail-content" style={{ padding: '20px 0' }}>
-               <div className="sender-info" style={{ marginBottom: '24px', background: '#f8fafc', padding: '16px', borderRadius: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div className="info-row">
-                  <span className="info-label" style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>{t("contact.nameLabel")}</span>
-                  <div className="info-value" style={{ fontWeight: '600', color: '#1e293b' }}>{selectedMessage.name}</div>
+            <div className="admin-form">
+               <div className="admin-modal-grid">
+                <div className="admin-modal-section">
+                  <span className="admin-modal-label">{t("contact.nameLabel")}</span>
+                  <div className="admin-modal-value">{selectedMessage.name}</div>
                 </div>
-                <div className="info-row">
-                  <span className="info-label" style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>{t("contact.emailLabel")}</span>
-                  <div className="info-value" style={{ fontWeight: '600', color: '#1e293b' }}>{selectedMessage.email}</div>
+                <div className="admin-modal-section">
+                  <span className="admin-modal-label">{t("contact.emailLabel")}</span>
+                  <div className="admin-modal-value">{selectedMessage.email}</div>
                 </div>
-                <div className="info-row">
-                  <span className="info-label" style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>{t("common.date")}</span>
-                  <div className="info-value" style={{ fontWeight: '600', color: '#1e293b' }}>{formatDate(selectedMessage.createdAt)}</div>
+                <div className="admin-modal-section">
+                  <span className="admin-modal-label">{t("common.date")}</span>
+                  <div className="admin-modal-value">{formatDate(selectedMessage.createdAt)}</div>
                 </div>
-                <div className="info-row">
-                  <span className="info-label" style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>{t("common.status")}</span>
-                  <div style={{ marginTop: '4px' }}>
-                    <select
-                      value={selectedMessage.status}
-                      onChange={(e) => handleStatusChange(selectedMessage._id, e.target.value)}
-                      disabled={isUpdating}
-                      style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '600' }}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="read">Read</option>
-                      <option value="replied">Replied</option>
-                    </select>
-                  </div>
+                <div className="admin-modal-section">
+                  <span className="admin-modal-label">{t("common.status")}</span>
+                  <select
+                    value={selectedMessage.status}
+                    onChange={(e) => handleStatusChange(selectedMessage._id, e.target.value)}
+                    disabled={isUpdating}
+                    className="admin_select"
+                  >
+                    <option value="pending">{t("admin.messages.status.pending")}</option>
+                    <option value="read">{t("admin.messages.status.read")}</option>
+                    <option value="replied">{t("admin.messages.status.replied")}</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="content-section" style={{ marginBottom: '24px' }}>
-                <h4 style={{ fontSize: '13px', fontWeight: '800', color: '#475569', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="admin-modal-section">
+                <h4 className="admin-modal-heading">
                   <Info size={16} /> {t("contact.subjectLabel")}
                 </h4>
-                <p style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: 0 }}>{selectedMessage.subject}</p>
+                <p className="admin-modal-value">{selectedMessage.subject}</p>
               </div>
 
-              <div className="content-section">
-                <h4 style={{ fontSize: '13px', fontWeight: '800', color: '#475569', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="admin-modal-section">
+                <h4 className="admin-modal-heading">
                   <Mail size={16} /> {t("contact.messageLabel")}
                 </h4>
-                <div style={{ 
-                  background: '#fff', 
-                  padding: '16px', 
-                  borderRadius: '12px', 
-                  border: '1px solid #e2e8f0', 
-                  lineHeight: '1.6',
-                  color: '#334155',
-                  whiteSpace: 'pre-wrap',
-                  maxHeight: '300px',
-                  overflowY: 'auto'
-                }}>
+                <div className="admin-modal-message">
                   {selectedMessage.message}
                 </div>
               </div>

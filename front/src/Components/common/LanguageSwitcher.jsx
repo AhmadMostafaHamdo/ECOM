@@ -1,40 +1,36 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import './LanguageSwitcher.css';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import "./LanguageSwitcher.css";
 
-const LanguageSwitcher = () => {
-    const { i18n } = useTranslation();
+const LanguageSwitcher = ({ variant = "glass" }) => {
+  const { t, i18n } = useTranslation();
+  const activeLanguage = i18n.resolvedLanguage || i18n.language || "en";
 
-    const changeLanguage = (lng) => {
-        i18n.changeLanguage(lng);
-        // Save language preference to localStorage
-        localStorage.setItem('i18nextLng', lng);
+  const changeLanguage = (language) => {
+    i18n.changeLanguage(language);
+    localStorage.setItem("i18nextLng", language);
+  };
 
-        // Update document direction for RTL/LTR
-        document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
-        document.documentElement.lang = lng;
-    };
-
-    return (
-        <div className="language_switcher">
-            <button
-                className={`lang_btn ${i18n.language === 'en' ? 'active' : ''}`}
-                onClick={() => changeLanguage('en')}
-                title="English"
-            >
-                <span className="flag">🇺🇸</span>
-                <span className="lang_text">EN</span>
-            </button>
-            <button
-                className={`lang_btn ${i18n.language === 'ar' ? 'active' : ''}`}
-                onClick={() => changeLanguage('ar')}
-                title="العربية"
-            >
-                <span className="flag">🇸🇦</span>
-                <span className="lang_text">AR</span>
-            </button>
-        </div>
-    );
+  return (
+    <div className={`language_switcher language_switcher--${variant}`}>
+      <button
+        type="button"
+        className={`lang_btn ${activeLanguage === "en" ? "active" : ""}`}
+        onClick={() => changeLanguage("en")}
+        title={t("language.english", "English")}
+      >
+        <span className="lang_text">EN</span>
+      </button>
+      <button
+        type="button"
+        className={`lang_btn ${activeLanguage === "ar" ? "active" : ""}`}
+        onClick={() => changeLanguage("ar")}
+        title={t("language.arabic", "Arabic")}
+      >
+        <span className="lang_text">AR</span>
+      </button>
+    </div>
+  );
 };
 
 export default LanguageSwitcher;

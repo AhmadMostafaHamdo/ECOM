@@ -1,0 +1,70 @@
+import {
+  BarChart3,
+  Boxes,
+  Flag,
+  LayoutDashboard,
+  MessageCircleMore,
+  MessagesSquare,
+  PackageSearch,
+  Users,
+} from "lucide-react";
+
+export const getAdminNavigation = (t) => [
+  {
+    key: "overview",
+    title: t("admin.dashboard"),
+    description: t("admin.welcomeMessage"),
+    icon: LayoutDashboard,
+    to: "/dashboard",
+    end: true,
+  },
+  {
+    key: "users",
+    title: t("admin.manageUsers"),
+    description: t("admin.manageUserAccounts"),
+    icon: Users,
+    to: "/dashboard/users",
+  },
+  {
+    key: "products",
+    title: t("admin.manageProducts"),
+    description: t("admin.productsTotal"),
+    icon: PackageSearch,
+    to: "/dashboard/products",
+  },
+  {
+    key: "categories",
+    title: t("admin.manageCategories"),
+    description: t("admin.totalCategories"),
+    icon: Boxes,
+    to: "/dashboard/categories",
+  },
+  {
+    key: "messages",
+    title: t("admin.messages.title"),
+    description: t("admin.messages.subtitle"),
+    icon: MessagesSquare,
+    to: "/dashboard/messages",
+  },
+  {
+    key: "chat",
+    title: t("admin.liveChat"),
+    description: t("adminChat.supportSub"),
+    icon: MessageCircleMore,
+    to: "/dashboard/chat",
+  },
+  {
+    key: "reports",
+    title: t("report.title"),
+    description: t("admin.reports.subtitle"),
+    icon: Flag,
+    to: "/dashboard/reports",
+  },
+  {
+    key: "statistics",
+    title: t("admin.statistics"),
+    description: t("admin.analytics"),
+    icon: BarChart3,
+    to: "/dashboard/statistics",
+  },
+];

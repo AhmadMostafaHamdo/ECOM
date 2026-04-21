@@ -97,8 +97,8 @@
   width: 50px !important;
   height: 50px !important;
   font-weight: 700 !important;
-  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background: linear-gradient(135deg, #ff9500, #ffbf5c) !important;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
 }
 
 .drawer_profile h3 {
@@ -134,7 +134,7 @@
 }
 
 .drawer_nav a svg {
-  color: #6366f1; /* Icon color accent */
+  color: #ff9500; /* Icon color accent */
   font-size: 20px;
 }
 
@@ -196,7 +196,7 @@
 }
 
 .signin_btn {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: linear-gradient(135deg, #ff9500, #e68600);
   color: white !important;
   justify-content: center;
   margin-top: auto;

@@ -376,7 +376,11 @@
     "craftingExperience": "جاري بناء تجربتك...",
     "selectRegion": "اختر المنطقة / العملة",
     "selectDeliveryRegion": "اختر منطقة التوصيل",
-    "currency": "العملة"
+    "currency": "العملة",
+    "date": "التاريخ",
+    "refresh": "تحديث",
+    "view": "عرض",
+    "user": "مستخدم"
   },
   "errors": {
     "pageNotFound": "الصفحة غير موجودة",
@@ -716,6 +720,14 @@
     "eg": "جمهورية مصر العربية",
     "us": "الولايات المتحدة",
     "gb": "المملكة المتحدة"
+  },
+  "language": {
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "theme": {
+    "light": "الوضع الفاتح",
+    "dark": "الوضع الداكن"
   },
   "adminChat": {
     "customerSupport": "دعم العملاء",

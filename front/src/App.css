@@ -1,26 +1,7 @@
-/* App.css - core layout only; theming uses index.css variables */
 .app_shell {
-    min-height: 100vh;
-    background: var(--bg);
-    transition: background 0.3s ease;
+  min-height: 100vh;
 }
 
 .app_main {
-    padding-top: var(--header-h);
-    animation: pageFade 0.45s ease-out;
-}
-
-.circle {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    background: var(--bg);
-    color: var(--text-2);
-    font-weight: 700;
-}
-
-.circle h2 {
-    font-size: 1.1rem;
+  min-height: calc(100vh - var(--header-h));
 }

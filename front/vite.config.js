@@ -17,9 +17,15 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('@mui')) return 'mui';
-            // All other core libs (React, Router, Redux, Motion) should stay together 
-            // in the vendor chunk to avoid circular dependencies and undefined references.
+            if (id.includes('@mui') || id.includes('@emotion')) return 'mui';
+            if (id.includes('react-router')) return 'router';
+            if (id.includes('@reduxjs') || id.includes('react-redux') || id.includes('/redux') || id.includes('redux-thunk')) return 'state';
+            if (id.includes('i18next')) return 'i18n';
+            if (id.includes('framer-motion')) return 'motion';
+            if (id.includes('recharts')) return 'charts';
+            if (id.includes('react-international-phone') || id.includes('libphonenumber-js')) return 'phone';
+            if (id.includes('react-toastify') || id.includes('lucide-react')) return 'ui';
+            if (id.includes('socket.io-client')) return 'realtime';
             return 'vendor';
           }
         }

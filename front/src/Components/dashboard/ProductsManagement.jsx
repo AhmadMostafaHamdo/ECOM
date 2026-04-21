@@ -67,7 +67,9 @@ const ProductsManagement = () => {
           queryParams.set("category", selectedCategory);
         }
 
-        const response = await axiosInstance.get(`/admin/products?${queryParams.toString()}`);
+        const response = await axiosInstance.get(
+          `/admin/products?${queryParams.toString()}`,
+        );
 
         if (response.status === 200) {
           const payload = response.data;
@@ -104,7 +106,9 @@ const ProductsManagement = () => {
         const payload = response.data;
         const categoriesArray = payload.data || payload;
         const list = Array.isArray(categoriesArray)
-          ? categoriesArray.map((item) => (typeof item === 'string' ? item : item.name))
+          ? categoriesArray.map((item) =>
+              typeof item === "string" ? item : item.name,
+            )
           : [];
         setCategories(list);
       }
@@ -121,13 +125,25 @@ const ProductsManagement = () => {
     loadProducts(1);
   }, [loadProducts]);
 
-  const handlePageChange = useCallback((newPage) => {
-    loadProducts(newPage, searchTerm, pagination.limit);
-  }, [loadProducts, searchTerm, pagination.limit]);
+  const handlePageChange = useCallback(
+    (newPage) => {
+      loadProducts(newPage, searchTerm, pagination.limit);
+    },
+    [loadProducts, searchTerm, pagination.limit],
+  );
 
-  const handlePageSizeChange = useCallback((newSize) => {
-    loadProducts(1, searchTerm, newSize);
-  }, [loadProducts, searchTerm]);
+  const handlePageSizeChange = useCallback(
+    (newSize) => {
+      loadProducts(1, searchTerm, newSize);
+    },
+    [loadProducts, searchTerm],
+  );
+
+  const handleFilterChange = useCallback((key, value) => {
+    if (key === "category") {
+      setSelectedCategory(value || CATEGORY_ALL);
+    }
+  }, []);
 
   const handleEdit = useCallback((product) => {
     setEditingId(product._id);
@@ -173,11 +189,21 @@ const ProductsManagement = () => {
         cost: Number(form.cost),
       };
 
-      const endpoint = isEditing ? `/admin/products/${editingId}` : "/admin/products";
-      const response = await (isEditing ? axiosInstance.put(endpoint, payload) : axiosInstance.post(endpoint, payload));
+      const endpoint = isEditing
+        ? `/admin/products/${editingId}`
+        : "/admin/products";
+      const response = await (isEditing
+        ? axiosInstance.put(endpoint, payload)
+        : axiosInstance.post(endpoint, payload));
 
       if (response.status === 200 || response.status === 201) {
-        toast.success(isEditing ? t("admin.productUpdatedSuccess") || "Product updated successfully!" : t("admin.productCreatedSuccess") || "Product created successfully!");
+        toast.success(
+          isEditing
+            ? t("admin.productUpdatedSuccess") ||
+                "Product updated successfully!"
+            : t("admin.productCreatedSuccess") ||
+                "Product created successfully!",
+        );
         resetForm();
         loadProducts(pagination.currentPage);
       }
@@ -198,9 +224,13 @@ const ProductsManagement = () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const response = await axiosInstance.delete(`/admin/products/${deleteTarget._id}`);
+      const response = await axiosInstance.delete(
+        `/admin/products/${deleteTarget._id}`,
+      );
       if (response.status === 200) {
-        toast.success(t("admin.productDeletedSuccess") || "Product deleted successfully!");
+        toast.success(
+          t("admin.productDeletedSuccess") || "Product deleted successfully!",
+        );
         const nextPage = Math.max(1, pagination.currentPage);
         await loadProducts(nextPage);
       }
@@ -214,84 +244,99 @@ const ProductsManagement = () => {
     }
   }, [deleteTarget, loadProducts, pagination.currentPage]);
 
-  const tableFilters = React.useMemo(() => [
-    {
-      key: "category",
-      label: t("navigation.categories"),
-      options: [
-        { value: CATEGORY_ALL, label: t("home.showingAll") },
-        ...categories.map((cat) => ({ value: cat, label: cat })),
-      ],
-    },
-  ], [categories, t]);
+  const tableFilters = React.useMemo(
+    () => [
+      {
+        key: "category",
+        label: t("navigation.categories"),
+        options: [
+          { value: CATEGORY_ALL, label: t("home.showingAll") },
+          ...categories.map((cat) => ({ value: cat, label: cat })),
+        ],
+      },
+    ],
+    [categories, t],
+  );
 
-  const tableColumns = React.useMemo(() => [
-    {
-      key: "title",
-      title: t("productCreator.productName"),
-      type: "avatar",
-      getAvatarText: (product) =>
-        product?.title?.shortTitle?.[0]?.toUpperCase() || "?",
-      getName: (product) => product?.title?.shortTitle,
-      getSubtitle: (product) =>
-        `ID: ${product._id?.substring(product._id.length - 8)}`,
-      sortable: true,
-    },
-    {
-      key: "category",
-      title: t("navigation.categories"),
-      type: "role",
-      sortable: true,
-    },
-    {
-      key: "price",
-      title: t("product.price"),
-      type: "custom",
-      render: (product) => (
-        <div>
-          <div className="product-price">
-            {product?.price?.currency || "$"} {product?.price?.cost}
-          </div>
-          <div className="product-category line-through" style={{ fontSize: '12px' }}>
-            {product?.price?.currency || "$"} {product?.price?.mrp}
-          </div>
-          {product?.locationDetail?.province && (
-            <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-              {product.locationDetail.province}, {product.locationDetail.country}
+  const tableColumns = React.useMemo(
+    () => [
+      {
+        key: "title",
+        title: t("productCreator.productName"),
+        type: "avatar",
+        getAvatarText: (product) =>
+          product?.title?.shortTitle?.[0]?.toUpperCase() || "?",
+        getName: (product) => product?.title?.shortTitle,
+        getSubtitle: (product) =>
+          `ID: ${product._id?.substring(product._id.length - 8)}`,
+        sortable: true,
+      },
+      {
+        key: "category",
+        title: t("navigation.categories"),
+        type: "role",
+        sortable: true,
+      },
+      {
+        key: "price",
+        title: t("product.price"),
+        type: "custom",
+        render: (product) => (
+          <div>
+            <div className="product-price">
+              {product?.price?.currency || "$"} {product?.price?.cost}
             </div>
-          )}
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      key: "status",
-      title: t("common.status"),
-      type: "status",
-      getStatusClass: () => "active",
-      sortable: true,
-    },
-    {
-      key: "actions",
-      title: t("common.actions") || t("common.results"),
-      type: "actions",
-    },
-  ], [t]);
+            <div
+              className="product-category line-through"
+              style={{ fontSize: "12px" }}
+            >
+              {product?.price?.currency || "$"} {product?.price?.mrp}
+            </div>
+            {product?.locationDetail?.province && (
+              <div
+                style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}
+              >
+                {product.locationDetail.province},{" "}
+                {product.locationDetail.country}
+              </div>
+            )}
+          </div>
+        ),
+        sortable: true,
+      },
+      {
+        key: "status",
+        title: t("common.status"),
+        type: "status",
+        getStatusClass: () => "active",
+        sortable: true,
+      },
+      {
+        key: "actions",
+        title: t("common.actions") || t("common.results"),
+        type: "actions",
+      },
+    ],
+    [t],
+  );
 
-  const tableActions = React.useMemo(() => [
-    {
-      icon: Pencil,
-      label: t("common.edit"),
-      onClick: handleEdit,
-      variant: "edit",
-    },
-    {
-      icon: Trash2,
-      label: t("common.delete"),
-      onClick: requestDelete,
-      variant: "delete",
-    },
-  ], [t, handleEdit, requestDelete]);
+  const tableActions = React.useMemo(
+    () => [
+      {
+        icon: Pencil,
+        label: t("common.edit"),
+        onClick: handleEdit,
+        variant: "edit",
+      },
+      {
+        icon: Trash2,
+        label: t("common.delete"),
+        onClick: requestDelete,
+        variant: "delete",
+      },
+    ],
+    [t, handleEdit, requestDelete],
+  );
 
   const totalProducts = pagination.totalItems;
   const categoriesCount = categories.length;
@@ -299,9 +344,12 @@ const ProductsManagement = () => {
   return (
     <div className="admin_page categories-container">
       {/* Stats Summary */}
-      <div className="categories-stats" style={{ marginBottom: '32px' }}>
+      <div className="categories-stats" style={{ marginBottom: "32px" }}>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb' }}>
+          <div
+            className="stat-icon"
+            style={{ background: "rgba(255, 149, 0, 0.1)", color: "#FF9500" }}
+          >
             <Package size={24} />
           </div>
           <div className="stat-info">
@@ -319,12 +367,15 @@ const ProductsManagement = () => {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+          <div
+            className="stat-icon"
+            style={{ background: "rgba(16, 185, 129, 0.1)", color: "#10b981" }}
+          >
             <Activity size={24} />
           </div>
           <div className="stat-info">
-            <div className="stat-value">{t('admin.live')}</div>
-            <div className="stat-label">{t('admin.inventoryStatus')}</div>
+            <div className="stat-value">{t("admin.live")}</div>
+            <div className="stat-label">{t("admin.inventoryStatus")}</div>
           </div>
         </div>
       </div>
@@ -345,7 +396,7 @@ const ProductsManagement = () => {
               fontWeight: "900",
               color: "#1e293b",
               margin: 0,
-              letterSpacing: '-0.02em'
+              letterSpacing: "-0.02em",
             }}
           >
             {t("admin.manageProducts")}
@@ -354,12 +405,15 @@ const ProductsManagement = () => {
             {t("admin.productsTotal")}: {totalProducts}
           </p>
         </div>
-        <button className="submit-btn-premium" style={{ width: 'auto', padding: '10px 24px' }} onClick={() => setShowForm(true)}>
+        <button
+          className="submit-btn-premium"
+          style={{ width: "auto", padding: "10px 24px" }}
+          onClick={() => setShowForm(true)}
+        >
           <Plus size={18} />
           {t("admin.createProduct")}
         </button>
       </header>
-
 
       <div className="admin_page_body">
         <section className="dashboard-section">
@@ -399,7 +453,7 @@ const ProductsManagement = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder={t('admin.searchProducts')}
+                  placeholder={t("admin.searchProducts")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="search-input"
@@ -431,6 +485,7 @@ const ProductsManagement = () => {
               loadProducts(pagination.currentPage, searchTerm, pagination.limit)
             }
             filters={tableFilters}
+            onFilterChange={handleFilterChange}
             columns={tableColumns}
             actions={tableActions}
           />
@@ -461,12 +516,12 @@ const ProductsManagement = () => {
         open={confirmOpen}
         title={
           deleteTarget
-            ? `${t('admin.deleteProductTitle')} ${deleteTarget?.title?.shortTitle || ""}?`
-            : t('admin.deleteProductTitle')
+            ? `${t("admin.deleteProductTitle")} ${deleteTarget?.title?.shortTitle || ""}?`
+            : t("admin.deleteProductTitle")
         }
-        message={t('admin.deleteProductConfirm')}
-        confirmText={deleting ? t('admin.deleting') : t('dialog.delete')}
-        cancelText={t('dialog.cancel')}
+        message={t("admin.deleteProductConfirm")}
+        confirmText={deleting ? t("admin.deleting") : t("dialog.delete")}
+        cancelText={t("dialog.cancel")}
         onConfirm={handleDeleteProduct}
         onCancel={() => {
           if (!deleting) {

@@ -8,14 +8,17 @@ const Newnav = ({
   categories = [{ name: CATEGORY_ALL }],
   selectedCategory = CATEGORY_ALL,
   onCategoryChange = () => {},
+  onApplyFilters = () => {},
 }) => {
   const scrollRef = useRef(null);
   const { account, setShowLoginPrompt } = useContext(Logincontext);
   
   // Normalize categories: support strings and object shapes
   const visibleCategories = Array.isArray(categories) && categories.length
-    ? categories.map((cat) => typeof cat === 'string' ? { name: cat, image: '' } : cat)
-    : [{ name: CATEGORY_ALL, image: '' }];
+    ? categories.map((cat) =>
+        typeof cat === "string" ? { name: cat, label: cat, image: "" } : cat,
+      )
+    : [{ name: CATEGORY_ALL, label: CATEGORY_ALL, image: "" }];
 
   const handleCategoryClick = (categoryName, e) => {
     if (!account) {
@@ -24,6 +27,7 @@ const Newnav = ({
     }
 
     onCategoryChange(categoryName);
+    onApplyFilters(null);
     // UX: Center the selected chip in the scroll view
     e.target.scrollIntoView({
       behavior: "smooth",
@@ -55,7 +59,7 @@ const Newnav = ({
                   }} 
                 />
               )}
-              <span className="category_label">{category.name}</span>
+              <span className="category_label">{category.label || category.name}</span>
             </button>
           ))}
         </div>

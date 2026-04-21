@@ -20,8 +20,10 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en', // default language
     fallbackLng: 'en',
+    supportedLngs: ['en', 'ar'],
+    load: 'languageOnly',
+    cleanCode: true,
     
     interpolation: {
       escapeValue: false

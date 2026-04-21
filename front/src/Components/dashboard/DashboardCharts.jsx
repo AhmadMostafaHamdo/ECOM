@@ -14,7 +14,7 @@ import {
   Legend,
   ResponsiveContainer,
   AreaChart,
-  Area
+  Area,
 } from "recharts";
 import { useTranslation } from "react-i18next";
 
@@ -28,15 +28,15 @@ const DashboardCharts = ({ stats }) => {
     { month: "Mar", users: 180, products: 110, orders: 92 },
     { month: "Apr", users: 220, products: 125, orders: 108 },
     { month: "May", users: 260, products: 140, orders: 125 },
-    { month: "Jun", users: 300, products: 160, orders: 145 }
+    { month: "Jun", users: 300, products: 160, orders: 145 },
   ];
 
   const categoryData = [
-    { name: "Electronics", value: 35, color: "#3b82f6" },
+    { name: "Electronics", value: 35, color: "#FF9500" },
     { name: "Clothing", value: 25, color: "#10b981" },
     { name: "Food", value: 20, color: "#f59e0b" },
-    { name: "Books", value: 12, color: "#8b5cf6" },
-    { name: "Other", value: 8, color: "#ef4444" }
+    { name: "Books", value: 12, color: "#FFBF5C" },
+    { name: "Other", value: 8, color: "#ef4444" },
   ];
 
   const userActivityData = [
@@ -46,7 +46,7 @@ const DashboardCharts = ({ stats }) => {
     { day: "Thu", active: 58, new: 22 },
     { day: "Fri", active: 65, new: 28 },
     { day: "Sat", active: 42, new: 8 },
-    { day: "Sun", active: 38, new: 6 }
+    { day: "Sun", active: 38, new: 6 },
   ];
 
   const revenueData = [
@@ -55,7 +55,7 @@ const DashboardCharts = ({ stats }) => {
     { month: "Mar", revenue: 48000 },
     { month: "Apr", revenue: 61000 },
     { month: "May", revenue: 58000 },
-    { month: "Jun", revenue: 67000 }
+    { month: "Jun", revenue: 67000 },
   ];
 
   return (
@@ -69,34 +69,34 @@ const DashboardCharts = ({ stats }) => {
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="month" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: "#ffffff", 
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#ffffff",
                   border: "1px solid #e5e7eb",
-                  borderRadius: "8px"
-                }} 
+                  borderRadius: "8px",
+                }}
               />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="users" 
-                stroke="#3b82f6" 
+              <Line
+                type="monotone"
+                dataKey="users"
+                stroke="#FF9500"
                 strokeWidth={2}
-                dot={{ fill: "#3b82f6", r: 4 }}
+                dot={{ fill: "#FF9500", r: 4 }}
                 name={t("admin.totalUsers")}
               />
-              <Line 
-                type="monotone" 
-                dataKey="products" 
-                stroke="#10b981" 
+              <Line
+                type="monotone"
+                dataKey="products"
+                stroke="#10b981"
                 strokeWidth={2}
                 dot={{ fill: "#10b981", r: 4 }}
                 name={t("admin.totalProducts")}
               />
-              <Line 
-                type="monotone" 
-                dataKey="orders" 
-                stroke="#f59e0b" 
+              <Line
+                type="monotone"
+                dataKey="orders"
+                stroke="#f59e0b"
                 strokeWidth={2}
                 dot={{ fill: "#f59e0b", r: 4 }}
                 name={t("admin.totalOrders")}
@@ -115,7 +115,9 @@ const DashboardCharts = ({ stats }) => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -137,15 +139,19 @@ const DashboardCharts = ({ stats }) => {
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="day" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: "#ffffff", 
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#ffffff",
                   border: "1px solid #e5e7eb",
-                  borderRadius: "8px"
-                }} 
+                  borderRadius: "8px",
+                }}
               />
               <Legend />
-              <Bar dataKey="active" fill="#3b82f6" name={t("admin.activeUsers")} />
+              <Bar
+                dataKey="active"
+                fill="#FF9500"
+                name={t("admin.activeUsers")}
+              />
               <Bar dataKey="new" fill="#10b981" name={t("admin.newUsers")} />
             </BarChart>
           </ResponsiveContainer>
@@ -159,18 +165,18 @@ const DashboardCharts = ({ stats }) => {
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="month" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: "#ffffff", 
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#ffffff",
                   border: "1px solid #e5e7eb",
-                  borderRadius: "8px"
-                }} 
+                  borderRadius: "8px",
+                }}
               />
-              <Area 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#8b5cf6" 
-                fill="#8b5cf6" 
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke="#FFBF5C"
+                fill="#FFBF5C"
                 fillOpacity={0.3}
                 name={t("admin.revenue")}
               />

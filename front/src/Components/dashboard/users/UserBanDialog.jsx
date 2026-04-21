@@ -1,67 +1,78 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../ui/dialog";
 
 const UserBanDialog = ({
-    banDialogOpen, setBanDialogOpen,
-    banTarget,
-    banReason, setBanReason,
-    handleBanUser, banning
+  banDialogOpen,
+  setBanDialogOpen,
+  banTarget,
+  banReason,
+  setBanReason,
+  handleBanUser,
+  banning,
 }) => {
-    const { t, i18n } = useTranslation();
-    const isRtl = i18n.dir() === "rtl";
+  const { t } = useTranslation();
 
-    const handleOpenChange = (open) => {
-        if (!banning) setBanDialogOpen(open);
-    };
+  const handleOpenChange = (nextOpen) => {
+    if (!banning) {
+      setBanDialogOpen(nextOpen);
+    }
+  };
 
-    return (
-        <Dialog open={banDialogOpen} onOpenChange={handleOpenChange}>
-            <DialogContent className="admin_dialog_content" style={{ maxWidth: '448px' }}>
-                <DialogHeader>
-                    <DialogTitle>{t("admin.banUser")}</DialogTitle>
-                </DialogHeader>
+  return (
+    <Dialog open={banDialogOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="dialog-shell--compact admin_dialog_content">
+        <DialogHeader>
+          <DialogTitle>{t("admin.banUser")}</DialogTitle>
+          <DialogDescription>
+            {t("admin.banConfirm", { name: banTarget?.fname })}
+          </DialogDescription>
+        </DialogHeader>
 
-                <div className="space-y-4 my-2">
-                    <p className="text-sm text-slate-500 leading-relaxed">
-                        {t("admin.banConfirm", { name: banTarget?.fname })}
-                    </p>
+        <div className="admin-form">
+          <div className="admin-form__field admin-form__field--full">
+            <label className="admin-form__label" htmlFor="ban-reason">
+              {t("admin.banReason")}
+            </label>
+            <textarea
+              id="ban-reason"
+              value={banReason}
+              onChange={(event) => setBanReason(event.target.value)}
+              placeholder={t("admin.banPlaceholder")}
+              className="admin_textarea"
+            />
+          </div>
+        </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 block">
-                            {t("admin.banReason")}
-                        </label>
-                        <input
-                            type="text"
-                            value={banReason}
-                            onChange={(e) => setBanReason(e.target.value)}
-                            placeholder={t("admin.banPlaceholder")}
-                            className="admin_input text-sm"
-                            style={{ textAlign: isRtl ? "right" : "left" }}
-                        />
-                    </div>
-                </div>
-
-                <DialogFooter>
-                    <button
-                        onClick={() => setBanDialogOpen(false)}
-                        className="btn-ghost text-sm font-bold"
-                        disabled={banning}
-                    >
-                        {t("common.cancel")}
-                    </button>
-                    <button
-                        onClick={handleBanUser}
-                        disabled={banning}
-                        className="btn_primary shadow-red-200"
-                        style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
-                    >
-                        {banning ? t("admin.banning") : t("admin.confirmBan")}
-                    </button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
+        <DialogFooter>
+          <button
+            type="button"
+            className="ui-button ui-button--ghost"
+            disabled={banning}
+            onClick={() => setBanDialogOpen(false)}
+          >
+            {t("common.cancel")}
+          </button>
+          <button
+            type="button"
+            className="ui-button ui-button--danger"
+            onClick={handleBanUser}
+            disabled={banning}
+          >
+            {banning ? <span className="ui-button__spinner" /> : null}
+            <span>{banning ? t("admin.banning") : t("admin.confirmBan")}</span>
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export default React.memo(UserBanDialog);

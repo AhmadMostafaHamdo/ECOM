@@ -350,7 +350,17 @@ const UsersManagement = () => {
           />
         </section>
 
-        <Dialog open={showForm} onOpenChange={setShowForm}>
+        <Dialog
+          open={showForm}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) {
+              resetForm();
+              return;
+            }
+
+            setShowForm(nextOpen);
+          }}
+        >
           <DialogContent className="admin_dialog_content admin_dialog_large">
             <DialogHeader>
               <DialogTitle>

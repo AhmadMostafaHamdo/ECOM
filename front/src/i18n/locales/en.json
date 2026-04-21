@@ -384,7 +384,11 @@
     "craftingExperience": "Crafting your experience...",
     "selectRegion": "Select Region / Currency",
     "selectDeliveryRegion": "Select Delivery Region",
-    "currency": "Currency"
+    "currency": "Currency",
+    "date": "Date",
+    "refresh": "Refresh",
+    "view": "View",
+    "user": "User"
   },
   "errors": {
     "pageNotFound": "Page not found",
@@ -729,6 +733,14 @@
     "eg": "Egypt",
     "us": "United States",
     "gb": "United Kingdom"
+  },
+  "language": {
+    "english": "English",
+    "arabic": "Arabic"
+  },
+  "theme": {
+    "light": "Light theme",
+    "dark": "Dark theme"
   },
   "adminChat": {
     "customerSupport": "Customer Support",

@@ -102,12 +102,12 @@
 
 .btn-outline {
   background: transparent;
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: #ff9500;
+  border-color: #ff9500;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: var(--color-primary-light);
+  background: rgba(255, 149, 0, 0.1);
 }
 
 .btn-ghost {

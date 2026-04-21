@@ -1,0 +1,217 @@
+/**
+ * KIK Design System - Color Variables
+ * Generated from brand logo: #FF9500 (Orange) + #808080 (Gray)
+ * Arab-European Market for Products
+ */
+
+/* ============================================
+   🎨 LIGHT THEME (Default)
+   ============================================ */
+:root {
+  /* Primary Brand Colors - Extracted from Logo Orange */
+  --color-primary: #ff9500;
+  --color-primary-50: #fff8e7;
+  --color-primary-100: #ffefd6;
+  --color-primary-200: #ffe0b3;
+  --color-primary-300: #ffd08a;
+  --color-primary-400: #ffbf5c;
+  --color-primary-500: #ff9500;
+  --color-primary-600: #e68600;
+  --color-primary-700: #cc7700;
+  --color-primary-800: #a35f00;
+  --color-primary-900: #7a4700;
+
+  /* Secondary Colors - Extracted from Logo Gray */
+  --color-secondary: #808080;
+  --color-secondary-50: #f5f5f5;
+  --color-secondary-100: #e8e8e8;
+  --color-secondary-200: #d4d4d4;
+  --color-secondary-300: #b8b8b8;
+  --color-secondary-400: #999999;
+  --color-secondary-500: #808080;
+  --color-secondary-600: #666666;
+  --color-secondary-700: #4d4d4d;
+  --color-secondary-800: #333333;
+  --color-secondary-900: #1a1a1a;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-success-soft: #d1fae5;
+  --color-success-dark: #047857;
+
+  --color-warning: #f59e0b;
+  --color-warning-soft: #fef3c7;
+  --color-warning-dark: #b45309;
+
+  --color-error: #ef4444;
+  --color-error-soft: #fee2e2;
+  --color-error-dark: #b91c1c;
+
+  --color-info: #808080;
+  --color-info-soft: #f5f5f5;
+  --color-info-dark: #4d4d4d;
+
+  /* Background & Surface */
+  --color-background: #ffffff;
+  --color-background-subtle: #fafafa;
+  --color-background-hover: #f5f5f5;
+  --color-background-active: #ebebeb;
+
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-elevated: #ffffff;
+
+  /* Text Colors */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #4d4d4d;
+  --color-text-tertiary: #808080;
+  --color-text-placeholder: #999999;
+  --color-text-disabled: #b8b8b8;
+  --color-text-inverse: #ffffff;
+
+  /* Border & Divider */
+  --color-border: #e8e8e8;
+  --color-border-subtle: #f0f0f0;
+  --color-border-strong: #d4d4d4;
+  --color-divider: #e8e8e8;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #ff9500 0%, #e68600 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #ffb84d 0%, #ff9500 100%);
+  --gradient-surface: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  --gradient-glow: radial-gradient(
+    circle,
+    rgba(255, 149, 0, 0.15) 0%,
+    transparent 70%
+  );
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+  --shadow-primary: 0 4px 16px rgba(255, 149, 0, 0.35);
+  --shadow-primary-lg: 0 8px 32px rgba(255, 149, 0, 0.45);
+
+  /* Legacy Mapping for Compatibility */
+  --primary: var(--color-primary);
+  --bg: var(--color-background);
+  --surface: var(--color-surface);
+  --surface-raised: var(--color-surface-raised);
+  --text-1: var(--color-text-primary);
+  --text-2: var(--color-text-secondary);
+  --text-3: var(--color-text-tertiary);
+  --border: var(--color-border);
+  --color-danger: var(--color-error);
+  --color-danger-soft: var(--color-error-soft);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --shadow-soft: var(--shadow-md);
+  --shadow-elevated: var(--shadow-lg);
+}
+
+/* ============================================
+   🌙 DARK THEME
+   ============================================ */
+[data-theme="dark"] {
+  /* Primary Brand Colors - Same orange, adjusted for dark */
+  --color-primary: #ffb84d;
+  --color-primary-50: #4d3300;
+  --color-primary-100: #664400;
+  --color-primary-200: #805500;
+  --color-primary-300: #996900;
+  --color-primary-400: #b37d00;
+  --color-primary-500: #cc8f00;
+  --color-primary-600: #e6a215;
+  --color-primary-700: #ffb84d;
+  --color-primary-800: #ffcc80;
+  --color-primary-900: #ffe0b3;
+
+  /* Secondary Colors - Inverted for dark mode */
+  --color-secondary: #b8b8b8;
+  --color-secondary-50: #1a1a1a;
+  --color-secondary-100: #262626;
+  --color-secondary-200: #333333;
+  --color-secondary-300: #404040;
+  --color-secondary-400: #666666;
+  --color-secondary-500: #808080;
+  --color-secondary-600: #999999;
+  --color-secondary-700: #b8b8b8;
+  --color-secondary-800: #d4d4d4;
+  --color-secondary-900: #ebebeb;
+
+  /* Semantic Colors - Adjusted for dark */
+  --color-success: #34d399;
+  --color-success-soft: #064e3b;
+  --color-success-dark: #6ee7b7;
+
+  --color-warning: #fbbf24;
+  --color-warning-soft: #451a03;
+  --color-warning-dark: #fcd34d;
+
+  --color-error: #f87171;
+  --color-error-soft: #450a0a;
+  --color-error-dark: #fca5a5;
+
+  --color-info: #b8b8b8;
+  --color-info-soft: #262626;
+  --color-info-dark: #d4d4d4;
+
+  /* Background & Surface - Dark mode */
+  --color-background: #0d0d0d;
+  --color-background-subtle: #121212;
+  --color-background-hover: #1a1a1a;
+  --color-background-active: #262626;
+
+  --color-surface: #1a1a1a;
+  --color-surface-raised: #262626;
+  --color-surface-elevated: #333333;
+
+  /* Text Colors - Inverted */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #ebebeb;
+  --color-text-tertiary: #b8b8b8;
+  --color-text-placeholder: #808080;
+  --color-text-disabled: #666666;
+  --color-text-inverse: #1a1a1a;
+
+  /* Border & Divider */
+  --color-border: #333333;
+  --color-border-subtle: #262626;
+  --color-border-strong: #404040;
+  --color-divider: #333333;
+
+  /* Gradients - Dark mode */
+  --gradient-primary: linear-gradient(135deg, #ffb84d 0%, #ff9500 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #ffcc80 0%, #ffb84d 100%);
+  --gradient-surface: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+  --gradient-glow: radial-gradient(
+    circle,
+    rgba(255, 184, 77, 0.2) 0%,
+    transparent 70%
+  );
+
+  /* Shadows - Adjusted for dark */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-primary: 0 4px 16px rgba(255, 184, 77, 0.3);
+  --shadow-primary-lg: 0 8px 32px rgba(255, 184, 77, 0.4);
+
+  /* Legacy Mapping for Dark Mode */
+  --primary: var(--color-primary);
+  --bg: var(--color-background);
+  --surface: var(--color-surface);
+  --surface-raised: var(--color-surface-raised);
+  --text-1: var(--color-text-primary);
+  --text-2: var(--color-text-secondary);
+  --text-3: var(--color-text-tertiary);
+  --border: var(--color-border);
+  --color-danger: var(--color-error);
+  --color-danger-soft: var(--color-error-soft);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --shadow-soft: var(--shadow-md);
+  --shadow-elevated: var(--shadow-lg);
+}
