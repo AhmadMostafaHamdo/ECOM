@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
 import DialogComponent from "./DialogComponent";
-import { 
-    Flag, 
-    RefreshCw, 
-    Eye, 
-    Trash2, 
-    Package, 
+import {
+    Flag,
+    RefreshCw,
+    Eye,
+    Trash2,
+    Package,
     User,
     AlertCircle,
     CheckCircle2,

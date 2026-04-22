@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 import { toast } from "react-toastify";
 
-const CategoriesManagement = ({ onCategoriesChanged = () => {} }) => {
+const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");

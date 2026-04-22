@@ -107,8 +107,8 @@ const ProductsManagement = () => {
         const categoriesArray = payload.data || payload;
         const list = Array.isArray(categoriesArray)
           ? categoriesArray.map((item) =>
-              typeof item === "string" ? item : item.name,
-            )
+            typeof item === "string" ? item : item.name,
+          )
           : [];
         setCategories(list);
       }
@@ -200,9 +200,9 @@ const ProductsManagement = () => {
         toast.success(
           isEditing
             ? t("admin.productUpdatedSuccess") ||
-                "Product updated successfully!"
+            "Product updated successfully!"
             : t("admin.productCreatedSuccess") ||
-                "Product created successfully!",
+            "Product created successfully!",
         );
         resetForm();
         loadProducts(pagination.currentPage);

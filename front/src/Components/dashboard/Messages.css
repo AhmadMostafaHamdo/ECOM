@@ -26,16 +26,13 @@
 .messages-title {
   font-size: 2.25rem;
   font-weight: 900;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 0.75rem;
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .messages-subtitle {
-  color: #64748b;
+  color: var(--color-text-tertiary);
   font-size: 1.1rem;
   font-weight: 500;
 }
@@ -67,46 +64,46 @@
   transform: translateY(-50%);
   width: 1.2rem;
   height: 1.2rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
   padding: 0.75rem 1rem 0.75rem 2.8rem;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--color-border);
   border-radius: 12px;
-  background-color: #ffffff;
-  color: #1e293b;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
   font-weight: 500;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #ff9d00;
-  box-shadow: 0 0 0 4px rgba(255, 157, 0, 0.1);
-  background: #fff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.1);
+  background: var(--color-surface);
 }
 
 .filter-select {
   padding: 0.75rem 1.25rem;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--color-border);
   border-radius: 12px;
-  background-color: #ffffff;
-  color: #475569;
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .filter-select:hover {
-  border-color: #cbd5e1;
+  border-color: var(--color-border-strong);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #ff9d00;
+  border-color: var(--color-primary);
 }
 
 /* Stats Cards */
@@ -121,26 +118,26 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-tertiary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .stat-item strong {
-  color: #1e293b;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .stat-item.pending {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--color-warning);
 }
 
 .stat-item.pending strong {
-  color: #d97706;
+  color: var(--color-warning-dark);
 }
 
 /* Main Content Layout */
@@ -159,9 +156,9 @@
 
 /* Message List */
 .messages-list {
-  background: white;
+  background: var(--color-surface);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
@@ -174,7 +171,7 @@
 
 .message-item {
   padding: 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-border-subtle);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -185,12 +182,12 @@
 }
 
 .message-item:hover {
-  background-color: #f8fafc;
+  background-color: var(--color-background-subtle);
 }
 
 .message-item.selected {
-  background-color: #fffaf0;
-  border-left: 4px solid #ff9d00;
+  background-color: var(--color-primary-50);
+  border-left: 4px solid var(--color-primary);
   padding-left: calc(1.25rem - 4px);
 }
 
@@ -204,14 +201,14 @@
 
 .sender-name {
   font-weight: 800;
-  color: #1e293b;
+  color: var(--color-text-primary);
   font-size: 1.05rem;
   margin: 0;
 }
 
 .sender-email {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--color-text-tertiary);
   font-weight: 500;
 }
 
@@ -246,7 +243,7 @@
 
 .message-date {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   font-weight: 600;
 }
 
@@ -258,7 +255,7 @@
   margin: 0 0 0.5rem 0;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #334155;
+  color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -266,15 +263,15 @@
 
 .message-excerpt {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--color-text-tertiary);
   line-height: 1.5;
   margin: 0;
 }
 
 /* Detail View */
 .message-detail {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
@@ -306,7 +303,7 @@
 .detail-header h3 {
   font-size: 1.5rem;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -317,11 +314,11 @@
 
 .status-select {
   padding: 0.6rem 1rem;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--color-border);
   border-radius: 12px;
   font-weight: 600;
-  background-color: #f8fafc;
-  color: #334155;
+  background-color: var(--color-background-subtle);
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
@@ -330,8 +327,8 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.6rem 1.25rem;
-  background-color: #fee2e2;
-  color: #ef4444;
+  background-color: var(--color-error-soft);
+  color: var(--color-error);
   border-radius: 12px;
   border: none;
   font-weight: 700;
@@ -340,12 +337,12 @@
 }
 
 .delete-btn:hover {
-  background-color: #fecaca;
+  background-color: var(--color-error-soft);
   transform: translateY(-1px);
 }
 
 .sender-info {
-  background-color: #f9fafb;
+  background-color: var(--color-background-subtle);
   border-radius: 16px;
   padding: 1.5rem;
   display: flex;
@@ -363,13 +360,13 @@
 .info-label {
   font-size: 0.75rem;
   font-weight: 800;
-  color: #94a3b8;
+  color: var(--color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .info-value {
-  color: #1e293b;
+  color: var(--color-text-primary);
   font-weight: 700;
   font-size: 1rem;
 }
@@ -385,7 +382,7 @@
 .admin-notes h4 {
   font-size: 0.9rem;
   font-weight: 800;
-  color: #475569;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   margin-bottom: 0.75rem;
   display: flex;
@@ -396,7 +393,7 @@
 .subject-section p {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--color-text-primary);
   margin: 0;
   line-height: 1.4;
 }
@@ -404,26 +401,26 @@
 .message-text {
   font-size: 1.05rem;
   line-height: 1.7;
-  color: #334155;
-  background: #fff;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
   padding: 1.5rem;
   border-radius: 16px;
-  border: 1.5px solid #f1f5f9;
+  border: 1.5px solid var(--color-border-subtle);
   white-space: pre-wrap;
 }
 
 .admin-notes {
-  background: #fff8e7;
-  border: 1.5px solid #ffe0b3;
+  background: var(--color-primary-50);
+  border: 1.5px solid var(--color-primary-200);
   padding: 1.5rem;
   border-radius: 16px;
 }
 
 .admin-notes h4 {
-  color: #ff9500;
+  color: var(--color-primary);
 }
 .admin-notes p {
-  color: #cc7700;
+  color: var(--color-primary-700);
   font-weight: 600;
   margin: 0;
   line-height: 1.6;
@@ -482,8 +479,8 @@
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f1f5f9;
-  border-top-color: #ff9d00;
+  border: 4px solid var(--color-secondary-100);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

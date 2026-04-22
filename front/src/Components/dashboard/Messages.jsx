@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
-import { 
-  Mail, 
-  Trash2, 
-  Eye, 
-  Clock, 
-  Reply, 
+import {
+  Mail,
+  Trash2,
+  Eye,
+  Clock,
+  Reply,
   AlertCircle,
   X,
   Info
@@ -263,10 +263,10 @@ const Messages = () => {
               {t("admin.messages.details") || "Message Details"}
             </DialogTitle>
           </DialogHeader>
-          
+
           {selectedMessage && (
             <div className="admin-form">
-               <div className="admin-modal-grid">
+              <div className="admin-modal-grid">
                 <div className="admin-modal-section">
                   <span className="admin-modal-label">{t("contact.nameLabel")}</span>
                   <div className="admin-modal-value">{selectedMessage.name}</div>

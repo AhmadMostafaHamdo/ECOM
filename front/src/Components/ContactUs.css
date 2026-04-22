@@ -1,6 +1,6 @@
 .contact-section {
   min-height: 100vh;
-  padding: 140px 24px 100px;
+  padding: 14px 24px 100px;
   background-color: var(--bg);
   position: relative;
   display: flex;
@@ -377,7 +377,7 @@
 
 @media (max-width: 768px) {
   .contact-section {
-    padding: 100px 16px 80px;
+    padding: 20px 16px 80px;
   }
   
   .contact-heading {

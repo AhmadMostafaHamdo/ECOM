@@ -38,7 +38,9 @@ const DashboardLayout = () => {
   const navigation = useMemo(() => getAdminNavigation(t), [t]);
   const activeItem =
     navigation.find((item) =>
-      item.end ? location.pathname === item.to : location.pathname.startsWith(item.to),
+      item.end
+        ? location.pathname === item.to
+        : location.pathname.startsWith(item.to),
     ) || navigation[0];
 
   const closeSidebar = () => setSidebarOpen(false);
@@ -57,81 +59,91 @@ const DashboardLayout = () => {
   };
 
   return (
-    <section className="dashboard-layout">
-      <button
-        type="button"
-        className={`dashboard-layout__overlay ${isSidebarOpen ? "is-open" : ""}`}
-        aria-label={t("dialog.close")}
-        aria-hidden={!isSidebarOpen}
-        tabIndex={isSidebarOpen ? 0 : -1}
-        onClick={closeSidebar}
-      />
+    <div className="dl-root">
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={closeSidebar}
+            className="dl-overlay"
+          />
+        )}
+      </AnimatePresence>
 
-      <aside
-        className={`dashboard-layout__sidebar admin-sidebar-shell ${isSidebarOpen ? "is-open" : ""}`}
-      >
-        <div className="admin-sidebar-shell__header">
-          <NavLink to="/dashboard" className="admin-sidebar-shell__brand" onClick={closeSidebar}>
-            <span className="admin-sidebar-shell__brand-mark">SC</span>
-            <div>
+      {/* ── Sidebar ────────────────────────────────────────────── */}
+      <aside className={`dl-sidebar ${isSidebarOpen ? "is-open" : ""}`}>
+        {/* Brand */}
+        <div className="dl-sidebar__header">
+          <NavLink to="/dashboard" className="dl-brand" onClick={closeSidebar}>
+            <div className="dl-brand__mark">SC</div>
+            <div className="dl-brand__copy">
               <strong>Studio Commerce</strong>
               <span>{t("admin.dashboard")}</span>
             </div>
           </NavLink>
-
-          <button
-            type="button"
-            className="dashboard-layout__icon-button dashboard-layout__drawer-toggle"
-            onClick={closeSidebar}
-            aria-label={t("dialog.close")}
-          >
-            <PanelRightClose size={18} />
-          </button>
         </div>
 
-        <nav className="admin-sidebar-shell__nav">
+        {/* Navigation */}
+        <nav className="dl-sidebar__nav custom-scrollbar">
           {navigation.map((item) => {
             const Icon = item.icon;
+            const isActive = item.end
+              ? location.pathname === item.to
+              : location.pathname.startsWith(item.to);
 
             return (
               <NavLink
                 key={item.key}
                 to={item.to}
                 end={item.end}
-                className={({ isActive }) =>
-                  `admin-sidebar-shell__link ${isActive ? "is-active" : ""}`
-                }
+                className={`dl-nav-link ${isActive ? "is-active" : ""}`}
                 onClick={closeSidebar}
               >
-                <span className="admin-sidebar-shell__link-icon">
-                  <Icon size={18} />
-                </span>
-                <span className="admin-sidebar-shell__link-copy">
+                <div className={`dl-nav-link__icon ${isActive ? "is-active" : ""}`}>
+                  <Icon size={19} />
+                </div>
+                <div className="dl-nav-link__copy">
                   <strong>{item.title}</strong>
                   <small>{item.description}</small>
-                </span>
+                </div>
+                {isActive && <div className="dl-nav-link__dot" />}
               </NavLink>
             );
           })}
         </nav>
 
-        <div className="admin-sidebar-shell__footer">
-          <div className="admin-sidebar-shell__profile">
-            <div className="admin-sidebar-shell__avatar">
+        {/* Footer */}
+        <div className="dl-sidebar__footer">
+          {/* User card */}
+          <div className="dl-user-card">
+            <div className="dl-user-card__avatar">
               {account?.fname?.[0]?.toUpperCase() || "A"}
             </div>
-            <div className="admin-sidebar-shell__meta">
+            <div className="dl-user-card__info">
               <strong>{account?.fname || t("admin.dashboard")}</strong>
               <span>{account?.role || t("auth.role_admin")}</span>
             </div>
           </div>
 
-          <div className="admin-sidebar-shell__footer-actions">
-            <NavLink to="/" className="ui-button ui-button--secondary" onClick={closeSidebar}>
+          {/* Action buttons */}
+          <div className="dl-sidebar__actions">
+            <NavLink
+              to="/"
+              className="dl-action-btn dl-action-btn--ghost"
+              onClick={closeSidebar}
+            >
               <House size={16} />
               {t("navigation.home")}
             </NavLink>
-            <button type="button" className="ui-button ui-button--danger" onClick={handleLogout}>
+            <button
+              type="button"
+              className="dl-action-btn dl-action-btn--danger"
+              onClick={handleLogout}
+            >
               <LogOut size={16} />
               {t("navigation.logout")}
             </button>
@@ -139,74 +151,94 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
-      <div className="dashboard-layout__content">
-        <header className="dashboard-layout__topbar">
-          <div className="dashboard-layout__topbar-inner">
-            <div className="dashboard-layout__heading">
-              <div className="dashboard-layout__eyebrow">{t("admin.analytics")}</div>
-              <h1 className="dashboard-layout__title">{activeItem.title}</h1>
-              <p className="dashboard-layout__description">{activeItem.description}</p>
-            </div>
-
-            <div className="dashboard-layout__tools">
+      {/* ── Main ────────────────────────────────────────────────── */}
+      <main className="dl-main">
+        {/* Topbar */}
+        <header className="dl-topbar">
+          <div className="dl-topbar__inner">
+            {/* Left: hamburger + page title */}
+            <div className="dl-topbar__left">
               <button
                 type="button"
-                className="dashboard-layout__icon-button dashboard-layout__drawer-toggle"
+                className="dl-icon-btn dl-hamburger"
                 onClick={() => setSidebarOpen(true)}
-                aria-label={t("navigation.dashboard")}
+                aria-label="Open menu"
               >
-                <Menu size={18} />
+                <Menu size={20} />
               </button>
 
-              <label className="dashboard-layout__search" htmlFor="dashboard-search">
-                <Search size={18} />
+              <div className="dl-page-heading">
+                <div className="dl-page-heading__eyebrow">
+                  {t("admin.analytics")}
+                </div>
+                <h1 className="dl-page-heading__title">{activeItem.title}</h1>
+              </div>
+            </div>
+
+            {/* Right: tools */}
+            <div className="dl-topbar__right">
+              {/* Search */}
+              <div className="dl-search">
+                <Search className="dl-search__icon" size={17} />
                 <input
-                  id="dashboard-search"
                   type="search"
                   placeholder={t("navigation.search")}
                   readOnly
+                  className="dl-search__input"
+                  aria-label="Search"
                 />
-              </label>
+              </div>
+
+              <div className="dl-topbar__divider" />
 
               <LanguageSwitcher variant="surface" />
 
+              {/* Theme toggle */}
               <button
                 type="button"
-                className="dashboard-layout__icon-button"
+                className="dl-icon-btn dl-theme-toggle"
                 onClick={toggleTheme}
-                aria-label={isDark ? t("theme.light", "Light theme") : t("theme.dark", "Dark theme")}
+                aria-label="Toggle theme"
               >
-                {isDark ? <SunMedium size={18} /> : <MoonStar size={18} />}
+                {isDark ? <SunMedium size={19} /> : <MoonStar size={19} />}
               </button>
 
-              <div className="dashboard-layout__profile">
-                <div className="dashboard-layout__avatar">
-                  {account?.fname?.[0]?.toUpperCase() || "A"}
+              {/* Profile chip */}
+              <div className="dl-profile-chip">
+                <div className="dl-profile-chip__text">
+                  <span className="dl-profile-chip__name">
+                    {account?.fname || t("admin.dashboard")}
+                  </span>
+                  <span className="dl-profile-chip__email">
+                    {account?.email || t("auth.role_admin")}
+                  </span>
                 </div>
-                <div className="dashboard-layout__profile-text">
-                  <strong>{account?.fname || t("admin.dashboard")}</strong>
-                  <span>{account?.email || t("auth.role_admin")}</span>
+                <div className="dl-profile-chip__avatar">
+                  {account?.fname?.[0]?.toUpperCase() || "A"}
                 </div>
               </div>
             </div>
           </div>
         </header>
 
-        <div className="dashboard-layout__panel">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={pageMotion.initial}
-              animate={pageMotion.animate}
-              exit={pageMotion.exit}
-              transition={pageMotion.transition}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+        {/* Page content */}
+        <div className="dl-page-body custom-scrollbar">
+          <div className="dl-page-body__inner">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={pageMotion.initial}
+                animate={pageMotion.animate}
+                exit={pageMotion.exit}
+                transition={pageMotion.transition}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
-    </section>
+      </main>
+    </div>
   );
 };
 

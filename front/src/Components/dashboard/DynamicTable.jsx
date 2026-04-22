@@ -53,9 +53,9 @@ const getSearchableValue = (item, searchKeys) => {
     searchKeys.length > 0
       ? searchKeys
       : Object.keys(item).filter((key) => {
-          const value = item[key];
-          return typeof value === "string" || typeof value === "number";
-        });
+        const value = item[key];
+        return typeof value === "string" || typeof value === "number";
+      });
 
   return keys
     .map((key) => getPathValue(item, key))
