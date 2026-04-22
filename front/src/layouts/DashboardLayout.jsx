@@ -17,6 +17,7 @@ import LanguageSwitcher from "../Components/common/LanguageSwitcher";
 import { useTheme } from "../Components/context/ThemeContext";
 import { axiosInstance } from "../services/http";
 import { getAdminNavigation } from "../features/admin/navigation";
+import ConfirmDialog from "../Components/common/ConfirmDialog";
 import "./layouts.css";
 import "../Components/dashboard/admin-dashboard.css";
 
@@ -34,6 +35,8 @@ const DashboardLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isLogoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const navigation = useMemo(() => getAdminNavigation(t), [t]);
   const activeItem =
@@ -46,11 +49,14 @@ const DashboardLayout = () => {
   const closeSidebar = () => setSidebarOpen(false);
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await axiosInstance.post("/logout");
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
+      setIsLoggingOut(false);
+      setLogoutDialogOpen(false);
       setAccount(false);
       localStorage.removeItem("auth_token");
       toast.success(t("auth.logoutSuccess"));
@@ -131,18 +137,10 @@ const DashboardLayout = () => {
 
           {/* Action buttons */}
           <div className="dl-sidebar__actions">
-            <NavLink
-              to="/"
-              className="dl-action-btn dl-action-btn--ghost"
-              onClick={closeSidebar}
-            >
-              <House size={16} />
-              {t("navigation.home")}
-            </NavLink>
             <button
               type="button"
               className="dl-action-btn dl-action-btn--danger"
-              onClick={handleLogout}
+              onClick={() => setLogoutDialogOpen(true)}
             >
               <LogOut size={16} />
               {t("navigation.logout")}
@@ -177,17 +175,6 @@ const DashboardLayout = () => {
 
             {/* Right: tools */}
             <div className="dl-topbar__right">
-              {/* Search */}
-              <div className="dl-search">
-                <Search className="dl-search__icon" size={17} />
-                <input
-                  type="search"
-                  placeholder={t("navigation.search")}
-                  readOnly
-                  className="dl-search__input"
-                  aria-label="Search"
-                />
-              </div>
 
               <div className="dl-topbar__divider" />
 
@@ -238,6 +225,18 @@ const DashboardLayout = () => {
           </div>
         </div>
       </main>
+
+      <ConfirmDialog
+        open={isLogoutDialogOpen}
+        title={t("logout.confirmTitle", "Confirm Logout")}
+        message={t("logout.confirmMessage", "Are you sure you want to logout? You will need to sign in again to access your account.")}
+        confirmText={t("logout.confirm", "Logout")}
+        cancelText={t("logout.cancel", "Cancel")}
+        onConfirm={handleLogout}
+        onCancel={() => setLogoutDialogOpen(false)}
+        loading={isLoggingOut}
+        type="danger"
+      />
     </div>
   );
 };

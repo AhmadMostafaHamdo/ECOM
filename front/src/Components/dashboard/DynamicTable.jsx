@@ -115,6 +115,7 @@ const DynamicTable = ({
   cacheTTL = 30000,
   title = "",
   subtitle = "",
+  headerActions = null,
   ...props
 }) => {
   const { t } = useTranslation();
@@ -371,11 +372,18 @@ const DynamicTable = ({
     <div className={cn("admin-table", className)} {...props}>
       {showToolbar ? (
         <div className="admin-table__toolbar">
-          <div>
-            {title ? <h2 className="admin-table__title">{title}</h2> : null}
-            {subtitle ? <p className="admin-table__subtitle">{subtitle}</p> : null}
+          {/* Top row: title + primary action */}
+          <div className="admin-table__toolbar-top">
+            <div className="admin-table__title-group">
+              {title ? <h2 className="admin-table__title">{title}</h2> : null}
+              {subtitle ? <p className="admin-table__subtitle">{subtitle}</p> : null}
+            </div>
+            {headerActions ? (
+              <div className="admin-table__header-actions">{headerActions}</div>
+            ) : null}
           </div>
 
+          {/* Bottom row: filters + search + refresh */}
           <div className="admin-table__actions">
             {filters.length > 0 ? (
               <>
@@ -548,6 +556,7 @@ DynamicTable.propTypes = {
   cacheTTL: PropTypes.number,
   title: PropTypes.string,
   subtitle: PropTypes.string,
+  headerActions: PropTypes.node,
 };
 
 export { tableCache };

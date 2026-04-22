@@ -169,7 +169,7 @@ const CreateProduct = ({ mode = "create" }) => {
 
     try {
       const formData = new FormData();
-      
+
       // Basic fields
       formData.append("shortTitle", form.shortTitle);
       formData.append("longTitle", form.longTitle);
@@ -196,14 +196,14 @@ const CreateProduct = ({ mode = "create" }) => {
           // Existing remote URL or relative path
           // If it's a blob URL (from current session), we skip it as it should have a 'file' property
           if (!image.url.startsWith('blob:')) {
-            const urlToSend = image.url.startsWith(ROOT_URL) 
-              ? image.url.replace(ROOT_URL, "") 
+            const urlToSend = image.url.startsWith(ROOT_URL)
+              ? image.url.replace(ROOT_URL, "")
               : image.url;
             existingUrls.push(urlToSend);
           }
         }
       });
-      
+
       // Send existing URLs as well
       existingUrls.forEach(url => formData.append("images", url));
 
@@ -220,8 +220,8 @@ const CreateProduct = ({ mode = "create" }) => {
         headers: { "Content-Type": "multipart/form-data" },
       };
 
-      const res = await (isEdit 
-        ? axiosInstance.put(endpoint, formData, config) 
+      const res = await (isEdit
+        ? axiosInstance.put(endpoint, formData, config)
         : axiosInstance.post(endpoint, formData, config));
 
       const successMsg = isEdit ? t("productCreator.updateSuccess") : t("productCreator.success");

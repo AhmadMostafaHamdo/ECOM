@@ -300,22 +300,8 @@ const UsersManagement = () => {
 
   return (
     <div className="admin_page">
-      <header className="admin_page_header admin_flex_between">
-        <div>
-          <h1 className="admin_page_title">
-            {t("admin.manageUsers")}
-          </h1>
-          <p className="admin_page_subtitle">
-            {t("admin.welcomeMessage")}
-          </p>
-        </div>
-        <button className="btn_primary" onClick={() => setShowForm(true)}>
-          {t("admin.createUser")}
-        </button>
-      </header>
-
       {listError && (
-        <div className="admin_error_alert">
+        <div className="admin_error_alert" role="alert">
           {listError}
         </div>
       )}
@@ -347,6 +333,14 @@ const UsersManagement = () => {
             onFilterChange={handleFilterChange}
             columns={tableColumns}
             actions={tableActions}
+            headerActions={
+              <button
+                className="submit-btn-premium"
+                onClick={() => setShowForm(true)}
+              >
+                + {t("admin.createUser")}
+              </button>
+            }
           />
         </section>
 
@@ -357,7 +351,6 @@ const UsersManagement = () => {
               resetForm();
               return;
             }
-
             setShowForm(nextOpen);
           }}
         >

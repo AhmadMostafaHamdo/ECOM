@@ -1,10 +1,10 @@
 /* ================================================================
-   USER FORM  (uf-*)
-   Premium modal form for creating / editing admin users
+   PRODUCT FORM  (pf-*)
+   Premium modal form for creating / editing products
    ================================================================ */
 
 /* ── Root ──────────────────────────────────────────────────────── */
-.uf-root {
+.pf-root {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -12,75 +12,100 @@
 }
 
 /* ── Sections / fieldsets ──────────────────────────────────────── */
-.uf-section {
-  border: none;
-  padding: 0;
+.pf-section {
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.07));
+  border-radius: 16px;
+  padding: 18px 20px;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.4);
 }
 
-.uf-section__legend {
+[data-theme="dark"] .pf-section,
+.dark .pf-section {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.pf-section__legend {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding: 0;
-  font-size: 0.72rem;
+  gap: 7px;
+  padding: 0 6px;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-3, #94a3b8);
 }
 
-/* ── Grid ──────────────────────────────────────────────────────── */
-.uf-grid {
+/* ── Grids ─────────────────────────────────────────────────────── */
+.pf-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
-@media (max-width: 580px) {
-  .uf-grid {
+.pf-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pf-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 640px) {
+  .pf-grid--2,
+  .pf-grid--3 {
     grid-template-columns: 1fr;
   }
 }
 
+@media (max-width: 800px) {
+  .pf-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ── Field ─────────────────────────────────────────────────────── */
-.uf-field {
+.pf-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.uf-field__label-row {
+.pf-field--full {
+  grid-column: 1 / -1;
+}
+
+.pf-field__label-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
 }
 
-.uf-field__label {
+.pf-field__label {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-2, #475569);
 }
 
-.uf-field__hint {
+.pf-field__hint {
   font-size: 0.74rem;
   color: var(--text-3, #94a3b8);
   font-style: italic;
 }
 
-/* ── Input control (wrapper for icon + input) ──────────────────── */
-.uf-field__control {
+/* ── Control wrapper ───────────────────────────────────────────── */
+.pf-field__control {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
-.uf-field__icon {
+.pf-field__icon {
   position: absolute;
   left: 13px;
   top: 50%;
@@ -89,15 +114,22 @@
   pointer-events: none;
   display: flex;
   align-items: center;
+  z-index: 1;
 }
 
-[dir="rtl"] .uf-field__icon {
+/* For textareas, align icon to top */
+.pf-field__control:has(.pf-textarea) .pf-field__icon {
+  top: 14px;
+  transform: none;
+}
+
+[dir="rtl"] .pf-field__icon {
   left: auto;
   right: 13px;
 }
 
-/* ── Input & Select ────────────────────────────────────────────── */
-.uf-input {
+/* ── Input / Select / Textarea ─────────────────────────────────── */
+.pf-input {
   width: 100%;
   min-height: 44px;
   padding: 0 14px 0 38px;
@@ -114,54 +146,101 @@
     background 0.18s;
 }
 
-[dir="rtl"] .uf-input {
+[dir="rtl"] .pf-input {
   padding: 0 38px 0 14px;
 }
 
-.uf-input::placeholder {
+.pf-input::placeholder {
   color: var(--text-3, #94a3b8);
 }
 
-.uf-input:focus {
+.pf-input:focus {
   border-color: var(--color-primary, #f97316);
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
 }
 
-.uf-input:disabled {
+.pf-input:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.uf-select {
+.pf-select {
   appearance: none;
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
+  background-position: right 10px center;
+  padding-right: 32px;
 }
 
-[dir="rtl"] .uf-select {
-  background-position: left 12px center;
-  padding-right: 38px;
-  padding-left: 36px;
+.pf-textarea {
+  min-height: 96px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  resize: vertical;
+  line-height: 1.6;
 }
 
 /* Dark mode */
-[data-theme="dark"] .uf-input,
-.dark .uf-input {
+[data-theme="dark"] .pf-input,
+.dark .pf-input {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
   color: #f1f5f9;
 }
 
-[data-theme="dark"] .uf-input:focus,
-.dark .uf-input:focus {
+[data-theme="dark"] .pf-input:focus,
+.dark .pf-input:focus {
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
 }
 
+/* ── Price group (amount + currency inline) ────────────────────── */
+.pf-price-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 0;
+}
+
+.pf-price-group__amount {
+  flex: 1;
+  border-radius: 12px 0 0 12px !important;
+  border-right: none !important;
+}
+
+[dir="rtl"] .pf-price-group__amount {
+  border-radius: 0 12px 12px 0 !important;
+  border-right: 1px solid var(--border, rgba(0, 0, 0, 0.1)) !important;
+  border-left: none !important;
+}
+
+.pf-price-group__currency {
+  width: 78px;
+  flex-shrink: 0;
+  border-radius: 0 12px 12px 0 !important;
+  padding-left: 10px !important;
+  padding-right: 28px !important;
+  background-position: right 8px center;
+  border-left: none !important;
+  background-color: var(--color-surface, #f8fafc);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+[dir="rtl"] .pf-price-group__currency {
+  border-radius: 12px 0 0 12px !important;
+  border-right: none !important;
+  border-left: 1px solid var(--border, rgba(0, 0, 0, 0.1)) !important;
+}
+
+.pf-price-group__amount:focus,
+.pf-price-group__currency:focus {
+  position: relative;
+  z-index: 1;
+}
+
 /* ── Error notice ──────────────────────────────────────────────── */
-.uf-error {
+.pf-error {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -174,13 +253,13 @@
   line-height: 1.5;
 }
 
-.uf-error__icon {
+.pf-error__icon {
   flex-shrink: 0;
   margin-top: 1px;
 }
 
 /* ── Actions row ───────────────────────────────────────────────── */
-.uf-actions {
+.pf-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
@@ -189,13 +268,13 @@
 }
 
 /* ── Buttons ───────────────────────────────────────────────────── */
-.uf-btn {
+.pf-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 42px;
-  padding: 0 20px;
+  padding: 0 22px;
   border-radius: 12px;
   font-size: 0.88rem;
   font-weight: 700;
@@ -210,40 +289,40 @@
     transform 0.14s;
 }
 
-.uf-btn:active {
+.pf-btn:active {
   transform: scale(0.97);
 }
 
-.uf-btn:disabled {
+.pf-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.uf-btn--ghost {
+.pf-btn--ghost {
   background: transparent;
   border-color: var(--border, rgba(0, 0, 0, 0.12));
   color: var(--text-2, #475569);
 }
 
-.uf-btn--ghost:hover {
+.pf-btn--ghost:hover {
   background: var(--color-surface, #f8fafc);
   color: var(--text-1, #0f172a);
 }
 
-[data-theme="dark"] .uf-btn--ghost,
-.dark .uf-btn--ghost {
+[data-theme="dark"] .pf-btn--ghost,
+.dark .pf-btn--ghost {
   border-color: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.7);
 }
 
-[data-theme="dark"] .uf-btn--ghost:hover,
-.dark .uf-btn--ghost:hover {
+[data-theme="dark"] .pf-btn--ghost:hover,
+.dark .pf-btn--ghost:hover {
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
 }
 
-.uf-btn--primary {
+.pf-btn--primary {
   background: linear-gradient(
     135deg,
     var(--color-primary, #f97316),
@@ -253,23 +332,23 @@
   box-shadow: 0 2px 12px rgba(249, 115, 22, 0.3);
 }
 
-.uf-btn--primary:hover {
+.pf-btn--primary:hover {
   box-shadow: 0 4px 18px rgba(249, 115, 22, 0.4);
   filter: brightness(1.06);
 }
 
 /* Spinner */
-.uf-btn__spinner {
+.pf-btn__spinner {
   display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.4);
   border-top-color: #fff;
-  animation: uf-spin 0.7s linear infinite;
+  animation: pf-spin 0.7s linear infinite;
   flex-shrink: 0;
 }
 
-@keyframes uf-spin {
+@keyframes pf-spin {
   to { transform: rotate(360deg); }
 }

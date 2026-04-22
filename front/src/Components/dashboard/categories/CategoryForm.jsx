@@ -1,239 +1,274 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Image as ImageIcon, Save, Plus, Upload, X } from 'lucide-react';
-import { ROOT_URL } from '../../../api';
+import React, { useRef, useState, useEffect } from "react";
+import { Image as ImageIcon, Save, Plus, Upload, X, Tag, Link2 } from "lucide-react";
+import { ROOT_URL } from "../../../api";
+import "./category-form.css";
 
 const CategoryForm = ({
-    editingId,
-    editName,
-    categoryName,
-    editImage,
-    categoryImage,
-    categoryFile,
-    editFile,
-    setEditName,
-    setCategoryName,
-    setEditImage,
-    setCategoryImage,
-    setCategoryFile,
-    setEditFile,
-    updateCategory,
-    addCategory,
-    setShowForm,
-    setEditingId,
-    saving,
-    t
+  editingId,
+  editName,
+  categoryName,
+  editImage,
+  categoryImage,
+  categoryFile,
+  editFile,
+  setEditName,
+  setCategoryName,
+  setEditImage,
+  setCategoryImage,
+  setCategoryFile,
+  setEditFile,
+  updateCategory,
+  addCategory,
+  setShowForm,
+  setEditingId,
+  saving,
+  t,
 }) => {
-    const fileInputRef = useRef(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
 
-    const currentName = editingId ? editName : categoryName;
-    const currentImage = editingId ? editImage : categoryImage;
-    const currentFile = editingId ? editFile : categoryFile;
+  const isEditing = Boolean(editingId);
+  const currentName = isEditing ? editName : categoryName;
+  const currentImage = isEditing ? editImage : categoryImage;
+  const currentFile = isEditing ? editFile : categoryFile;
 
-    useEffect(() => {
-        if (currentFile) {
-            const url = URL.createObjectURL(currentFile);
-            setPreviewUrl(url);
-            return () => URL.revokeObjectURL(url);
-        } else {
-            setPreviewUrl(null);
-        }
-    }, [currentFile]);
+  useEffect(() => {
+    if (currentFile) {
+      const url = URL.createObjectURL(currentFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [currentFile]);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (editingId) {
-                setEditFile(file);
-            } else {
-                setCategoryFile(file);
-            }
-        }
-    };
+  const setFile = (file) => (isEditing ? setEditFile(file) : setCategoryFile(file));
 
-    const removeFile = () => {
-        if (editingId) {
-            setEditFile(null);
-        } else {
-            setCategoryFile(null);
-        }
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-    };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) setFile(file);
+  };
 
-    // Helper to get image src: local file preview > URL
-    const getImageSrc = () => {
-        if (previewUrl) return previewUrl;
-        if (currentImage) {
-            // Check if it's a relative path starting with /uploads
-            if (currentImage.startsWith('/uploads')) {
-                return `${ROOT_URL}${currentImage}`;
-            }
-            return currentImage;
-        }
-        return null;
-    };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) setFile(file);
+  };
 
-    const finalImageSrc = getImageSrc();
+  const removeFile = () => {
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
-    return (
-        <form
-            className="admin_form"
-            onSubmit={editingId ? updateCategory : addCategory}
+  const getImageSrc = () => {
+    if (previewUrl) return previewUrl;
+    if (currentImage) {
+      return currentImage.startsWith("/uploads")
+        ? `${ROOT_URL}${currentImage}`
+        : currentImage;
+    }
+    return null;
+  };
+
+  const finalImageSrc = getImageSrc();
+
+  const handleCancel = () => {
+    setShowForm(false);
+    if (isEditing) setEditingId(null);
+  };
+
+  return (
+    <form
+      className="cf-root"
+      onSubmit={isEditing ? updateCategory : addCategory}
+      noValidate
+    >
+      {/* ── Category Name ─────────────────────────────────────────── */}
+      <fieldset className="cf-section">
+        <legend className="cf-section__legend">
+          <Tag size={13} />
+          {t("admin.categoryName", "Category Name")}
+        </legend>
+
+        <div className="cf-field">
+          <div className="cf-field__control">
+            <span className="cf-field__icon" aria-hidden="true">
+              <Tag size={15} />
+            </span>
+            <input
+              id="cf-name"
+              type="text"
+              value={currentName}
+              onChange={(e) =>
+                isEditing
+                  ? setEditName(e.target.value)
+                  : setCategoryName(e.target.value)
+              }
+              required
+              className="cf-input"
+              placeholder={t("admin.enterCategoryName", "e.g. Electronics")}
+              autoComplete="off"
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      {/* ── Category Image ────────────────────────────────────────── */}
+      <fieldset className="cf-section">
+        <legend className="cf-section__legend">
+          <ImageIcon size={13} />
+          {t("admin.categoryImage", "Category Image")}
+        </legend>
+
+        {/* Drop zone / upload button */}
+        <div
+          className={`cf-dropzone${dragOver ? " cf-dropzone--active" : ""}${currentFile ? " cf-dropzone--has-file" : ""}`}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => !currentFile && fileInputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && !currentFile && fileInputRef.current?.click()}
+          aria-label={t("admin.uploadLocalImage", "Upload local image")}
         >
-            <div className="premium-input-group">
-                <label>{t("admin.categoryName") || "Category Name"}</label>
-                <div className="input-wrapper">
-                    <input
-                        type="text"
-                        value={currentName}
-                        onChange={(e) =>
-                            editingId
-                                ? setEditName(e.target.value)
-                                : setCategoryName(e.target.value)
-                        }
-                        required
-                        placeholder={t("admin.enterCategoryName") || "e.g. Electronics"}
-                    />
-                </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="cf-file-input"
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+
+          {currentFile ? (
+            <div className="cf-file-info">
+              <div className="cf-file-info__icon">
+                <ImageIcon size={20} />
+              </div>
+              <div className="cf-file-info__meta">
+                <span className="cf-file-info__name">{currentFile.name}</span>
+                <span className="cf-file-info__size">
+                  {(currentFile.size / 1024).toFixed(1)} KB
+                </span>
+              </div>
+              <button
+                type="button"
+                className="cf-file-info__remove"
+                onClick={(e) => { e.stopPropagation(); removeFile(); }}
+                aria-label="Remove file"
+              >
+                <X size={14} />
+              </button>
             </div>
-
-            <div className="premium-input-group">
-                <label>{t("admin.categoryImage") || "Category Image"}</label>
-                
-                <div className="upload-options">
-                    <div className="file-upload-section">
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                        />
-                        <button
-                            type="button"
-                            className="upload-btn"
-                            onClick={() => fileInputRef.current?.click()}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                background: 'var(--brand-light)',
-                                color: 'var(--brand)',
-                                border: '1px dashed var(--brand)',
-                                padding: '10px 16px',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                width: '100%',
-                                justifyContent: 'center',
-                                fontWeight: '600'
-                            }}
-                        >
-                            <Upload size={18} />
-                            {currentFile ? currentFile.name : (t("admin.uploadLocalImage") || "Upload Local Image")}
-                        </button>
-                        
-                        {currentFile && (
-                            <button 
-                                type="button" 
-                                onClick={removeFile}
-                                style={{
-                                    marginTop: '8px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    color: '#ef4444',
-                                    fontSize: '12px',
-                                    background: 'none',
-                                    border: 'none',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <X size={14} /> Remove local file
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="divider" style={{ margin: '16px 0', textAlign: 'center', position: 'relative' }}>
-                        <span style={{ background: 'white', padding: '0 10px', fontSize: '12px', color: '#94a3b8', position: 'relative', zIndex: 1 }}>{t("common.or") || "OR"}</span>
-                        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: '#e2e8f0' }}></div>
-                    </div>
-
-                    <div className="input-wrapper">
-                        <input
-                            type="url"
-                            value={currentImage}
-                            onChange={(e) =>
-                                editingId
-                                    ? setEditImage(e.target.value)
-                                    : setCategoryImage(e.target.value)
-                            }
-                            placeholder={t("admin.imageUrlPlaceholder") || "https://example.com/image.png"}
-                            disabled={!!currentFile}
-                            style={{ opacity: currentFile ? 0.6 : 1 }}
-                        />
-                    </div>
-                </div>
-
-                <div className="image-preview-container" style={{ marginTop: '16px' }}>
-                    {finalImageSrc ? (
-                        <img
-                            src={finalImageSrc}
-                            alt="Preview"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = "https://via.placeholder.com/150?text=Invalid+Image";
-                            }}
-                            style={{
-                                width: '100%',
-                                maxHeight: '200px',
-                                objectFit: 'contain',
-                                borderRadius: '8px',
-                                border: '1px solid #e2e8f0'
-                            }}
-                        />
-                    ) : (
-                        <div className="empty-preview" style={{
-                            height: '150px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: '#f8fafc',
-                            borderRadius: '8px',
-                            border: '1px dashed #cbd5e1',
-                            color: '#64748b'
-                        }}>
-                            <ImageIcon size={32} />
-                            <span style={{ fontSize: '13px', marginTop: '8px' }}>{t("admin.noImageProvided") || "No image provided"}</span>
-                        </div>
-                    )}
-                </div>
+          ) : (
+            <div className="cf-dropzone__empty">
+              <div className="cf-dropzone__icon">
+                <Upload size={22} />
+              </div>
+              <p className="cf-dropzone__label">
+                {t("admin.uploadLocalImage", "Click or drag & drop an image")}
+              </p>
+              <span className="cf-dropzone__hint">PNG, JPG, WEBP — max 5 MB</span>
             </div>
+          )}
+        </div>
 
-            <div style={{ marginTop: "24px" }}>
-                <button
-                    type="submit"
-                    className="submit-btn-premium"
-                    disabled={saving || !currentName.trim()}
-                    style={{ width: '100%' }}
-                >
-                    {saving ? (
-                        <div className="dt-search-spinner" />
-                    ) : (
-                        editingId ? <Save size={18} /> : <Plus size={18} />
-                    )}
-                    {saving
-                        ? t("common.loading")
-                        : editingId
-                            ? t("admin.editCategory")
-                            : t("admin.createCategory")}
-                </button>
+        {/* OR divider */}
+        <div className="cf-divider">
+          <span>{t("common.or", "OR")}</span>
+        </div>
+
+        {/* URL input */}
+        <div className="cf-field">
+          <div className="cf-field__label-row">
+            <label className="cf-field__label" htmlFor="cf-image-url">
+              {t("admin.imageUrl", "Image URL")}
+            </label>
+            {currentFile && (
+              <span className="cf-field__hint">
+                {t("admin.urlDisabledWhenFile", "Disabled while a file is selected")}
+              </span>
+            )}
+          </div>
+          <div className="cf-field__control">
+            <span className="cf-field__icon" aria-hidden="true">
+              <Link2 size={15} />
+            </span>
+            <input
+              id="cf-image-url"
+              type="url"
+              value={currentImage}
+              onChange={(e) =>
+                isEditing
+                  ? setEditImage(e.target.value)
+                  : setCategoryImage(e.target.value)
+              }
+              placeholder={t("admin.imageUrlPlaceholder", "https://example.com/image.png")}
+              disabled={!!currentFile}
+              className="cf-input"
+            />
+          </div>
+        </div>
+
+        {/* Image preview */}
+        <div className="cf-preview">
+          {finalImageSrc ? (
+            <img
+              src={finalImageSrc}
+              alt={t("admin.imagePreview", "Preview")}
+              className="cf-preview__img"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://via.placeholder.com/300x160?text=Invalid+Image";
+              }}
+            />
+          ) : (
+            <div className="cf-preview__empty">
+              <ImageIcon size={28} />
+              <span>{t("admin.noImageProvided", "No image provided")}</span>
             </div>
-        </form>
-    );
+          )}
+        </div>
+      </fieldset>
+
+      {/* ── Actions ──────────────────────────────────────────────── */}
+      <div className="cf-actions">
+        <button
+          type="button"
+          className="cf-btn cf-btn--ghost"
+          onClick={handleCancel}
+          disabled={saving}
+        >
+          {t("dialog.cancel", "Cancel")}
+        </button>
+        <button
+          type="submit"
+          className="cf-btn cf-btn--primary"
+          disabled={saving || !currentName.trim()}
+        >
+          {saving ? (
+            <span className="cf-btn__spinner" aria-hidden="true" />
+          ) : isEditing ? (
+            <Save size={16} />
+          ) : (
+            <Plus size={16} />
+          )}
+          <span>
+            {saving
+              ? t("common.loading", "Saving…")
+              : isEditing
+                ? t("admin.editCategory", "Save Changes")
+                : t("admin.createCategory", "Create Category")}
+          </span>
+        </button>
+      </div>
+    </form>
+  );
 };
 
 export default CategoryForm;
-
+    
