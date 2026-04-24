@@ -34,11 +34,13 @@ export const useUsersManagement = () => {
       if (response.status === 200) {
         const payload = response.data;
         setUsers(payload.data || []);
+        // Backend returns pagination nested under payload.pagination
+        const pag = payload.pagination || {};
         setPagination({
-          totalItems: payload.total || payload.data.length,
-          totalPages: payload.total_pages || 1,
-          currentPage: payload.page || 1,
-          limit: payload.limit || 10,
+          totalItems: pag.totalItems ?? payload.total ?? (payload.data?.length || 0),
+          totalPages: pag.totalPages ?? payload.total_pages ?? 1,
+          currentPage: pag.currentPage ?? payload.page ?? 1,
+          limit: pag.limit ?? payload.limit ?? 10,
         });
       }
     } catch (loadError) {

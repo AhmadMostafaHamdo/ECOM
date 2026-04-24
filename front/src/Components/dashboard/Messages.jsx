@@ -242,7 +242,10 @@ const Messages = () => {
             loading={loading}
             pagination={pagination}
             onPageChange={(page) => fetchMessages(page, statusFilterRef.current, searchTermRef.current)}
-            onPageSizeChange={(size) => fetchMessages(1, statusFilterRef.current, searchTermRef.current)}
+            onPageSizeChange={(size) => {
+              setPagination((prev) => ({ ...prev, limit: size }));
+              fetchMessages(1, statusFilterRef.current, searchTermRef.current);
+            }}
             searchable
             searchPlaceholder={t("admin.messages.search", "Search messages…")}
             onSearch={handleSearch}

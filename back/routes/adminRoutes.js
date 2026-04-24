@@ -46,12 +46,11 @@ router.get(
   adminController.getStats,
 ); // Cache for 1 hour
 
-// Contact messages
+// Contact messages — no cache so new messages appear immediately
 router.get(
   "/admin/contact/messages",
   authenticate,
   requireAdmin,
-  cacheMiddleware(300),
   adminController.getContactMessages,
 );
 router.put(

@@ -262,26 +262,44 @@ exports.updateUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Strict whitelist — only allow specific safe fields to be updated
-    const { fname, role, country, mobile } = req.body;
+    const { fname, email, role, country, mobile, password, cpassword } = req.body;
+    const validator = require("validator");
+    const bcrypt = require("bcryptjs");
+
+    const updateFields = {};
 
     if (fname !== undefined) {
         const trimmed = fname.trim();
         if (trimmed.length < 2 || trimmed.length > 100) {
-            return res.status(422).json({ error: "Name must be 2–100 characters" });
+            return res.status(422).json({ error: "Name must be 2\u2013100 characters" });
         }
-        user.fname = trimmed;
+        updateFields.fname = trimmed;
+    }
+
+    if (email !== undefined) {
+        const trimmedEmail = email.toLowerCase().trim();
+        if (!validator.isEmail(trimmedEmail)) {
+            return res.status(422).json({ error: "Invalid email address" });
+        }
+        // Only check duplicate if email is actually changing
+        if (trimmedEmail !== user.email) {
+            const existingEmail = await User.findOne({ email: trimmedEmail, _id: { $ne: user._id } });
+            if (existingEmail) {
+                return res.status(422).json({ error: "This email is already in use" });
+            }
+        }
+        updateFields.email = trimmedEmail;
     }
 
     if (role !== undefined) {
         if (!["user", "admin"].includes(role)) {
             return res.status(400).json({ error: "Invalid role" });
         }
-        user.role = role;
+        updateFields.role = role;
     }
 
     if (country !== undefined) {
-        user.country = country.trim().substring(0, 100);
+        updateFields.country = country.trim().substring(0, 100);
     }
 
     if (mobile !== undefined) {
@@ -289,15 +307,44 @@ exports.updateUser = asyncHandler(async (req, res) => {
         if (!/^\+?[\d\s\-()]{7,20}$/.test(trimmedMobile)) {
             return res.status(422).json({ error: "Invalid mobile number" });
         }
-        const existingMobile = await User.findOne({ mobile: trimmedMobile, _id: { $ne: user._id } });
-        if (existingMobile) {
-            return res.status(422).json({ error: "This mobile number is already in use" });
+        if (trimmedMobile !== user.mobile) {
+            const existingMobile = await User.findOne({ mobile: trimmedMobile, _id: { $ne: user._id } });
+            if (existingMobile) {
+                return res.status(422).json({ error: "This mobile number is already in use" });
+            }
         }
-        user.mobile = trimmedMobile;
+        updateFields.mobile = trimmedMobile;
     }
 
-    await user.save();
-    res.status(200).json({ success: true, data: toPublicUser(user) });
+    if (password !== undefined && password.trim()) {
+        if (password.length < 6 || password.length > 128) {
+            return res.status(422).json({ error: "Password must be 6\u2013128 characters" });
+        }
+        if (cpassword !== undefined && password !== cpassword) {
+            return res.status(422).json({ error: "Passwords do not match" });
+        }
+        updateFields.password = await bcrypt.hash(password, 12);
+        updateFields.cpassword = await bcrypt.hash(cpassword || password, 12);
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+        return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    // Always stamp updatedAt
+    updateFields.updatedAt = new Date();
+
+    // Use raw MongoDB driver — bypasses ALL Mongoose middleware, hooks, and
+    // unique-index caching that can silently block email changes
+    await User.collection.updateOne(
+        { _id: user._id },
+        { $set: updateFields }
+    );
+
+    // Re-fetch fresh from DB to guarantee the returned document is up-to-date
+    const updatedUser = await User.findById(req.params.id).select("-password -tokens -cpassword");
+
+    res.status(200).json({ success: true, data: toPublicUser(updatedUser) });
 });
 
 /**

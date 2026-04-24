@@ -1,6 +1,7 @@
 const Contact = require("../models/contactSchema");
 const { asyncHandler } = require("../middleware/errorMiddleware");
 const validator = require("validator");
+const { clearCache } = require("../middleware/cacheMiddleware");
 
 /**
  * @desc    Submit a contact message

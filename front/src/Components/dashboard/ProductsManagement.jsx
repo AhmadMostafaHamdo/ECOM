@@ -305,13 +305,6 @@ const ProductsManagement = () => {
         sortable: true,
       },
       {
-        key: "status",
-        title: t("common.status"),
-        type: "status",
-        getStatusClass: () => "active",
-        sortable: true,
-      },
-      {
         key: "actions",
         title: t("common.actions") || t("common.results"),
         type: "actions",

@@ -56,6 +56,7 @@
 }
 
 @media (max-width: 640px) {
+
   .pf-grid--2,
   .pf-grid--3 {
     grid-template-columns: 1fr;
@@ -323,11 +324,9 @@
 }
 
 .pf-btn--primary {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary, #f97316),
-    color-mix(in srgb, var(--color-primary, #f97316) 80%, #000)
-  );
+  background: linear-gradient(135deg,
+      var(--color-primary, #f97316),
+      color-mix(in srgb, var(--color-primary, #f97316) 80%, #000));
   color: #fff;
   box-shadow: 0 2px 12px rgba(249, 115, 22, 0.3);
 }
@@ -350,5 +349,7 @@
 }
 
 @keyframes pf-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

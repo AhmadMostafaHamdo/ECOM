@@ -34,12 +34,12 @@ exports.getContactMessages = asyncHandler(async (req, res) => {
 
     let query = {};
 
-    // Validate status against allowed values
-    const allowedStatuses = ["all", "pending", "read", "replied"];
+    // Validate status — frontend sends "" to mean "all"
+    const allowedStatuses = ["all", "pending", "read", "replied", ""];
     if (!allowedStatuses.includes(status)) {
         return res.status(400).json({ error: "Invalid status filter" });
     }
-    if (status !== "all") query.status = status;
+    if (status && status !== "all") query.status = status;
 
     if (search) {
         const searchRegex = new RegExp(
