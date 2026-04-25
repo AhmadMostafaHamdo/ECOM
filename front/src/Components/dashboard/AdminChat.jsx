@@ -29,6 +29,8 @@ const AdminChat = () => {
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
+    const [userSearchResults, setUserSearchResults] = useState([]);
+    const [isSearchingUsers, setIsSearchingUsers] = useState(false);
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
 
@@ -110,6 +112,43 @@ const AdminChat = () => {
         await fetchMessages(conv._id);
     };
 
+    const searchUsers = async (query = '') => {
+        setIsSearchingUsers(true);
+        try {
+            const res = await axiosInstance.get(`/admin/users?search=${query}&limit=20`);
+            if (res.status === 200) {
+                // Filter out current user from search results
+                const results = (res.data.data || []).filter(u => u._id !== account?._id);
+                setUserSearchResults(results);
+            }
+        } catch (err) {
+            console.error('Failed to search users:', err);
+        } finally {
+            setIsSearchingUsers(false);
+        }
+    };
+
+    const startConversationWithUser = async (userId) => {
+        try {
+            setLoading(true);
+            const res = await axiosInstance.post('/conversations', { recipientId: userId });
+            if (res.status === 200 || res.status === 201) {
+                const newConv = res.data;
+                // Add to conversations if not already there
+                if (!conversations.some(c => c._id === newConv._id)) {
+                    setConversations(prev => [newConv, ...prev]);
+                }
+                setActiveConversation(newConv);
+                fetchMessages(newConv._id);
+                setUserSearchResults([]);
+            }
+        } catch (err) {
+            console.error('Failed to start conversation:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const sendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !activeConversation || sending) return;
@@ -187,6 +226,10 @@ const AdminChat = () => {
                     account={account}
                     getOtherParticipant={getOtherParticipant}
                     formatTime={formatTime}
+                    userSearchResults={userSearchResults}
+                    isSearchingUsers={isSearchingUsers}
+                    searchUsers={searchUsers}
+                    startConversationWithUser={startConversationWithUser}
                 />
 
                 <AdminMessagesPanel

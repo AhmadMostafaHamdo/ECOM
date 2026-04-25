@@ -316,7 +316,7 @@ const UsersManagement = () => {
             pagination={pagination}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
-            onRefresh={() =>
+            onRefresh={() => 
               loadUsers(pagination.currentPage, "", pagination.limit)
             }
             cacheKey="users-management"
