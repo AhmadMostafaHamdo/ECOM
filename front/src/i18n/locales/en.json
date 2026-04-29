@@ -600,8 +600,7 @@
     "updating": "Updating...",
     "confirmAction": "Confirm",
     "live": "Live",
-    "inventoryStatus": "Inventory Status",
-    "searchProducts": "Search products..."
+    "inventoryStatus": "Inventory Status"
   },
   "table": {
     "noDataFound": "No data found",
@@ -758,6 +757,12 @@
     "chooseConversation": "Choose a conversation from the sidebar to start corresponding with your customers.",
     "loadingConversations": "Loading conversations...",
     "now": "Now",
-    "minutes": "{{count}}m"
+    "minutes": "{{count}}m",
+    "tabConversations": "Conversations",
+    "tabAllUsers": "All users",
+    "searchUsers": "Search users...",
+    "startChat": "Start chat",
+    "openChat": "Open chat",
+    "noUsers": "No users"
   }
 }
