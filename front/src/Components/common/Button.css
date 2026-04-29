@@ -49,16 +49,16 @@
 
 /* Variants */
 .btn-primary {
-  background: var(--primary);
-  color: #0f172a;
-  border-color: var(--primary);
+  background: var(--gradient-primary, var(--primary));
+  color: var(--on-primary, #ffffff);
+  border-color: transparent;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  background: var(--gradient-primary-hover, var(--primary-hover));
+  border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--primary-glow);
+  box-shadow: 0 8px 18px var(--primary-glow);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -102,8 +102,8 @@
 
 .btn-outline {
   background: transparent;
-  color: #ff9500;
-  border-color: #ff9500;
+  color: var(--primary-strong, #cc7700);
+  border-color: var(--primary);
 }
 
 .btn-outline:hover:not(:disabled) {
