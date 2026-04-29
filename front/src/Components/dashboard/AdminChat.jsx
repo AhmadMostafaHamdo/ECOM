@@ -24,6 +24,9 @@ const AdminChat = () => {
     const { t, i18n } = useTranslation();
     const { account } = useContext(Logincontext);
     const [conversations, setConversations] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [startingChat, setStartingChat] = useState(false);
     const [activeConversation, setActiveConversation] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
@@ -64,6 +67,23 @@ const AdminChat = () => {
         }
     }, []);
 
+    const fetchUsers = useCallback(async () => {
+        setUsersLoading(true);
+        try {
+            const res = await axiosInstance.get('/admin/users', {
+                params: { limit: 100 }
+            });
+            if (res.status === 200) {
+                const list = res.data?.data || [];
+                setUsers(list.filter(u => u._id !== account?._id));
+            }
+        } catch (err) {
+            console.error('Failed to fetch users:', err);
+        } finally {
+            setUsersLoading(false);
+        }
+    }, [account]);
+
     const fetchMessages = useCallback(async (convId) => {
         try {
             const res = await axiosInstance.get(`/conversations/${convId}/messages`);
@@ -81,6 +101,10 @@ const AdminChat = () => {
         const interval = setInterval(fetchConversations, 10000);
         return () => clearInterval(interval);
     }, [fetchConversations]);
+
+    useEffect(() => {
+        if (account) fetchUsers();
+    }, [account, fetchUsers]);
 
     useEffect(() => {
         if (activeConversation && socketRef.current) {
@@ -108,6 +132,37 @@ const AdminChat = () => {
     const openConversation = async (conv) => {
         setActiveConversation(conv);
         await fetchMessages(conv._id);
+    };
+
+    const startConversationWithUser = async (user) => {
+        if (!user?._id || startingChat) return;
+
+        const existing = conversations.find(c => {
+            const ids = (c.participants || []).map(p => p?._id || p);
+            return ids.includes(user._id);
+        });
+        if (existing) {
+            await openConversation(existing);
+            return;
+        }
+
+        setStartingChat(true);
+        try {
+            const res = await axiosInstance.post('/conversations', { recipientId: user._id });
+            if (res.status === 200 || res.status === 201) {
+                const conv = res.data;
+                setConversations(prev => {
+                    const filtered = prev.filter(c => c._id !== conv._id);
+                    return [conv, ...filtered];
+                });
+                await openConversation(conv);
+                fetchConversations();
+            }
+        } catch (err) {
+            console.error('Failed to start conversation:', err);
+        } finally {
+            setStartingChat(false);
+        }
     };
 
     const sendMessage = async (e) => {
@@ -182,6 +237,10 @@ const AdminChat = () => {
             <div className="admin-chat-body">
                 <AdminChatSidebar
                     conversations={conversations}
+                    users={users}
+                    usersLoading={usersLoading}
+                    startingChat={startingChat}
+                    startConversationWithUser={startConversationWithUser}
                     activeConversation={activeConversation}
                     openConversation={openConversation}
                     account={account}

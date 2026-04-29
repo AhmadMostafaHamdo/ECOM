@@ -92,14 +92,15 @@
   inset: 0;
   background: linear-gradient(
     to right,
-    rgba(10, 20, 40, 0.75) 0%,
-    rgba(10, 20, 40, 0.35) 55%,
-    transparent 100%
+    rgba(8, 14, 28, 0.78) 0%,
+    rgba(8, 14, 28, 0.55) 45%,
+    rgba(8, 14, 28, 0.18) 75%,
+    rgba(8, 14, 28, 0) 100%
   );
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 48px;
+  padding: 0 56px;
   color: #ffffff;
   pointer-events: none;
   z-index: 2;
@@ -107,23 +108,28 @@
 
 .banner_overlay p {
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 2.5px;
-  color: var(--primary);
-  margin-bottom: 10px;
+  letter-spacing: 0.22em;
+  color: #ffb74d;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  margin-bottom: 12px;
   opacity: 0;
   transform: translateY(16px);
   animation: bannerFade 0.55s forwards 0.25s;
 }
 
 .banner_overlay h2 {
-  font-size: 2.6rem;
-  font-weight: 900;
-  line-height: 1.1;
-  max-width: 520px;
-  margin-bottom: 20px;
-  letter-spacing: -0.5px;
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1.08;
+  max-width: 560px;
+  margin-bottom: 24px;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.5);
   opacity: 0;
   transform: translateY(20px);
   animation: bannerFade 0.55s forwards 0.45s;
@@ -132,26 +138,40 @@
 .banner_cta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--primary);
-  color: #0f172a;
+  gap: 8px;
+  background: var(--gradient-primary, var(--primary));
+  color: #ffffff;
   border: none;
-  padding: 10px 22px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 800;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   cursor: pointer;
   pointer-events: all;
   width: fit-content;
   opacity: 0;
   transform: translateY(20px);
   animation: bannerFade 0.55s forwards 0.6s;
-  transition: background 0.2s, transform 0.2s;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 10px 22px rgba(255, 149, 0, 0.42),
+    0 1px 2px rgba(0, 0, 0, 0.18);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
 }
 
 .banner_cta:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
+  background: var(--gradient-primary-hover, var(--primary-hover));
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.22) inset,
+    0 16px 32px rgba(255, 149, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+  filter: saturate(1.05);
 }
 
 @keyframes bannerFade {

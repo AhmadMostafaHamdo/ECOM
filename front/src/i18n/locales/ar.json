@@ -442,7 +442,7 @@
     "noProductsFound": "لم يتم العثور على منتجات.",
     "auditingInventory": "جاري مراجعة المخزون...",
     "productsTotal": "إجمالي المنتجات",
-    "searchProducts": "بحث المنتجات...",
+    "searchProducts": "البحث عن المنتجات...",
     "searchProductsById": "بحث المنتجات بالاسم، المعرف...",
     "shortTitle": "العنوان القصير",
     "longTitle": "العنوان الطويل",
@@ -587,8 +587,7 @@
     "updating": "جاري التحديث...",
     "confirmAction": "تأكيد",
     "live": "مباشر",
-    "inventoryStatus": "حالة المخزون",
-    "searchProducts": "البحث عن المنتجات..."
+    "inventoryStatus": "حالة المخزون"
   },
   "table": {
     "noDataFound": "لم يتم العثور على بيانات",
@@ -745,6 +744,12 @@
     "chooseConversation": "اختر محادثة من الشريط الجانبي لبدء المراسلة مع عملائك.",
     "loadingConversations": "جاري تحميل المحادثات...",
     "now": "الآن",
-    "minutes": "{{count}} د"
+    "minutes": "{{count}} د",
+    "tabConversations": "المحادثات",
+    "tabAllUsers": "كل المستخدمين",
+    "searchUsers": "ابحث عن مستخدم...",
+    "startChat": "بدء محادثة",
+    "openChat": "فتح المحادثة",
+    "noUsers": "لا يوجد مستخدمون"
   }
 }
