@@ -110,7 +110,7 @@ a {
 
 .app_main {
   min-height: calc(100vh - var(--header-h));
-  padding-top: calc(var(--header-h) + var(--space-6));
+  padding-top:  var(--space-6);
 }
 
 .app_loading {
@@ -383,6 +383,6 @@ a {
   }
 
   .app_main {
-    padding-top: calc(var(--header-h) + var(--space-4));
+    padding-top: var(--space-4));
   }
 }
