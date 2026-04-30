@@ -5,13 +5,6 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const slides = [
   {
-    src: "/assets/banners/fashion.png",
-    labelKey: "home.bannerLabel1",
-    titleKey: "home.heroDesignTitle",
-    defaultLabel: "New Season Collection",
-    defaultTitle: "Discover Premium Fashion",
-  },
-  {
     src: "/assets/banners/electronics.png",
     labelKey: "home.bannerLabel2",
     titleKey: "home.bannerTitle2",
