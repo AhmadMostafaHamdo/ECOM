@@ -292,7 +292,7 @@ const Maincomp = React.memo(
                 <span className="home_products_tag">{t("product.curated", "Curated")}</span>
                 <h2 className="home_products_title">
                   {isDefaultView
-                    ? t("home.allProducts", "All Products")
+                    ? t("home.allProducts")
                     : selectedCategory === CATEGORY_ALL
                     ? t("allProducts.title", "Products")
                     : selectedCategory}

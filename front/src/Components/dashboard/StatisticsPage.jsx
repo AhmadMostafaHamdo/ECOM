@@ -68,12 +68,20 @@ const StatisticsPage = () => {
   return (
     <div className="admin_page">
       <div className="dashboard-header">
-        <div className="dashboard-title">{t("admin.statistics")}</div>
+        <div className="dashboard-title-group">
+          <h1 className="admin_page_title">{t("admin.statistics")}</h1>
+          <p className="admin_page_subtitle">{t("admin.statsDescription") || "Comprehensive overview of your store's performance and system health."}</p>
+        </div>
         <div className="dashboard-controls">
+          <button className="filter-btn" style={{ width: "auto" }}>
+            <Download className="btn-icon-sm" />
+            {t("admin.exportReport") || "Export"}
+          </button>
           <button
             onClick={fetchStats}
             disabled={loading}
             className="filter-btn"
+            style={{ width: "auto", background: "var(--color-primary-50)", color: "var(--color-primary)", borderColor: "var(--color-primary-200)" }}
             title={
               lastUpdated
                 ? `${t("admin.refreshStats")}: ${lastUpdated}`
@@ -87,6 +95,7 @@ const StatisticsPage = () => {
           </button>
         </div>
       </div>
+
       <section className="admin_stats_grid">
         {[
           {
@@ -124,68 +133,34 @@ const StatisticsPage = () => {
                 className="admin_stat_icon"
                 style={{ background: stat.color + "15", color: stat.color }}
               >
-                <stat.icon className="btn-icon-sm" />
+                <stat.icon size={20} />
               </span>
-            </div>
-            <h3>{stat.label}</h3>
-            <p>{loading ? "..." : stat.value}</p>
-            <span
-              className="admin_badge"
-              style={{ background: `${stat.color}20`, color: stat.color }}
-            >
-              {stat.trend}
-            </span>
-          </article>
-        ))}
-      </section>
-
-      <section className="admin_stats_grid">
-        <h2
-          className="dashboard-title"
-          style={{ gridColumn: "1 / -1", marginBottom: "var(--space-6)" }}
-        >
-          {t("admin.derivedMetrics")}
-        </h2>
-        {[
-          {
-            label: t("admin.productsPerCategory"),
-            value: derivedMetrics.productsPerCategory,
-            color: "#06b6d4",
-            icon: Package,
-          },
-          {
-            label: t("admin.cartItemsPerUser"),
-            value: derivedMetrics.cartsPerUser,
-            color: "#FFBF5C",
-            icon: Users,
-          },
-        ].map((metric, i) => (
-          <article key={i} className="admin_stat_card">
-            <div className="admin_stat_icon_row">
               <span
-                className="admin_stat_icon"
-                style={{ background: metric.color + "15", color: metric.color }}
+                className="admin_badge"
+                style={{ 
+                  background: stat.trend.startsWith("+") ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", 
+                  color: stat.trend.startsWith("+") ? "#10b981" : "#ef4444" 
+                }}
               >
-                <metric.icon className="btn-icon-sm" />
+                {stat.trend}
               </span>
             </div>
-            <h3>{metric.label}</h3>
-            <p>{loading ? "..." : metric.value}</p>
-            <span
-              className="admin_badge"
-              style={{ background: `${metric.color}20`, color: metric.color }}
-            >
-              {t("admin.calculated")}
-            </span>
+            <div className="admin_stat_content">
+              <h3>{stat.label}</h3>
+              <p>{loading ? "..." : stat.value}</p>
+            </div>
           </article>
         ))}
       </section>
 
       <div className="dashboard-grid-two">
         <section className="dashboard-section">
-          <div className="dashboard-controls">
-            <h2 className="dashboard-title">{t("admin.resourceAllocation")}</h2>
-            <select className="filter-btn">
+          <div className="dashboard-header" style={{ border: "none" }}>
+            <h2 className="dashboard-title">
+              <Package size={18} />
+              {t("admin.resourceAllocation")}
+            </h2>
+            <select className="filter-btn" style={{ width: "auto", minHeight: "36px" }}>
               <option>{t("admin.last30Days")}</option>
               <option>{t("admin.last6Months")}</option>
             </select>
@@ -222,7 +197,7 @@ const StatisticsPage = () => {
                 <div className="progress-header">
                   <span className="progress-label">{item.label}</span>
                   <span className="progress-value">
-                    {item.value} / {item.total}
+                    {Math.round((item.value / item.total) * 100)}%
                   </span>
                 </div>
                 <div className="progress-bar">
@@ -230,7 +205,7 @@ const StatisticsPage = () => {
                     className="progress-bar-fill"
                     style={{
                       width: `${Math.min(100, (item.value / item.total) * 100)}%`,
-                      background: item.color,
+                      background: `linear-gradient(90deg, ${item.color}, ${item.color}cc)`,
                     }}
                   ></div>
                 </div>
@@ -239,9 +214,16 @@ const StatisticsPage = () => {
           </div>
         </section>
 
-        <section className="dashboard-section status-section">
-          <h2 className="dashboard-title">{t("admin.operationalStatus")}</h2>
-          <p className="dashboard-subtitle">{t("admin.healthStatus")}</p>
+        <section className="dashboard-section">
+          <div className="dashboard-header" style={{ border: "none" }}>
+            <div className="dashboard-title-group">
+              <h2 className="dashboard-title">
+                <TrendingUp size={18} />
+                {t("admin.operationalStatus")}
+              </h2>
+              <p className="dashboard-subtitle">{t("admin.healthStatus")}</p>
+            </div>
+          </div>
 
           <div className="status-list">
             {[
@@ -269,9 +251,55 @@ const StatisticsPage = () => {
           </div>
         </section>
       </div>
+
+      <section className="admin_stats_grid" style={{ marginTop: "40px" }}>
+        <h2
+          className="dashboard-title"
+          style={{ gridColumn: "1 / -1", marginBottom: "var(--space-2)", fontSize: "1.2rem" }}
+        >
+          {t("admin.derivedMetrics")}
+        </h2>
+        {[
+          {
+            label: t("admin.productsPerCategory"),
+            value: derivedMetrics.productsPerCategory,
+            color: "#06b6d4",
+            icon: Package,
+          },
+          {
+            label: t("admin.cartItemsPerUser"),
+            value: derivedMetrics.cartsPerUser,
+            color: "#FFBF5C",
+            icon: Users,
+          },
+        ].map((metric, i) => (
+          <article key={i} className="admin_stat_card" style={{ borderLeft: `4px solid ${metric.color}` }}>
+            <div className="admin_stat_icon_row">
+              <span
+                className="admin_stat_icon"
+                style={{ background: metric.color + "15", color: metric.color }}
+              >
+                <metric.icon size={20} />
+              </span>
+            </div>
+            <div className="admin_stat_content">
+              <h3>{metric.label}</h3>
+              <p>{loading ? "..." : metric.value}</p>
+            </div>
+            <span
+              className="admin_badge"
+              style={{ background: `${metric.color}10`, color: metric.color, border: `1px solid ${metric.color}20` }}
+            >
+              {t("admin.calculated")}
+            </span>
+          </article>
+        ))}
+      </section>
+
       {error && <div className="admin_notice error">{error}</div>}
     </div>
   );
 };
 
 export default StatisticsPage;
+

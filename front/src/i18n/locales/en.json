@@ -16,6 +16,7 @@
     "logoText": "Studio Commerce"
   },
   "home": {
+    "allProducts":"All Products",
     "title": "Welcome to Our Store",
     "subtitle": "Discover amazing products at great prices",
     "premiumCollection": "Premium Week Collection",
@@ -725,7 +726,8 @@
     "invalidEmail": "Please enter a valid email address",
     "nameRange": "Name must be between 2 and 100 characters",
     "subjectRange": "Subject must be between 3 and 200 characters",
-    "messageRange": "Message must be between 10 and 1000 characters"
+    "messageRange": "Message must be between 10 and 1000 characters",
+    "sendmessage":"Send Message"
   },
   "countries": {
     "sa": "Saudi Arabia",
