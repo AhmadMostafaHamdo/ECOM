@@ -2,28 +2,28 @@ import React, { useRef, useContext } from "react";
 import { Logincontext } from "../context/Contextprovider";
 import "../newnav/newnav.css";
 
-const CATEGORY_ALL = "All Categories";
+const CATEGORY_ALL = "";
 
 const Newnav = ({
   categories = [{ name: CATEGORY_ALL }],
   selectedCategory = CATEGORY_ALL,
-  onCategoryChange = () => {},
-  onApplyFilters = () => {},
+  onCategoryChange = () => { },
+  onApplyFilters = () => { },
 }) => {
   const scrollRef = useRef(null);
   const { account, setShowLoginPrompt } = useContext(Logincontext);
-  
+
   // Normalize categories: support strings and object shapes
   const visibleCategories = Array.isArray(categories) && categories.length
     ? categories.map((cat) =>
-        typeof cat === "string" ? { name: cat, label: cat, image: "" } : cat,
-      )
+      typeof cat === "string" ? { name: cat, label: cat, image: "" } : cat,
+    )
     : [{ name: CATEGORY_ALL, label: CATEGORY_ALL, image: "" }];
 
   const handleCategoryClick = (categoryName, e) => {
     if (!account) {
-        setShowLoginPrompt(true);
-        return;
+      setShowLoginPrompt(true);
+      return;
     }
 
     onCategoryChange(categoryName);
@@ -52,11 +52,11 @@ const Newnav = ({
               onClick={(e) => handleCategoryClick(category.name, e)}
             >
               {category.image && (
-                <div 
-                  className="category_image_thumb" 
+                <div
+                  className="category_image_thumb"
                   style={{
                     backgroundImage: `url(${category.image})`,
-                  }} 
+                  }}
                 />
               )}
               <span className="category_label">{category.label || category.name}</span>

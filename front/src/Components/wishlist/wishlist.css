@@ -32,6 +32,7 @@
 }
 
 @keyframes heartbeat {
+
   0%,
   100% {
     transform: scale(1);
@@ -63,16 +64,12 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(
-      circle at 20% 50%,
+    radial-gradient(circle at 20% 50%,
       rgba(244, 63, 94, 0.15) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 80% 30%,
+      transparent 60%),
+    radial-gradient(circle at 80% 30%,
       rgba(99, 102, 241, 0.12) 0%,
-      transparent 50%
-    );
+      transparent 50%);
   pointer-events: none;
 }
 
@@ -88,8 +85,6 @@
 }
 
 .wishlist_back_btn {
-  width: 40px;
-  height: 40px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.08);
@@ -100,6 +95,7 @@
   justify-content: center;
   transition: all 0.2s;
   flex-shrink: 0;
+  margin-bottom: 0 !important; /* Reset component margin */
 }
 
 .wishlist_back_btn:hover {

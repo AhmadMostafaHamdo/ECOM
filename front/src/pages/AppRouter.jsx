@@ -80,17 +80,7 @@ const AppRouter = () => {
         }
       >
         <Routes>
-          <Route element={<AuthLayout />}>
-            <Route
-              path="/login"
-              element={account ? <Navigate to={isAdmin ? "/dashboard" : "/"} replace /> : <SignIn />}
-            />
-            <Route
-              path="/signup"
-              element={account ? <Navigate to={isAdmin ? "/dashboard" : "/"} replace /> : <SignUp />}
-            />
-          </Route>
-
+          {/* Storefront Routes (Prioritized) */}
           <Route
             element={
               <StorefrontLayout
@@ -107,16 +97,12 @@ const AppRouter = () => {
             <Route
               path="/"
               element={
-                isAdmin ? (
-                  <Navigate to="/dashboard" replace />
-                ) : (
-                  <Maincomp
-                    selectedCategory={storefront.selectedCategory}
-                    filters={storefront.appliedFilters}
-                    setSelectedCategory={storefront.setSelectedCategory}
-                    searchTerm={storefront.searchTerm}
-                  />
-                )
+                <Maincomp
+                  selectedCategory={storefront.selectedCategory}
+                  filters={storefront.appliedFilters}
+                  setSelectedCategory={storefront.setSelectedCategory}
+                  searchTerm={storefront.searchTerm}
+                />
               }
             />
             <Route
@@ -153,6 +139,19 @@ const AppRouter = () => {
             />
           </Route>
 
+          {/* Auth Routes */}
+          <Route element={<AuthLayout />}>
+            <Route
+              path="/login"
+              element={account ? <Navigate to={isAdmin ? "/dashboard" : "/"} replace /> : <SignIn />}
+            />
+            <Route
+              path="/signup"
+              element={account ? <Navigate to={isAdmin ? "/dashboard" : "/"} replace /> : <SignUp />}
+            />
+          </Route>
+
+          {/* Dashboard Routes */}
           <Route
             path="/dashboard"
             element={

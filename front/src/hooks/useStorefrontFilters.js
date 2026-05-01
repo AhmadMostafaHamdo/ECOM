@@ -4,12 +4,7 @@ import { axiosInstance } from "../services/http";
 const CATEGORY_ALL = "All Categories";
 
 export const useStorefrontFilters = (t) => {
-  const [categories, setCategories] = useState([
-    {
-      name: CATEGORY_ALL,
-      label: t("navigation.allCategories"),
-    },
-  ]);
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
   const [appliedFilters, setAppliedFilters] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,30 +15,26 @@ export const useStorefrontFilters = (t) => {
       const payload = response.data;
       const categoriesArray = payload.data || payload;
 
-      if (!Array.isArray(categoriesArray) || categoriesArray.length === 0) {
-        setCategories([
-          {
-            name: CATEGORY_ALL,
-            label: t("navigation.allCategories"),
-          },
-        ]);
+      if (!Array.isArray(categoriesArray)) {
+        setCategories([]);
         return;
       }
 
-      setCategories([
-        {
-          name: CATEGORY_ALL,
-          label: t("navigation.allCategories"),
-        },
-        ...categoriesArray.map((category) =>
-          typeof category === "string"
-            ? { name: category, label: category }
-            : {
-                ...category,
-                label: category.label || category.name,
-              },
-        ),
-      ]);
+      // Normalizing categories from API
+      const normalized = categoriesArray.map((category) => {
+        if (typeof category === "string") {
+          return {
+            name: category,
+            label: category === CATEGORY_ALL ? t("navigation.allCategories") : category,
+          };
+        }
+        return {
+          ...category,
+          label: category.name === CATEGORY_ALL ? t("navigation.allCategories") : (category.label || category.name),
+        };
+      });
+
+      setCategories(normalized);
     } catch (error) {
       console.error("Category list refresh failed:", error.message);
     }
@@ -54,29 +45,11 @@ export const useStorefrontFilters = (t) => {
   }, [refreshCategories]);
 
   useEffect(() => {
-    setCategories((current) => {
-      if (current.length === 0) {
-        return current;
+    if (categories.length > 0) {
+      const categoryNames = categories.map((category) => category.name);
+      if (!categoryNames.includes(selectedCategory)) {
+        setSelectedCategory(CATEGORY_ALL);
       }
-
-      const [firstCategory, ...rest] = current;
-
-      return [
-        {
-          ...firstCategory,
-          name: CATEGORY_ALL,
-          label: t("navigation.allCategories"),
-        },
-        ...rest,
-      ];
-    });
-  }, [t]);
-
-  useEffect(() => {
-    const categoryNames = categories.map((category) => category.name);
-
-    if (!categoryNames.includes(selectedCategory)) {
-      setSelectedCategory(CATEGORY_ALL);
     }
   }, [categories, selectedCategory]);
 

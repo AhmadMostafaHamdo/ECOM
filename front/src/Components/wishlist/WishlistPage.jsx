@@ -122,7 +122,7 @@ const WishlistPage = () => {
             {/* Header */}
             <div className="wishlist_hero">
                 <div className="wishlist_hero_content">
-                    <BackButton className="wishlist_back_btn" showText={false} />
+                    <BackButton className="wishlist_back_btn" showText={true} />
                     <div className="wishlist_title_block">
                         <div className="wishlist_icon_circle">
                             <FavoriteIcon />
@@ -193,7 +193,7 @@ const WishlistPage = () => {
                                     >
                                         <div className="wishlist_card_img">
                                             <img
-                                                src={ (() => {
+                                                src={(() => {
                                                     // Unified image resolution: images array first, then url, then detailUrl
                                                     if (Array.isArray(product.images) && product.images.length > 0) {
                                                         const img = product.images[0];
@@ -202,7 +202,7 @@ const WishlistPage = () => {
                                                     const fallback = product.url || product.detailUrl;
                                                     if (!fallback) return '';
                                                     return fallback.startsWith('http') || fallback.startsWith('blob:') ? fallback : `${ROOT_URL}${fallback}`;
-                                                })() }
+                                                })()}
                                                 alt={product.title?.shortTitle || 'Product'}
                                                 loading="lazy"
                                                 onError={(e) => { e.target.style.opacity = '0.3'; }}
