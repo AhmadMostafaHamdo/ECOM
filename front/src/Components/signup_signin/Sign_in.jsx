@@ -140,7 +140,7 @@ const Sign_in = () => {
                 id="si_email"
                 type="email"
                 name="email"
-                placeholder="name@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={logdata.email}
                 onChange={adddata}
               />
@@ -160,7 +160,7 @@ const Sign_in = () => {
                 id="si_pass"
                 type="password"
                 name="password"
-                placeholder="••••••••"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={logdata.password}
                 onChange={adddata}
               />

@@ -214,8 +214,8 @@ exports.createUser = asyncHandler(async (req, res) => {
         return res.status(422).json({ error: "Name must be 2–100 characters" });
     }
 
-    if (password.length < 6 || password.length > 128) {
-        return res.status(422).json({ error: "Password must be 6–128 characters" });
+    if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
+        return res.status(422).json({ error: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character" });
     }
 
     if (password !== cpassword) {
@@ -261,6 +261,11 @@ exports.updateUser = asyncHandler(async (req, res) => {
 
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Protect superadmin from being modified by others
+    if (user.email === "superadmin@gmail.com" && req.userID.toString() !== user._id.toString()) {
+        return res.status(403).json({ error: "This superadmin account is protected and cannot be modified by other admins" });
+    }
 
     const { fname, email, role, country, mobile, password, cpassword } = req.body;
     const validator = require("validator");
@@ -317,8 +322,8 @@ exports.updateUser = asyncHandler(async (req, res) => {
     }
 
     if (password !== undefined && password.trim()) {
-        if (password.length < 6 || password.length > 128) {
-            return res.status(422).json({ error: "Password must be 6\u2013128 characters" });
+        if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
+            return res.status(422).json({ error: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character" });
         }
         if (cpassword !== undefined && password !== cpassword) {
             return res.status(422).json({ error: "Passwords do not match" });
@@ -360,6 +365,12 @@ exports.deleteUser = asyncHandler(async (req, res) => {
         return res.status(400).json({ error: "Cannot delete your own account" });
     }
 
+    // Protect superadmin from deletion
+    const userToProtect = await User.findById(req.params.id);
+    if (userToProtect && userToProtect.email === "superadmin@gmail.com") {
+        return res.status(403).json({ error: "This superadmin account is protected and cannot be deleted" });
+    }
+
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.status(200).json({ success: true, deletedUserId: user._id });
@@ -388,6 +399,11 @@ exports.banUser = asyncHandler(async (req, res) => {
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Protect superadmin from being banned
+    if (user.email === "superadmin@gmail.com") {
+        return res.status(403).json({ error: "This superadmin account is protected and cannot be banned" });
+    }
 
     user.isBanned = isBanned;
     user.banReason = isBanned ? (banReason ? banReason.toString().trim().substring(0, 500) : "Violation of terms of service") : "";

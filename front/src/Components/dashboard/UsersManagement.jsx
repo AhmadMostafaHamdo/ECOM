@@ -120,6 +120,11 @@ const UsersManagement = () => {
       role: form.role,
     };
     if (form.password.trim()) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(form.password)) {
+        setFormError(t("auth.passwordLength"));
+        return;
+      }
       payload.password = form.password;
       payload.cpassword = form.password;
     }
@@ -253,6 +258,7 @@ const UsersManagement = () => {
         label: t("common.edit"),
         tooltipKey: "common.edit",
         variant: "edit",
+        isVisible: (user) => user.email !== "superadmin@gmail.com",
         onClick: handleEdit,
       },
       {
@@ -260,6 +266,7 @@ const UsersManagement = () => {
         label: t("common.delete"),
         tooltipKey: "common.delete",
         variant: "delete",
+        isVisible: (user) => user.email !== "superadmin@gmail.com",
         onClick: requestDelete,
       },
       {
@@ -267,7 +274,7 @@ const UsersManagement = () => {
         label: t("admin.banUser"),
         tooltipKey: t("admin.banUser"),
         variant: "delete",
-        isVisible: (user) => !user.isBanned && user.role !== "admin",
+        isVisible: (user) => !user.isBanned && user.role !== "admin" && user.email !== "superadmin@gmail.com",
         onClick: requestBan,
       },
       {
@@ -275,7 +282,7 @@ const UsersManagement = () => {
         label: t("admin.unbanUser"),
         tooltipKey: t("admin.unbanUser"),
         variant: "edit",
-        isVisible: (user) => user.isBanned,
+        isVisible: (user) => user.isBanned && user.email !== "superadmin@gmail.com",
         onClick: requestUnban,
       },
       {
@@ -283,7 +290,7 @@ const UsersManagement = () => {
         label: t("admin.adminRole"),
         tooltipKey: t("admin.promoteAdmin"),
         variant: "edit",
-        isVisible: (user) => user.role !== "admin" && !user.isBanned,
+        isVisible: (user) => user.role !== "admin" && !user.isBanned && user.email !== "superadmin@gmail.com",
         onClick: requestToggleAdmin,
       },
       {
@@ -291,7 +298,7 @@ const UsersManagement = () => {
         label: t("admin.userRole"),
         tooltipKey: t("admin.demoteAdmin"),
         variant: "delete",
-        isVisible: (user) => user.role === "admin",
+        isVisible: (user) => user.role === "admin" && user.email !== "superadmin@gmail.com",
         onClick: requestToggleAdmin,
       },
     ],

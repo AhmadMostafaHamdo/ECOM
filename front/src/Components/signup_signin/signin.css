@@ -433,7 +433,13 @@
   75% { transform: translateX(4px); }
 }
 
-.field input::placeholder { color: var(--text-3); font-weight: 300; }
+.field input::placeholder {
+  color: var(--text-3);
+  font-weight: 400;
+  opacity: 0.6;
+  font-size: 0.82rem;
+  letter-spacing: 0.2px;
+}
 
 .field input:focus {
   background: var(--cream);

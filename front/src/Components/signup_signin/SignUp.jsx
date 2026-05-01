@@ -54,9 +54,10 @@ const Signup = () => {
     }
     if (!mobile) newErrors.mobile = t("auth.mobileRequired");
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!password) {
       newErrors.password = t("auth.passwordRequired");
-    } else if (password.length < 6) {
+    } else if (!passwordRegex.test(password)) {
       newErrors.password = t("auth.passwordLength");
     }
     if (!cpassword) {
@@ -177,7 +178,7 @@ const Signup = () => {
               <label htmlFor="su_fname">{t("auth.firstName")}</label>
               <input
                 id="su_fname" type="text" name="fname"
-                placeholder="Ex: John Doe"
+                placeholder={t("auth.firstNamePlaceholder")}
                 value={udata.fname} onChange={adddata} required
               />
               {errors.fname && <span className="error_msg">{errors.fname}</span>}
@@ -187,7 +188,7 @@ const Signup = () => {
               <label htmlFor="su_email">{t("auth.email")}</label>
               <input
                 id="su_email" type="email" name="email"
-                placeholder="example@mail.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={udata.email} onChange={adddata} 
               />
               {errors.email && <span className="error_msg">{errors.email}</span>}
@@ -222,7 +223,7 @@ const Signup = () => {
               <label htmlFor="su_pass">{t("auth.password")}</label>
               <input
                 id="su_pass" type="password" name="password"
-                placeholder="••••••••"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={udata.password} onChange={adddata} 
               />
               {errors.password && <span className="error_msg">{errors.password}</span>}
@@ -232,7 +233,7 @@ const Signup = () => {
               <label htmlFor="su_cpass">{t("auth.confirmPassword")}</label>
               <input
                 id="su_cpass" type="password" name="cpassword"
-                placeholder="••••••••"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={udata.cpassword} onChange={adddata} 
               />
               {errors.cpassword && <span className="error_msg">{errors.cpassword}</span>}

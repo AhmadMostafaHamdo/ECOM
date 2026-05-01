@@ -124,7 +124,7 @@ const UserForm = ({
             onChange={handleInputChange}
             required={!isEditing}
             className="uf-input"
-            placeholder={isEditing ? t("auth.passwordPlaceholder") : "••••••••"}
+            placeholder={t("auth.passwordPlaceholder")}
             autoComplete={isEditing ? "new-password" : "new-password"}
           />
         </Field>
