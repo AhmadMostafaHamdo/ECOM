@@ -113,7 +113,7 @@ const Cart = () => {
     }
     setLikeLoading(true);
     try {
-      const res = await axiosInstance.post(`/products/${id}/like`);
+      const res = await axiosInstance.post(`/products/${id}/like`,{});
       if (res.status === 200) {
         const data = res.data;
         setLiked(data.liked);
