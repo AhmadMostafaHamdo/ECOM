@@ -9,11 +9,11 @@ const buildCookieOptions = () => ({
     expires: new Date(Date.now() + ONE_YEAR_MS),
     maxAge: ONE_YEAR_MS,
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",                
+    secure: true,                   
     path: "/",
-    secure: process.env.NODE_ENV === "production",
+    domain: ".kikorganisk.com",       
 });
-
 /**
  * @desc    Register a new user
  * @route   POST /api/register
