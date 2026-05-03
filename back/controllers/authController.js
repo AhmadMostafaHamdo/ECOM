@@ -5,15 +5,66 @@ const { toSessionUser, ONE_YEAR_MS } = require("../utils/helpers");
 const { asyncHandler } = require("../middleware/errorMiddleware");
 
 // Reusable cookie options builder
-const buildCookieOptions = () => ({
-    expires: new Date(Date.now() + ONE_YEAR_MS),
-    maxAge: ONE_YEAR_MS,
-    httpOnly: true,
-    sameSite: "none",                
-    secure: true,                   
-    path: "/",
-    domain: ".kikorganisk.com",       
-});
+const isProduction = process.env.NODE_ENV === "production";
+
+const normalizeCookieDomain = (domain) => {
+    if (!domain) return undefined;
+    const trimmed = domain.trim();
+    if (!trimmed) return undefined;
+    if (trimmed === "localhost" || trimmed.endsWith(".localhost")) return undefined;
+    if (!trimmed.includes(".")) return undefined;
+    return trimmed.startsWith(".") ? trimmed : `.${trimmed}`;
+};
+
+const deriveCookieDomainFromOrigins = () => {
+    const origins = (process.env.CLIENT_ORIGINS || "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+    const candidates = [];
+    for (const origin of origins) {
+        try {
+            const url = new URL(origin);
+            let host = url.hostname;
+            if (!host || host === "localhost" || host === "127.0.0.1") continue;
+            if (host.startsWith("www.")) host = host.slice(4);
+            const normalized = normalizeCookieDomain(host);
+            if (normalized) candidates.push(normalized);
+        } catch {
+            // ignore invalid origins
+        }
+    }
+
+    candidates.sort((a, b) => a.length - b.length);
+    return candidates[0];
+};
+
+const cookieDomain =
+    normalizeCookieDomain(process.env.COOKIE_DOMAIN) ||
+    (isProduction ? deriveCookieDomainFromOrigins() : undefined);
+
+const buildCookieOptions = () => {
+    const options = {
+        expires: new Date(Date.now() + ONE_YEAR_MS),
+        maxAge: ONE_YEAR_MS,
+        httpOnly: true,
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
+        path: "/",
+    };
+
+    if (cookieDomain) {
+        options.domain = cookieDomain;
+    }
+
+    return options;
+};
+
+const buildClearCookieOptions = () => {
+    const { expires, maxAge, ...options } = buildCookieOptions();
+    return options;
+};
 /**
  * @desc    Register a new user
  * @route   POST /api/register
@@ -142,7 +193,7 @@ exports.logout = asyncHandler(async (req, res) => {
         return curelem.token !== req.token;
     });
 
-    res.clearCookie("eccomerce", { path: "/" });
+    res.clearCookie("eccomerce", buildClearCookieOptions());
     await req.rootUser.save();
     res.status(200).json({ success: true });
 });

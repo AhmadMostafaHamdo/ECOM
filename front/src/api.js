@@ -20,14 +20,31 @@ export const axiosInstance = axios.create({
 
 // Helper to get cookie value by name
 export const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
+    if (typeof document === "undefined") return null;
+
+    // `document.cookie` can contain multiple cookies with the same name (different Path/Domain).
+    // Do not assume uniqueness; return the last matching occurrence.
+    const cookies = (document.cookie || "").split(";");
+    let result = null;
+
+    for (const raw of cookies) {
+        const [rawName, ...rawValueParts] = raw.trim().split("=");
+        if (!rawName || rawName !== name) continue;
+        const rawValue = rawValueParts.join("=");
+        try {
+            result = decodeURIComponent(rawValue);
+        } catch {
+            result = rawValue;
+        }
+    }
+
+    return result;
 };
 
 // Request interceptor to add CSRF token and Auth token manually
 axiosInstance.interceptors.request.use((config) => {
+    config.headers = config.headers || {};
+
     // Add CSRF Token
     const csrfToken = getCookie('csrfToken');
     if (csrfToken) {
