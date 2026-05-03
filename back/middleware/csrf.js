@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
     const token = crypto.randomBytes(32).toString("hex");
     res.cookie("csrfToken", token, {
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       httpOnly: false,
     });
     req.csrfToken = token;
