@@ -18,7 +18,10 @@ const hpp = require("hpp");
 const DefaultData = require("./defaultdata");
 const connectDB = require("./db/conn");
 const router = require("./routes/index"); // Modular router
-const allowedOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173,http://127.0.0.1:5173").split(",").map((o) => o.trim()).filter(Boolean);
+const allowedOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173,http://127.0.0.1:5173")
+  .split(",")
+  .map((o) => o.trim().replace(/^['"`]|['"`]$/g, ""))
+  .filter(Boolean);
 
 const server = http.createServer(app);
 

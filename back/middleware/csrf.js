@@ -50,9 +50,16 @@ module.exports = (req, res, next) => {
 
   if (cookieDomain) {
     cookieOptions.domain = cookieDomain;
-    // Migrate from older host-only cookie (api.*) to a shared parent-domain cookie.
-    // This prevents duplicate cookie names (host-only + domain cookie) causing mismatches.
+    // Build clear options with matching attributes
+    const clearOptions = { path: "/" };
+    if (cookieDomain) clearOptions.domain = cookieDomain;
+    if (isProduction) {
+      clearOptions.secure = true;
+      clearOptions.sameSite = "none";
+    }
+    // Clear old cookies with different scopes
     res.clearCookie(cookieName, { path: "/" });
+    res.clearCookie(cookieName, clearOptions);
   }
 
   const currentToken = req.cookies?.[cookieName];
@@ -62,6 +69,20 @@ module.exports = (req, res, next) => {
   res.cookie(cookieName, token, cookieOptions);
   req.csrfToken = token;
 
+  // Debug logging if enabled
+  if (process.env.DEBUG_CSRF === "true") {
+    console.log("CSRF Debug:", {
+      method: req.method,
+      url: req.url,
+      cookieName,
+      currentToken: !!currentToken,
+      receivedToken: !!req.headers[headerName],
+      cookieDomain,
+      isProduction,
+      cookieOptions,
+    });
+  }
+
   // Exempt safe methods and login/register from CSRF if you wish, or apply to all mutations
   const safeMethods = ["GET", "HEAD", "OPTIONS"];
 
@@ -70,6 +91,14 @@ module.exports = (req, res, next) => {
     const receivedToken = req.headers[headerName];
 
     if (!receivedToken || receivedToken !== token) {
+      console.error("CSRF Error:", {
+        receivedToken: !!receivedToken,
+        token: !!token,
+        receivedTokenValue: receivedToken ? `${receivedToken.substring(0, 10)}...` : null,
+        tokenValue: token ? `${token.substring(0, 10)}...` : null,
+        method: req.method,
+        url: req.url,
+      });
       return res
         .status(403)
         .json({ error: "Invalid CSRF Token. Request mitigated." });

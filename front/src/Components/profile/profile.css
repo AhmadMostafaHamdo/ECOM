@@ -904,7 +904,7 @@
 
 /* ── ≤ 1024px — small desktop / large tablet ─────────────────── */
 @media (max-width: 1024px) {
-  .pp-hero { padding: 80px 20px 44px; }
+  .pp-hero { padding: 80px 20px 44px; margin-top: 35px; }
   .pp-body { padding: 24px 20px 60px; }
   .pp-row--top { grid-template-columns: 300px 1fr; }
 }

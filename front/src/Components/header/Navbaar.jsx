@@ -147,35 +147,7 @@ const Navbaar = React.memo(({ onSearch }) => {
               <SearchIcon style={{ fontSize: 20 }} />
             </button>
 
-            {text && (
-              <List className="extrasearch_dropdown">
-                {isSearching ? (
-                  <ListItem className="searching_status">{t("common.searching")}</ListItem>
-                ) : suggestions.length ? (
-                  suggestions.map((p) => (
-                    <ListItem key={p.id} className="suggestion_item">
-                      <NavLink
-                        to={`/getproductsone/${p.id}`}
-                        onClick={(e) => {
-                          if (!account) {
-                            e.preventDefault();
-                            setShowLoginPrompt(true);
-                          } else {
-                            setText("");
-                          }
-                        }}
-                      >
-                        {p.title.longTitle}
-                      </NavLink>
-                    </ListItem>
-                  ))
-                ) : (
-                  <ListItem className="searching_status">
-                    {t("allProducts.noProductsFound")}
-                  </ListItem>
-                )}
-              </List>
-            )}
+          
           </form>
         </div>
 
