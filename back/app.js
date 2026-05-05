@@ -28,7 +28,19 @@ const server = http.createServer(app);
 // Socket.IO setup
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: function (origin, callback) {
+            let cleanedOrigin = origin;
+            if (cleanedOrigin) {
+                cleanedOrigin = cleanedOrigin
+                    .trim()
+                    .replace(/^['"`\s]+|['"`\s]+$/g, "");
+            }
+            if (!cleanedOrigin || allowedOrigins.includes(cleanedOrigin) || process.env.NODE_ENV !== "production") {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -90,9 +102,18 @@ app.use(cookieParser());
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+        // Clean origin: remove any quotes, backticks, and trim whitespace
+        let cleanedOrigin = origin;
+        if (cleanedOrigin) {
+            cleanedOrigin = cleanedOrigin
+                .trim()
+                .replace(/^['"`\s]+|['"`\s]+$/g, "");
+        }
+        
+        if (!cleanedOrigin || allowedOrigins.includes(cleanedOrigin) || process.env.NODE_ENV !== "production") {
             callback(null, true);
         } else {
+            console.log("CORS blocked origin:", { original: origin, cleaned: cleanedOrigin, allowed: allowedOrigins });
             callback(new Error('Not allowed by CORS'));
         }
     },
