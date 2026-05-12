@@ -48,7 +48,7 @@ const AppRouter = () => {
   const { account, showLoginPrompt, setShowLoginPrompt } = useContext(Logincontext);
   const { isDark } = useTheme();
   const authChecked = useAppSession();
-  const storefront = useStorefrontFilters(t);
+  const storefront = useStorefrontFilters(t, i18n);
 
   useDocumentDirection(i18n);
 
@@ -86,7 +86,9 @@ const AppRouter = () => {
               <StorefrontLayout
                 categories={storefront.categories}
                 selectedCategory={storefront.selectedCategory}
+                selectedSubCategory={storefront.selectedSubCategory}
                 onCategoryChange={storefront.setSelectedCategory}
+                onSubCategoryChange={storefront.setSelectedSubCategory}
                 onApplyFilters={storefront.handleFilterApply}
                 onSearchChange={storefront.setSearchTerm}
                 showLoginPrompt={showLoginPrompt}
@@ -99,6 +101,8 @@ const AppRouter = () => {
               element={
                 <Maincomp
                   selectedCategory={storefront.selectedCategory}
+                  selectedSubCategory={storefront.selectedSubCategory}
+                  categories={storefront.categories}
                   filters={storefront.appliedFilters}
                   setSelectedCategory={storefront.setSelectedCategory}
                   searchTerm={storefront.searchTerm}

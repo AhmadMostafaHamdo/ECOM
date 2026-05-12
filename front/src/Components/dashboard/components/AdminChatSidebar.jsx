@@ -46,13 +46,13 @@ const AdminChatSidebar = ({
     return (
         <div className={`admin-chat-sidebar ${activeConversation ? 'mobile-hidden' : ''}`}>
             <div className="admin-chat-tabs">
-                <button 
+                <button
                     className={`chat-tab ${activeTab === 'recent' ? 'active' : ''}`}
                     onClick={() => handleTabChange('recent')}
                 >
                     {t('adminChat.recent', 'Recent')}
                 </button>
-                <button 
+                <button
                     className={`chat-tab ${activeTab === 'users' ? 'active' : ''}`}
                     onClick={() => handleTabChange('users')}
                 >

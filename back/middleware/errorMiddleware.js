@@ -2,7 +2,20 @@
  * Helper to wrap async express routes and pass errors to the global error handler.
  */
 exports.asyncHandler = (fn) => (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+    Promise.resolve(fn(req, res, next)).catch((error) => {
+        if (typeof next === "function") {
+            return next(error);
+        }
+
+        if (res && !res.headersSent) {
+            return res.status(error.statusCode || 500).json({
+                success: false,
+                error: error.message || "Internal Server Error",
+            });
+        }
+
+        throw error;
+    });
 };
 
 /**

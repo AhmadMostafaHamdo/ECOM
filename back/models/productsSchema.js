@@ -14,6 +14,12 @@ const productSchema = new mongoose.Schema({
         default: "Uncategorized",
         index: true
     },
+    subCategory: {
+        type: String,
+        trim: true,
+        default: "",
+        index: true
+    },
     url: String,
     detailUrl: String,
     images: [String],

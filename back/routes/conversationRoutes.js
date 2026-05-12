@@ -31,7 +31,7 @@ router.post("/", authenicate, async (req, res) => {
         ])
       });
       await conversation.save();
-      
+
       // Populate participants after saving
       conversation = await Conversation.findById(conversation._id)
         .populate("participants", "fname email");

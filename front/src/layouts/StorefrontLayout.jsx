@@ -19,7 +19,9 @@ const transition = {
 const StorefrontLayout = ({
   categories,
   selectedCategory,
+  selectedSubCategory,
   onCategoryChange,
+  onSubCategoryChange,
   onApplyFilters,
   onSearchChange,
   showLoginPrompt,
@@ -36,7 +38,9 @@ const StorefrontLayout = ({
         <Newnav
           categories={categories}
           selectedCategory={selectedCategory}
+          selectedSubCategory={selectedSubCategory}
           onCategoryChange={onCategoryChange}
+          onSubCategoryChange={onSubCategoryChange}
           onApplyFilters={onApplyFilters}
         />
       )}

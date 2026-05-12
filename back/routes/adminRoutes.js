@@ -6,12 +6,15 @@ const adminController = require("../controllers/adminController");
 const { asyncHandler } = require("../middleware/errorMiddleware");
 const authenticate = require("../middleware/authenticate");
 const requireAdmin = require("../middleware/admin");
+const categoryController = require("../controllers/categoryController");
 const Category = require("../models/categorySchema");
 const products = require("../models/productsSchema");
 const User = require("../models/userSchema");
 const { resolveProductCategory, buildProductPayload, escapeRegex: escapeRx, normalizeCategory: normalizecat, optimizeImage } = require("../utils/helpers");
 const { CATEGORY_ALL, UNCATEGORIZED } = require("../utils/constants");
 const upload = require("../middleware/upload");
+
+const categoryUpload = upload.any();
 
 // Helper functions
 const normalizeCategory = (value = "") => value.toString().trim().toLowerCase();
@@ -80,38 +83,7 @@ router.get(
   "/admin/categories",
   authenticate,
   requireAdmin,
-  asyncHandler(async (req, res) => {
-    try {
-      const { page = 1, limit = 10, search = "" } = req.query;
-      const pageNum = Math.max(1, parseInt(page) || 1);
-      const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
-      const skip = (pageNum - 1) * limitNum;
-
-      let query = {};
-      if (search) {
-        const searchRegex = new RegExp(escapeRegex(search), "i");
-        query.name = searchRegex;
-      }
-
-      const [categories, totalItems] = await Promise.all([
-        Category.find(query).sort({ name: 1 }).skip(skip).limit(limitNum),
-        Category.countDocuments(query),
-      ]);
-
-      const payload = await getCategoryDashboardPayload(categories);
-
-      res.status(200).json({
-        data: payload,
-        page: pageNum,
-        limit: limitNum,
-        total: totalItems,
-        total_pages: Math.ceil(totalItems / limitNum),
-      });
-    } catch (error) {
-      console.error("[Admin] Failed to fetch categories:", error.message);
-      res.status(500).json({ error: "Failed to fetch categories" });
-    }
-  }),
+  categoryController.getAdminCategories,
 );
 
 
@@ -119,50 +91,8 @@ router.post(
   "/admin/categories",
   authenticate,
   requireAdmin,
-  upload.single("imageFile"),
-  asyncHandler(async (req, res) => {
-    try {
-      const name = req.body?.name?.toString() || "";
-      let image = req.body?.image?.toString() || "";
-
-      // Handle file upload
-      if (req.file) {
-        const filename = await optimizeImage(req.file.buffer, req.file.originalname);
-        image = `/uploads/${filename}`;
-      }
-
-      if (!name || name.trim().length < 2) {
-        return res
-          .status(422)
-          .json({ error: "Category name must be at least 2 characters" });
-      }
-
-      if (name.trim().length > 50) {
-        return res.status(422).json({ error: "Category name must be at most 50 characters" });
-      }
-
-      const existingCategory = await Category.findOne({
-        normalizedName: name.trim().toLowerCase(),
-      });
-      if (existingCategory) {
-        return res.status(409).json({ error: "Category already exists" });
-      }
-
-      const newCategory = new Category({
-        name: name.trim(),
-        image: image ? image.trim().substring(0, 2048) : "",
-      });
-
-      await newCategory.save();
-      res.status(201).json(newCategory);
-    } catch (error) {
-      console.error("[AdminAPI] Failed to create category:", error.message);
-      res.status(500).json({ 
-        error: "Failed to create category",
-        message: error.message 
-      });
-    }
-  }),
+  categoryUpload,
+  categoryController.createCategory,
 );
 
 
@@ -170,101 +100,22 @@ router.put(
   "/admin/categories/:id",
   authenticate,
   requireAdmin,
-  upload.single("imageFile"),
-  async (req, res) => {
-    try {
-      const { name, image: imageBody } = req.body;
-      const categoryId = req.params.id;
-      let image = imageBody;
-
-      // Handle file upload
-      if (req.file) {
-        const filename = await optimizeImage(req.file.buffer, req.file.originalname);
-        image = `/uploads/${filename}`;
-      }
-
-      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-        return res.status(400).json({ error: "Invalid category ID" });
-      }
-
-      const category = await Category.findById(categoryId);
-      if (!category) {
-        return res.status(404).json({ error: "Category not found" });
-      }
-
-      if (name) {
-        const trimmedName = name.trim();
-        if (trimmedName.length < 2) {
-          return res.status(422).json({ error: "Category name must be at least 2 characters" });
-        }
-        if (trimmedName.length > 100) {
-          return res.status(422).json({ error: "Category name must be at most 100 characters" });
-        }
-        const duplicate = await Category.findOne({
-          normalizedName: trimmedName.toLowerCase(),
-          _id: { $ne: category._id },
-        });
-        if (duplicate) {
-          return res.status(409).json({ error: "Category already exists" });
-        }
-        category.name = trimmedName;
-      }
-
-      if (image !== undefined) {
-        category.image = image.trim().substring(0, 2048);
-      }
-
-      await category.save();
-      res.status(200).json(category);
-    } catch (error) {
-      console.error("[Admin] Failed to update category:", error.message);
-      res.status(500).json({ error: "Failed to update category" });
-    }
-  },
+  categoryUpload,
+  categoryController.updateCategory,
 );
 
 router.delete(
   "/admin/categories/:id",
   authenticate,
   requireAdmin,
-  async (req, res) => {
-    try {
-      const categoryId = req.params.id;
-
-      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-        return res.status(400).json({ error: "Invalid category ID" });
-      }
-
-      const category = await Category.findById(categoryId);
-
-      if (!category) {
-        return res.status(404).json({ error: "Category not found" });
-      }
-
-      // Move products to "Uncategorized"
-      await products.updateMany(
-        { category: { $regex: `^${escapeRx(category.name)}$`, $options: "i" } },
-        { $set: { category: "Uncategorized" } },
-      );
-
-      await Category.findByIdAndDelete(categoryId);
-
-      res.status(200).json({
-        success: true,
-        message: "Category deleted successfully",
-      });
-    } catch (error) {
-      console.error("[Admin] Failed to delete category:", error.message);
-      res.status(500).json({ error: "Failed to delete category" });
-    }
-  },
+  categoryController.deleteCategory,
 );
 
 // ─── Admin Products Management ──────────────────────────────────────────────
 
 router.get("/admin/products", authenticate, requireAdmin, async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "", category = "" } = req.query;
+    const { page = 1, limit = 10, search = "", category = "", subCategory = "" } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
     const skip = (pageNum - 1) * limitNum;
@@ -273,6 +124,9 @@ router.get("/admin/products", authenticate, requireAdmin, async (req, res) => {
 
     if (category && normalizecat(category) !== normalizecat(CATEGORY_ALL)) {
       clauses.push({ category: { $regex: `^${escapeRx(category)}$`, $options: "i" } });
+    }
+    if (subCategory) {
+      clauses.push({ subCategory: { $regex: `^${escapeRx(subCategory)}$`, $options: "i" } });
     }
 
     if (search) {

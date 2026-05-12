@@ -19,6 +19,7 @@ import { formatCurrency } from "../../utils/localizeUtils";
 import { motion, AnimatePresence } from "framer-motion";
 import { LocalOffer, StarRate, Visibility, ArrowForward } from "@mui/icons-material";
 import Pagination from "../common/Pagination";
+import { getCategoryValue } from "../../utils/categoryUtils";
 
 const CATEGORY_ALL = "All Categories";
 
@@ -117,7 +118,9 @@ const ProductCard = ({ product, onLoginRequired }) => {
       </div>
 
       <div className="home_card_body">
-        <span className="home_card_category">{product.category}</span>
+        <span className="home_card_category">
+          {product.subCategory ? `${product.category} / ${product.subCategory}` : product.category}
+        </span>
         <h3 className="home_card_title">{product?.title?.shortTitle || "Untitled"}</h3>
         {product.tagline && <p className="home_card_tagline">{product.tagline}</p>}
 
@@ -151,6 +154,8 @@ const ProductCard = ({ product, onLoginRequired }) => {
 const Maincomp = React.memo(
   ({
     selectedCategory = CATEGORY_ALL,
+    selectedSubCategory = "",
+    categories = [],
     filters = null,
     setSelectedCategory,
     searchTerm = "",
@@ -195,6 +200,7 @@ const Maincomp = React.memo(
             selectedCategory && selectedCategory !== CATEGORY_ALL
               ? selectedCategory
               : undefined,
+          subCategory: selectedSubCategory || undefined,
           selections: filters?.selections || {},
           price: filters?.price ?? null,
           search: searchTerm,
@@ -229,7 +235,7 @@ const Maincomp = React.memo(
       } finally {
         setLoading(false);
       }
-    }, [selectedCategory, filters, searchTerm]);
+    }, [selectedCategory, selectedSubCategory, filters, searchTerm]);
 
     useEffect(() => {
       fetchProducts(1);
@@ -241,7 +247,10 @@ const Maincomp = React.memo(
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const isDefaultView = selectedCategory === CATEGORY_ALL && !filters && !searchTerm;
+    const selectedCategoryOption = categories.find((category) => getCategoryValue(category) === selectedCategory);
+    const selectedSubCategoryOption = selectedCategoryOption?.subCategories?.find((sub) => sub.value === selectedSubCategory);
+    const selectedLabel = selectedSubCategoryOption?.label || selectedCategoryOption?.label || selectedCategory;
+    const isDefaultView = selectedCategory === CATEGORY_ALL && !selectedSubCategory && !filters && !searchTerm;
 
     if (loading && products.length === 0) {
       return (
@@ -271,7 +280,7 @@ const Maincomp = React.memo(
             <h4>
               {selectedCategory === CATEGORY_ALL
                 ? t("home.showingAll")
-                : `${t("home.category")}: ${selectedCategory}`}
+                : `${t("home.category")}: ${selectedLabel}`}
             </h4>
             <p>
               {pagination.totalItems} {t("allProducts.productsFound")}
@@ -295,7 +304,7 @@ const Maincomp = React.memo(
                     ? t("home.allProducts")
                     : selectedCategory === CATEGORY_ALL
                     ? t("allProducts.title", "Products")
-                    : selectedCategory}
+                    : selectedLabel}
                 </h2>
                 <span className="home_products_count">
                   {pagination.totalItems} {t("allProducts.productsFound", "products")}

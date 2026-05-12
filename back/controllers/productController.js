@@ -50,7 +50,7 @@ exports.ensureCategoryCatalog = async () => {
         const categoryNames = [...new Set(resolvedCategories.filter(Boolean))];
         if (!categoryNames.includes(UNCATEGORIZED)) categoryNames.push(UNCATEGORIZED);
 
-        const existingCategories = await Category.find({}, { normalizedName: 1 }).lean();
+        const existingCategories = await Category.find({}, { normalizedName: 1, name: 1 }).lean();
         const existingNormalized = new Set(existingCategories.map((category) => category.normalizedName));
         const missingCategoryNames = categoryNames.filter((name) => !existingNormalized.has(normalizeCategory(name)));
 
@@ -63,7 +63,7 @@ exports.ensureCategoryCatalog = async () => {
 };
 
 exports.getProducts = asyncHandler(async (req, res) => {
-    const { category, search, page = 1, limit = 10 } = req.query;
+    const { category, subCategory, search, page = 1, limit = 10 } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
     const skip = (pageNum - 1) * limitNum;
@@ -71,6 +71,9 @@ exports.getProducts = asyncHandler(async (req, res) => {
     let query = {};
     if (category && normalizeCategory(category) !== normalizeCategory(CATEGORY_ALL)) {
         query.category = { $regex: `^${escapeRegex(category)}$`, $options: "i" };
+    }
+    if (subCategory) {
+        query.subCategory = { $regex: `^${escapeRegex(subCategory)}$`, $options: "i" };
     }
 
     if (search) {
@@ -102,7 +105,7 @@ exports.getProducts = asyncHandler(async (req, res) => {
  * @route   POST /api/products/filter
  */
 exports.filterProducts = asyncHandler(async (req, res) => {
-    const { category, selections = {}, price, search, page = 1, limit = 12 } = req.method === 'POST' ? req.body : req.query;
+    const { category, subCategory, selections = {}, price, search, page = 1, limit = 12 } = req.method === 'POST' ? req.body : req.query;
 
     let activeSelections = selections;
     if (req.method === 'GET' && typeof selections === 'string') {
@@ -116,6 +119,9 @@ exports.filterProducts = asyncHandler(async (req, res) => {
     const clauses = [];
     if (category && normalizeCategory(category) !== normalizeCategory(CATEGORY_ALL)) {
         clauses.push({ category: { $regex: `^${escapeRegex(category)}$`, $options: "i" } });
+    }
+    if (subCategory) {
+        clauses.push({ subCategory: { $regex: `^${escapeRegex(subCategory)}$`, $options: "i" } });
     }
 
     if (search) {

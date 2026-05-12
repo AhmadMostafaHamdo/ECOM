@@ -9,6 +9,25 @@ const keysecret = process.env.KEY;
 
 const normalizeCategory = (value = "") => value.toString().trim().toLowerCase();
 
+const getLocalizedNameValue = (name, preferredLanguage = "en") => {
+    if (typeof name === "string") return name.trim();
+    if (name && typeof name === "object") {
+        return (
+            name[preferredLanguage] ||
+            name.en ||
+            name.ar ||
+            Object.values(name).find((value) => typeof value === "string" && value.trim()) ||
+            ""
+        ).toString().trim();
+    }
+    return "";
+};
+
+const getCategoryValue = (category = {}) => {
+    if (typeof category === "string") return category.trim();
+    return getLocalizedNameValue(category.name);
+};
+
 const generateSessionId = () => crypto.randomBytes(16).toString("hex");
 
 const getClientIp = (req = {}) => {
@@ -88,6 +107,7 @@ const resolveProductCategory = (productDoc) => {
         ...product,
         id: (product.id || product._id).toString(),
         category: categoryValue || shortTitleValue || UNCATEGORIZED,
+        subCategory: typeof product.subCategory === "string" ? product.subCategory.trim() : "",
     };
 };
 
@@ -167,6 +187,9 @@ const buildProductPayload = (body = {}, fallback = {}) => {
     const category = (body.category || fallback.category || UNCATEGORIZED)
         .toString()
         .trim();
+    const subCategory = (body.subCategory || fallback.subCategory || "")
+        .toString()
+        .trim();
 
     const cost = Number(body.cost || fallback?.price?.cost || 0);
     const mrp = Number(body.mrp || fallback?.price?.mrp || cost);
@@ -198,6 +221,7 @@ const buildProductPayload = (body = {}, fallback = {}) => {
 
     return {
         category: category || UNCATEGORIZED,
+        subCategory,
         url: primaryImage,
         detailUrl: detailImage,
         images: images.length
@@ -249,6 +273,8 @@ const optimizeImage = async (fileBuffer, filename) => {
 
 module.exports = {
     normalizeCategory,
+    getLocalizedNameValue,
+    getCategoryValue,
     generateSessionId,
     getClientIp,
     getViewerIdentity,

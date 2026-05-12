@@ -13,6 +13,7 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const categoryController = require("../controllers/categoryController");
 
 const keysecret = process.env.KEY;
 const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
@@ -796,35 +797,11 @@ router.get("/categories", async (req, res) => {
   }
 });
 
-router.post("/categories", async (req, res) => {
-  try {
-    const result = await createCategoryRecord(req.body?.name);
-    return res.status(result.status).json(result.body);
-  } catch (error) {
-    console.log("error " + error.message);
-    res.status(500).json({ error: "Failed to create category" });
-  }
-});
+router.post("/categories", upload.any(), categoryController.createCategory);
 
-router.put("/categories/:id", async (req, res) => {
-  try {
-    const result = await updateCategoryRecord(req.params.id, req.body?.name);
-    return res.status(result.status).json(result.body);
-  } catch (error) {
-    console.log("error " + error.message);
-    res.status(500).json({ error: "Failed to update category" });
-  }
-});
+router.put("/categories/:id", upload.any(), categoryController.updateCategory);
 
-router.delete("/categories/:id", async (req, res) => {
-  try {
-    const result = await deleteCategoryRecord(req.params.id);
-    return res.status(result.status).json(result.body);
-  } catch (error) {
-    console.log("error " + error.message);
-    res.status(500).json({ error: "Failed to delete category" });
-  }
-});
+router.delete("/categories/:id", categoryController.deleteCategory);
 
 router.get("/admin/categories", authenicate, requireAdmin, async (req, res) => {
   try {
@@ -863,45 +840,23 @@ router.post(
   "/admin/categories",
   authenicate,
   requireAdmin,
-  async (req, res) => {
-    try {
-      const result = await createCategoryRecord(req.body?.name);
-      return res.status(result.status).json(result.body);
-    } catch (error) {
-      console.log("error " + error.message);
-      res.status(500).json({ error: "Failed to create admin category" });
-    }
-  },
+  upload.any(),
+  categoryController.createCategory,
 );
 
 router.put(
   "/admin/categories/:id",
   authenicate,
   requireAdmin,
-  async (req, res) => {
-    try {
-      const result = await updateCategoryRecord(req.params.id, req.body?.name);
-      return res.status(result.status).json(result.body);
-    } catch (error) {
-      console.log("error " + error.message);
-      res.status(500).json({ error: "Failed to update admin category" });
-    }
-  },
+  upload.any(),
+  categoryController.updateCategory,
 );
 
 router.delete(
   "/admin/categories/:id",
   authenicate,
   requireAdmin,
-  async (req, res) => {
-    try {
-      const result = await deleteCategoryRecord(req.params.id);
-      return res.status(result.status).json(result.body);
-    } catch (error) {
-      console.log("error " + error.message);
-      res.status(500).json({ error: "Failed to delete admin category" });
-    }
-  },
+  categoryController.deleteCategory,
 );
 
 router.get("/admin/users", authenicate, requireAdmin, async (req, res) => {

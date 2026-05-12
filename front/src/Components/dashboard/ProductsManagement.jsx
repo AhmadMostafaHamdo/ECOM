@@ -9,6 +9,7 @@ import "./CategoriesManagement.css";
 import ProductForm from "./products/ProductForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { toast } from "react-toastify";
+import { getActiveLanguage, normalizeCategoryOption } from "../../utils/categoryUtils";
 
 const CATEGORY_ALL = "All Categories"; // internal value, label will be translated
 
@@ -29,10 +30,12 @@ const emptyForm = {
   province: "",
   city: "",
   mobile: "",
+  subCategory: "",
 };
 
 const ProductsManagement = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = getActiveLanguage(i18n);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
@@ -106,16 +109,16 @@ const ProductsManagement = () => {
         const payload = response.data;
         const categoriesArray = payload.data || payload;
         const list = Array.isArray(categoriesArray)
-          ? categoriesArray.map((item) =>
-            typeof item === "string" ? item : item.name,
-          )
+          ? categoriesArray
+            .filter((item) => (typeof item === "string" ? item !== CATEGORY_ALL : item?._id !== "all"))
+            .map((item) => normalizeCategoryOption(item, t, language))
           : [];
         setCategories(list);
       }
     } catch (err) {
       console.error(err);
     }
-  }, []);
+  }, [t, language]);
 
   useEffect(() => {
     loadCategories();
@@ -164,6 +167,7 @@ const ProductsManagement = () => {
       province: product?.locationDetail?.province || "",
       city: product?.locationDetail?.city || "",
       mobile: product?.mobile || "",
+      subCategory: product?.subCategory || "",
     });
     setShowForm(true);
   }, []);
@@ -176,7 +180,11 @@ const ProductsManagement = () => {
 
   const updateField = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "category" ? { subCategory: "" } : {}),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -251,7 +259,7 @@ const ProductsManagement = () => {
         label: t("navigation.categories"),
         options: [
           { value: CATEGORY_ALL, label: t("home.showingAll") },
-          ...categories.map((cat) => ({ value: cat, label: cat })),
+          ...categories.map((cat) => ({ value: cat.value, label: cat.label })),
         ],
       },
     ],
@@ -274,7 +282,17 @@ const ProductsManagement = () => {
       {
         key: "category",
         title: t("navigation.categories"),
-        type: "role",
+        type: "custom",
+        render: (product) => (
+          <div>
+            <div className="product-category">{product.category}</div>
+            {product.subCategory && (
+              <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
+                {product.subCategory}
+              </div>
+            )}
+          </div>
+        ),
         sortable: true,
       },
       {
@@ -421,8 +439,8 @@ const ProductsManagement = () => {
                   {t("navigation.allCategories")}
                 </option>
                 {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                  <option key={c.value} value={c.value}>
+                    {c.label}
                   </option>
                 ))}
               </select>

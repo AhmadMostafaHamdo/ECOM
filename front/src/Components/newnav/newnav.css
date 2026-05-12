@@ -36,6 +36,19 @@
     display: none;
 }
 
+.sub_category_row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 0 12px;
+    scrollbar-width: none;
+}
+
+.sub_category_row::-webkit-scrollbar {
+    display: none;
+}
+
 /* Category Chips */
 .category_chip {
     background: #f1f5f9;
@@ -51,6 +64,29 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.sub_category_chip {
+    background: var(--surface, #fff);
+    border: 1px solid rgba(245, 166, 35, 0.25);
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sub_category_chip:hover,
+.sub_category_chip.active {
+    background: #fff7e6;
+    border-color: var(--nav-orange);
+    color: #9a5a00;
 }
 
 .category_image_thumb {
@@ -93,5 +129,9 @@
     .category_chip {
         padding: 6px 14px;
         font-size: 12px;
+    }
+    .sub_category_chip {
+        padding: 6px 12px;
+        font-size: 11px;
     }
 }

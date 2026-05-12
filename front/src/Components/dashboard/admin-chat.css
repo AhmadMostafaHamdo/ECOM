@@ -23,6 +23,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -553,7 +554,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -566,9 +569,11 @@
   .admin-chat-body {
     grid-template-columns: 1fr;
   }
+
   .admin-chat-sidebar {
     display: none;
   }
+
   .admin-chat-sidebar.mobile-visible {
     display: flex;
     position: absolute;

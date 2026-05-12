@@ -9,6 +9,7 @@ import Input from "../common/Input";
 import "./create-product.css";
 import { LocalOffer, ShoppingBag, Map, FilterFrames } from "@mui/icons-material";
 import PhoneInput from "../ui/PhoneInput";
+import { CATEGORY_ALL_VALUE, getActiveLanguage, normalizeCategoryOption } from "../../utils/categoryUtils";
 
 const initialForm = {
   shortTitle: "",
@@ -27,16 +28,18 @@ const initialForm = {
   province: "",
   city: "",
   mobile: "",
+  subCategory: "",
 };
 
 const CreateProduct = ({ mode = "create" }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { activeCountry } = useLocalize();
+  const language = getActiveLanguage(i18n);
   const navigate = useNavigate();
   const { id: editId } = useParams();
   const isEdit = mode === "edit" && Boolean(editId);
 
-  const CATEGORY_ALL = t("navigation.allCategories", "All Categories");
+  const CATEGORY_ALL = CATEGORY_ALL_VALUE;
 
   const [form, setForm] = useState(initialForm);
   const [categories, setCategories] = useState([]);
@@ -45,6 +48,11 @@ const CreateProduct = ({ mode = "create" }) => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [images, setImages] = useState([]);
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.value === form.category),
+    [categories, form.category],
+  );
+  const subCategories = selectedCategory?.subCategories || [];
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -60,15 +68,16 @@ const CreateProduct = ({ mode = "create" }) => {
           const categoriesArray = payload.data || payload;
           const list = Array.isArray(categoriesArray)
             ? categoriesArray
-              .map((item) => (typeof item === "string" ? item : item.name))
-              .filter((name) => name !== CATEGORY_ALL)
+              .filter((item) => (typeof item === "string" ? item !== CATEGORY_ALL : item?._id !== "all"))
+              .map((item) => normalizeCategoryOption(item, t, language))
             : [];
           categoryList = list;
           setCategories(list);
           if (!isEdit) {
             setForm((prev) => ({
               ...prev,
-              category: list[0] || "",
+              category: list[0]?.value || "",
+              subCategory: "",
             }));
           }
         }
@@ -79,9 +88,9 @@ const CreateProduct = ({ mode = "create" }) => {
 
           if (
             productPayload?.category &&
-            !categoryList.includes(productPayload.category)
+            !categoryList.some((category) => category.value === productPayload.category)
           ) {
-            setCategories((prev) => [...prev, productPayload.category]);
+            setCategories((prev) => [...prev, { value: productPayload.category, label: productPayload.category, subCategories: [] }]);
           }
 
           setForm({
@@ -95,7 +104,8 @@ const CreateProduct = ({ mode = "create" }) => {
             tagline: productPayload?.tagline || "",
             url: productPayload?.url || "",
             detailUrl: productPayload?.detailUrl || "",
-            category: productPayload?.category || categoryList[0] || "",
+            category: productPayload?.category || categoryList[0]?.value || "",
+            subCategory: productPayload?.subCategory || "",
             currency: productPayload?.price?.currency || "SYP",
             country: productPayload?.locationDetail?.country || "",
             province: productPayload?.locationDetail?.province || "",
@@ -128,7 +138,7 @@ const CreateProduct = ({ mode = "create" }) => {
     };
 
     bootstrap();
-  }, [editId, isEdit, navigate, t]);
+  }, [editId, isEdit, navigate, t, language]);
 
 
   const updateField = useCallback((event) => {
@@ -136,6 +146,7 @@ const CreateProduct = ({ mode = "create" }) => {
     setForm((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "category" ? { subCategory: "" } : {}),
     }));
   }, []);
 
@@ -175,6 +186,7 @@ const CreateProduct = ({ mode = "create" }) => {
       formData.append("longTitle", form.longTitle);
       formData.append("description", form.description);
       formData.append("category", form.category);
+      formData.append("subCategory", form.subCategory || "");
       formData.append("mrp", form.mrp);
       formData.append("cost", form.cost);
       formData.append("currency", form.currency);
@@ -307,11 +319,29 @@ const CreateProduct = ({ mode = "create" }) => {
               required
             >
               {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+                <option key={category.value} value={category.value}>
+                  {category.label}
                 </option>
               ))}
             </Input>
+
+            {subCategories.length > 0 && (
+              <Input
+                as="select"
+                label={t("admin.subCategory", "SubCategory")}
+                id="subCategory"
+                name="subCategory"
+                value={form.subCategory}
+                onChange={updateField}
+              >
+                <option value="">{t("admin.selectSubCategory", "Select subCategory...")}</option>
+                {subCategories.map((subCategory) => (
+                  <option key={subCategory.value} value={subCategory.value}>
+                    {subCategory.label}
+                  </option>
+                ))}
+              </Input>
+            )}
 
             <Input
               as="textarea"

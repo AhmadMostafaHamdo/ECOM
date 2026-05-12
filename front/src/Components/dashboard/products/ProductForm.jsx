@@ -46,6 +46,9 @@ const ProductForm = ({
   t,
   error,
 }) => {
+  const selectedCategory = categories.find((category) => (category.value || category) === form.category);
+  const subCategories = selectedCategory?.subCategories || [];
+
   return (
     <form className="pf-root" onSubmit={handleSubmit} noValidate>
 
@@ -80,10 +83,29 @@ const ProductForm = ({
             >
               <option value="">{t("admin.selectCategory", "Select category…")}</option>
               {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c.value || c} value={c.value || c}>{c.label || c}</option>
               ))}
             </select>
           </Field>
+
+          {subCategories.length > 0 && (
+            <Field label={t("admin.subCategory", "SubCategory")} icon={Layers}>
+              <select
+                id="pf-subCategory"
+                name="subCategory"
+                value={form.subCategory || ""}
+                onChange={updateField}
+                className="pf-input pf-select"
+              >
+                <option value="">{t("admin.selectSubCategory", "Select subCategory...")}</option>
+                {subCategories.map((subCategory) => (
+                  <option key={subCategory.value} value={subCategory.value}>
+                    {subCategory.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
         </div>
 
         <Field label={t("admin.legalDesignation", "Legal Designation")} icon={FileText} full>

@@ -42,6 +42,8 @@ const AllProducts = () => {
     };
 
     const location = useLocation();
+    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const selectedSubCategory = queryParams.get("subCategory") || "";
 
     // Core State
     const [products, setProducts] = useState([]);
@@ -53,13 +55,12 @@ const AllProducts = () => {
 
     // Initial fetch from URL
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const q = params.get("search");
+        const q = queryParams.get("search");
         if (q) {
             setSearchTerm(q);
             setDebouncedSearch(q);
         }
-    }, [location.search]);
+    }, [queryParams]);
 
     const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid");
@@ -105,6 +106,7 @@ const AllProducts = () => {
 
             const payload = {
                 category: backendCategory,
+                subCategory: selectedSubCategory || undefined,
                 selections: {},
                 price: debouncedPrice[1] < 30000 ? debouncedPrice[1] : null,
                 search: debouncedSearch,
@@ -138,7 +140,7 @@ const AllProducts = () => {
         } finally {
             setLoading(false);
         }
-    }, [categorySlug, displayCategoryName, debouncedSearch, debouncedPrice]);
+    }, [categorySlug, displayCategoryName, selectedSubCategory, debouncedSearch, debouncedPrice]);
 
     // Trigger fetch on filter changes
     useEffect(() => {
@@ -411,7 +413,9 @@ const AllProducts = () => {
                                             </div>
                                             <div className="card_details">
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span className="product_category">{product.category}</span>
+                                                    <span className="product_category">
+                                                        {product.subCategory ? `${product.category} / ${product.subCategory}` : product.category}
+                                                    </span>
                                                     {product.locationDetail && (product.locationDetail.country || product.locationDetail.city) && (
                                                         <span className="product_location" style={{ fontSize: '11px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                             <LocalOffer style={{ fontSize: '12px', color: 'var(--primary)' }} />

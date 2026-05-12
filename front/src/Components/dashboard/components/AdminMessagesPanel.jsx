@@ -59,7 +59,7 @@ const AdminMessagesPanel = ({
                     <div className="admin-messages-area">
                         <AnimatePresence initial={false}>
                             {messages.length === 0 ? (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     className="admin-messages-empty"
