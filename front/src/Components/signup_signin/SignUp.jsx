@@ -54,10 +54,9 @@ const Signup = () => {
     }
     if (!mobile) newErrors.mobile = t("auth.mobileRequired");
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!password) {
       newErrors.password = t("auth.passwordRequired");
-    } else if (!passwordRegex.test(password)) {
+    } else if (password.length < 6) {
       newErrors.password = t("auth.passwordLength");
     }
     if (!cpassword) {

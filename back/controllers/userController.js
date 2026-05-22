@@ -214,8 +214,9 @@ exports.createUser = asyncHandler(async (req, res) => {
         return res.status(422).json({ error: "Name must be 2–100 characters" });
     }
 
-    if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
-        return res.status(422).json({ error: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character" });
+    // Keep password validation aligned with the user schema minimum length.
+    if (password.length < 6) {
+        return res.status(422).json({ error: "Password must be at least 6 characters" });
     }
 
     if (password !== cpassword) {
@@ -322,8 +323,9 @@ exports.updateUser = asyncHandler(async (req, res) => {
     }
 
     if (password !== undefined && password.trim()) {
-        if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
-            return res.status(422).json({ error: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character" });
+        // Keep password validation aligned with the user schema minimum length.
+        if (password.length < 6) {
+            return res.status(422).json({ error: "Password must be at least 6 characters" });
         }
         if (cpassword !== undefined && password !== cpassword) {
             return res.status(422).json({ error: "Passwords do not match" });

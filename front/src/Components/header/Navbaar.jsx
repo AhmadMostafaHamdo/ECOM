@@ -25,6 +25,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 
 // Internal Components
 import Rightheader from "./Rightheader";
+import ConfirmDialog from "../common/ConfirmDialog";
 import LanguageSwitcher from "../common/LanguageSwitcher";
 import { useTheme } from "../context/ThemeContext";
 import LightModeIcon from "@mui/icons-material/LightMode";
@@ -48,6 +49,8 @@ const Navbaar = React.memo(({ onSearch }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const fetchSuggestions = useCallback(async (query) => {
     if (!query.trim()) {
@@ -81,12 +84,21 @@ const Navbaar = React.memo(({ onSearch }) => {
     }
   }, [account, dispatch]);
 
+  const requestLogout = useCallback(() => {
+    setAnchorEl(null);
+    setIsLogoutDialogOpen(true);
+  }, []);
+
   const logoutuser = useCallback(async () => {
+    setIsLoggingOut(true);
+
     try {
       await axiosInstance.post("/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
+      setIsLoggingOut(false);
+      setIsLogoutDialogOpen(false);
       setAccount(false);
       localStorage.removeItem("auth_token");
       setAnchorEl(null);
@@ -108,7 +120,7 @@ const Navbaar = React.memo(({ onSearch }) => {
 
           <Drawer open={dropen} onClose={() => setDropen(false)}>
             <Rightheader
-              userlog={logoutuser}
+              userlog={requestLogout}
               logclose={() => setDropen(false)}
             />
           </Drawer>
@@ -254,7 +266,7 @@ const Navbaar = React.memo(({ onSearch }) => {
             {account && (
               <MenuItem
                 className="profile_menu_item logout_item"
-                onClick={logoutuser}
+                onClick={requestLogout}
               >
                 <div className="menu_item_icon">
                   <LogoutIcon fontSize="small" />
@@ -265,6 +277,21 @@ const Navbaar = React.memo(({ onSearch }) => {
           </Menu>
         </div>
       </nav>
+
+      <ConfirmDialog
+        open={isLogoutDialogOpen}
+        title={t("logout.confirmTitle", "Confirm Logout")}
+        message={t(
+          "logout.confirmMessage",
+          "Are you sure you want to logout? You will need to sign in again to access your account.",
+        )}
+        confirmText={t("logout.confirm", "Logout")}
+        cancelText={t("logout.cancel", "Cancel")}
+        onConfirm={logoutuser}
+        onCancel={() => setIsLogoutDialogOpen(false)}
+        loading={isLoggingOut}
+        type="warning"
+      />
     </header>
   );
 });

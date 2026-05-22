@@ -91,9 +91,9 @@ exports.register = asyncHandler(async (req, res) => {
         return res.status(422).json({ error: "Name must be 2–100 characters" });
     }
 
-    // Validate password strength
-    if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 })) {
-        return res.status(422).json({ error: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character" });
+    // Keep password validation aligned with the user schema minimum length.
+    if (password.length < 6) {
+        return res.status(422).json({ error: "Password must be at least 6 characters" });
     }
 
     if (password !== cpassword) {

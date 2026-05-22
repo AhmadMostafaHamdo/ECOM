@@ -13,7 +13,7 @@ const iconMap = {
   danger: Trash2,
   warning: AlertTriangle,
   info: ShieldAlert,
-};
+}; 
 
 const ConfirmDialog = ({
   open,

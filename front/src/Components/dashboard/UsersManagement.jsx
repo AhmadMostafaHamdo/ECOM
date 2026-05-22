@@ -120,8 +120,7 @@ const UsersManagement = () => {
       role: form.role,
     };
     if (form.password.trim()) {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (!passwordRegex.test(form.password)) {
+      if (form.password.length < 6) {
         setFormError(t("auth.passwordLength"));
         return;
       }
