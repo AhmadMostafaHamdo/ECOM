@@ -6,10 +6,13 @@ import { Logincontext } from "../Components/context/Contextprovider";
 import { useTheme } from "../Components/context/ThemeContext";
 import { useAppSession } from "../hooks/useAppSession";
 import { useDocumentDirection } from "../hooks/useDocumentDirection";
+import { usePWAInstall } from "../hooks/usePWAInstall";
 import { useStorefrontFilters } from "../hooks/useStorefrontFilters";
 import StorefrontLayout from "../layouts/StorefrontLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 import AuthLayout from "../layouts/AuthLayout";
+import PWAInstallPrompt from "../Components/PWAInstallPrompt";
+import PWAFloatingInstall from "../Components/PWAFloatingInstall";
 import "react-toastify/dist/ReactToastify.css";
 
 const Maincomp = lazy(() => import("../Components/home/Maincomp"));
@@ -48,6 +51,7 @@ const AppRouter = () => {
   const { account, showLoginPrompt, setShowLoginPrompt } = useContext(Logincontext);
   const { isDark } = useTheme();
   const authChecked = useAppSession();
+  const pwaInstall = usePWAInstall();
   const storefront = useStorefrontFilters(t, i18n);
 
   useDocumentDirection(i18n);
@@ -197,6 +201,8 @@ const AppRouter = () => {
         pauseOnHover
         theme={isDark ? "dark" : "light"}
       />
+      <PWAInstallPrompt pwaInstall={pwaInstall} />
+      <PWAFloatingInstall pwaInstall={pwaInstall} />
     </div>
   );
 };
