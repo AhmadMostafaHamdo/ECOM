@@ -7,11 +7,27 @@ export const getActiveLanguage = (i18n) =>
   (i18n?.language || "en").toLowerCase().startsWith("ar") ? "ar" : "en";
 
 export const getLocalizedName = (name, language = "en") => {
-  if (typeof name === "string") return name;
-  if (name && typeof name === "object") {
-    return name?.[language] || name?.en || name?.ar || "";
+  if (!name) return "";
+
+  let parsed = name;
+  if (typeof name === "string") {
+    if (name.trim().startsWith("{") && name.trim().endsWith("}")) {
+      try {
+        parsed = JSON.parse(name);
+      } catch (e) {
+        return name;
+      }
+    } else {
+      return name;
+    }
   }
-  return "";
+
+  if (typeof parsed === "object" && parsed !== null) {
+    if (parsed[language]) return parsed[language];
+    return parsed.en || parsed.ar || Object.values(parsed)[0] || "";
+  }
+
+  return String(name);
 };
 
 export const getCategoryValue = (category) => {

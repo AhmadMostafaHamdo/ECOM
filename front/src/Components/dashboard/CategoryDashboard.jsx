@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
 import "./category-dashboard.css";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { getActiveLanguage, getLocalizedName } from "../../utils/categoryUtils";
 
 const UNCATEGORIZED = "Uncategorized";
 
 const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = getActiveLanguage(i18n);
     const [categories, setCategories] = useState([]);
     const [categoryName, setCategoryName] = useState("");
     const [loading, setLoading] = useState(true);
@@ -136,10 +138,10 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
                             {categories.map((category) => (
                                 <li key={category._id} className="category_item">
                                     <div>
-                                        <h3>{category.name}</h3>
+                                        <h3>{getLocalizedName(category.name, language)}</h3>
                                         <p>{category.productCount} product(s)</p>
                                     </div>
-                                    {category.name === UNCATEGORIZED ? (
+                                    {getLocalizedName(category.name, "en") === UNCATEGORIZED ? (
                                         <span className="protected_badge">{t('common.status')}</span>
                                     ) : (
                                         <button
@@ -161,7 +163,7 @@ const CategoryDashboard = ({ onCategoriesChanged = () => { } }) => {
             <ConfirmDialog
                 open={isConfirmOpen}
                 title={t('admin.deleteCategory') || "Delete Category"}
-                message={`Are you sure you want to delete "${categoryToDelete?.name}"? All products in this category will be reassigned to Uncategorized.`}
+                message={`Are you sure you want to delete "${getLocalizedName(categoryToDelete?.name, language)}"? All products in this category will be reassigned to Uncategorized.`}
                 confirmText={t('common.delete')}
                 cancelText={t('common.cancel')}
                 onConfirm={confirmDeleteCategory}

@@ -64,18 +64,18 @@ const PWAFloatingInstall = ({ pwaInstall }) => {
           <button
             type="button"
             onClick={handleInstall}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-[var(--gradient-primary)] px-5 text-sm font-extrabold text-white shadow-[var(--shadow-primary-lg)] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
+            className="inline-flex min-h-14 items-center justify-center gap-3 rounded-full border-2 border-[var(--surface-1)] bg-[var(--primary)] px-6 text-sm font-extrabold text-white shadow-2xl transition hover:-translate-y-1 hover:bg-[var(--primary-dark)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
             title="Install app"
             aria-label="Install Studio Commerce app"
           >
-            <span className="grid h-7 w-7 place-items-center rounded-full bg-white/18">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-white/20">
               {pwaInstall.isIOSInstallCapable ? (
-                <Smartphone size={17} aria-hidden="true" />
+                <Smartphone size={18} aria-hidden="true" />
               ) : (
-                <Download size={17} aria-hidden="true" />
+                <Download size={18} aria-hidden="true" />
               )}
             </span>
-            <span>تثبيت التطبيق</span>
+            <span className="drop-shadow-sm">تثبيت التطبيق</span>
           </button>
         </motion.div>
       )}

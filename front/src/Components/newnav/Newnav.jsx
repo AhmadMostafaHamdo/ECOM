@@ -1,6 +1,7 @@
 import React, { useRef, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { Logincontext } from "../context/Contextprovider";
-import { resolveImageUrl } from "../../utils/categoryUtils";
+import { resolveImageUrl, getLocalizedName, getActiveLanguage } from "../../utils/categoryUtils";
 import "../newnav/newnav.css";
 
 const CATEGORY_ALL = "";
@@ -15,6 +16,8 @@ const Newnav = ({
 }) => {
   const scrollRef = useRef(null);
   const { account, setShowLoginPrompt } = useContext(Logincontext);
+  const { t, i18n } = useTranslation();
+  const language = getActiveLanguage(i18n);
 
   // Normalize categories: support strings and object shapes
   const visibleCategories = Array.isArray(categories) && categories.length
@@ -79,7 +82,9 @@ const Newnav = ({
                   }}
                 />
               )}
-              <span className="category_label">{category.label || category.name}</span>
+              <span className="category_label">
+                {category.value === CATEGORY_ALL && t ? t("navigation.allCategories", "All Categories") : getLocalizedName(category.label || category.name, language)}
+              </span>
             </button>
           ))}
         </div>
@@ -105,7 +110,7 @@ const Newnav = ({
                     }}
                   />
                 )}
-                <span className="category_label">{subCategory.label}</span>
+                <span className="category_label">{getLocalizedName(subCategory.label || subCategory.name, language)}</span>
               </button>
             ))}
           </div>

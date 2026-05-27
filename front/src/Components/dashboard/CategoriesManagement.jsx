@@ -20,15 +20,15 @@ const emptyDraft = {
 };
 
 const toDraft = (category = {}) => ({
-  nameEn: typeof category.name === "string" ? category.name : category.name?.en || "",
-  nameAr: typeof category.name === "string" ? "" : category.name?.ar || "",
+  nameEn: getLocalizedName(category.name, "en"),
+  nameAr: getLocalizedName(category.name, "ar") !== getLocalizedName(category.name, "en") ? getLocalizedName(category.name, "ar") : "",
   image: category.image || "",
   file: null,
   subCategories: Array.isArray(category.subCategories)
     ? category.subCategories.map((subCategory) => ({
       _id: subCategory._id,
-      nameEn: typeof subCategory.name === "string" ? subCategory.name : subCategory.name?.en || "",
-      nameAr: typeof subCategory.name === "string" ? "" : subCategory.name?.ar || "",
+      nameEn: getLocalizedName(subCategory.name, "en"),
+      nameAr: getLocalizedName(subCategory.name, "ar") !== getLocalizedName(subCategory.name, "en") ? getLocalizedName(subCategory.name, "ar") : "",
       image: subCategory.image || "",
       value: subCategory.value || "",
       slug: subCategory.slug || "",

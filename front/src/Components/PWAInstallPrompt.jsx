@@ -123,14 +123,14 @@ const PWAInstallPrompt = ({ pwaInstall }) => {
               <button
                 type="button"
                 onClick={handleInstall}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[14px] bg-[var(--gradient-primary)] px-5 text-sm font-extrabold text-white shadow-[var(--shadow-primary)] transition hover:-translate-y-0.5"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[14px] border-2 border-transparent bg-[var(--primary)] px-6 text-sm font-extrabold text-white shadow-xl transition hover:-translate-y-1 hover:bg-[var(--primary-dark)] hover:border-[var(--primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {pwaInstall.isIOSInstallCapable ? (
                   <Plus size={18} aria-hidden="true" />
                 ) : (
                   <Download size={18} aria-hidden="true" />
                 )}
-                {pwaInstall.isIOSInstallCapable ? "فهمت" : "تثبيت التطبيق"}
+                <span className="drop-shadow-sm">{pwaInstall.isIOSInstallCapable ? "فهمت" : "تثبيت التطبيق"}</span>
               </button>
             </div>
           </motion.section>
