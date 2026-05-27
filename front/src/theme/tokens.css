@@ -51,17 +51,17 @@
   --color-neutral-800: #182235;
   --color-neutral-900: #0e1626;
 
-  --bg: linear-gradient(180deg, #f7f9fc 0%, #eef3fb 100%);
-  --surface: rgba(255, 255, 255, 0.88);
+  --bg: linear-gradient(180deg, #f9f9f9 0%, #f4f4f4 100%);
+  --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-muted: #f3f6fb;
+  --surface-muted: #f4f4f4;
   --surface-inverse: rgba(11, 18, 32, 0.94);
-  --border: rgba(148, 163, 184, 0.22);
-  --border-strong: rgba(91, 107, 132, 0.28);
-  --text-1: #0f172a;
-  --text-2: #42516a;
-  --text-3: #6b7b95;
-  --text-inverse: #f8fbff;
+  --border: #e8e8e8;
+  --border-strong: #d4d4d4;
+  --text-1: #0a0a0a;
+  --text-2: #2d2d2d;
+  --text-3: #5a5a5a;
+  --text-inverse: #ffffff;
 
   --primary: #ff9500;
   --primary-hover: #e68500;
