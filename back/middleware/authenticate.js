@@ -63,22 +63,49 @@ const authenicate = async (req, res, next) => {
             ? authHeader.split(" ")[1]
             : null;
 
+        console.log("[AUTH MIDDLEWARE] URL:", req.url);
+        console.log("[AUTH MIDDLEWARE] Auth header present:", !!authHeader);
+        if (authHeader) console.log("[AUTH MIDDLEWARE] Header starts with Bearer:", authHeader.startsWith("Bearer "));
+        console.log("[AUTH MIDDLEWARE] Token extracted:", token ? `${token.substring(0, 15)}...` : "NONE");
+
         if (!token) {
             console.log("Auth failed: Authorization header missing or malformed.");
             return res.status(401).json({ error: "Unauthorized: token missing" });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || process.env.KEY);
+        const secret = process.env.JWT_SECRET || process.env.KEY;
+        console.log("[AUTH MIDDLEWARE] Secret used for verify (first 5 chars):", secret ? secret.substring(0,5) : "NONE");
+        
+        let decoded;
+        try {
+            decoded = jwt.verify(token, secret);
+            console.log("[AUTH MIDDLEWARE] Token decoded successfully:", decoded);
+        } catch (verifyErr) {
+            console.log("[AUTH MIDDLEWARE] JWT Verify Error:", verifyErr.message);
+            throw verifyErr;
+        }
 
-        const rootUser = await User.findOne({ _id: decoded.id, "tokens.token": token });
+        const userId = decoded.id || decoded._id;
+
+        const rootUser = await User.findOne({ _id: userId, "tokens.token": token });
 
         if (!rootUser) {
+            console.log(`[AUTH MIDDLEWARE] User not found for id: ${userId} AND token match.`);
+            const userWithoutToken = await User.findOne({ _id: decoded.id });
+            console.log(`[AUTH MIDDLEWARE] Does user exist at all? ${!!userWithoutToken}`);
+            if (userWithoutToken) {
+                console.log(`[AUTH MIDDLEWARE] User tokens length: ${userWithoutToken.tokens?.length}`);
+                if (userWithoutToken.tokens?.length > 0) {
+                    console.log(`[AUTH MIDDLEWARE] First token starts with: ${userWithoutToken.tokens[0].token.substring(0,15)}...`);
+                }
+            }
             clearAuthCookie(res);
             return res.status(401).json({ error: "Unauthorized: invalid token" });
         }
 
         // Check if user is banned
         if (rootUser.isBanned) {
+            console.log("[AUTH MIDDLEWARE] User is banned.");
             clearAuthCookie(res);
             return res.status(403).json({
                 error: "Account suspended",
@@ -87,6 +114,7 @@ const authenicate = async (req, res, next) => {
             });
         }
 
+        console.log("[AUTH MIDDLEWARE] Authentication successful for user:", rootUser.email);
         req.token = token;
         // Attach decoded to req.user as per user's request
         req.user = decoded;
@@ -98,9 +126,9 @@ const authenicate = async (req, res, next) => {
         next();
 
     } catch (error) {
+        console.log("[AUTH MIDDLEWARE] Final catch block error:", error.message);
         clearAuthCookie(res);
         res.status(401).json({ error: "Unauthorized: token invalid or expired" });
-        console.log(error);
     }
 };
 
@@ -116,7 +144,8 @@ const optionalAuthenticate = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || process.env.KEY);
-        const rootUser = await User.findOne({ _id: decoded.id, "tokens.token": token });
+        const userId = decoded.id || decoded._id;
+        const rootUser = await User.findOne({ _id: userId, "tokens.token": token });
 
         if (!rootUser || rootUser.isBanned) {
             clearAuthCookie(res);

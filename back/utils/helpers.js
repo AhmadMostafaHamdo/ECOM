@@ -4,9 +4,7 @@ const { ONE_YEAR_MS, UNCATEGORIZED } = require("./constants");
 const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
-
-const keysecret = process.env.KEY;
-
+const keysecret = process.env.JWT_SECRET;
 const normalizeCategory = (value = "") => value.toString().trim().toLowerCase();
 
 const getLocalizedNameValue = (name, preferredLanguage = "en") => {
