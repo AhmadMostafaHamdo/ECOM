@@ -23,17 +23,16 @@ const clearAuthCookie = (res) => {
 
 const authenicate = async (req, res, next) => {
     try {
-        let token = req.cookies.eccomerce;
-        if (!token && req.headers.authorization) {
-            const authHeader = req.headers.authorization;
-            if (authHeader.startsWith("Bearer ")) {
-                token = authHeader.split(" ")[1];
-            }
+        const authHeader = req.headers.authorization;
+        let token = req.cookies?.eccomerce;
+        
+        if (!token && authHeader?.startsWith("Bearer ")) {
+            token = authHeader.split(" ")[1];
         }
 
         console.log("[AUTH MIDDLEWARE] URL:", req.url);
         console.log("[AUTH MIDDLEWARE] Auth header present:", !!authHeader);
-        if (authHeader) console.log("[AUTH MIDDLEWARE] Header starts with Bearer:", authHeader.startsWith("Bearer "));
+        console.log("[AUTH MIDDLEWARE] Header starts with Bearer:", authHeader?.startsWith("Bearer "));
         console.log("[AUTH MIDDLEWARE] Token extracted:", token ? `${token.substring(0, 15)}...` : "NONE");
 
         if (!token) {
@@ -102,12 +101,11 @@ const authenicate = async (req, res, next) => {
 
 const optionalAuthenticate = async (req, res, next) => {
     try {
-        let token = req.cookies.eccomerce;
-        if (!token && req.headers.authorization) {
-            const authHeader = req.headers.authorization;
-            if (authHeader.startsWith("Bearer ")) {
-                token = authHeader.split(" ")[1];
-            }
+        const authHeader = req.headers.authorization;
+        let token = req.cookies?.eccomerce;
+        
+        if (!token && authHeader?.startsWith("Bearer ")) {
+            token = authHeader.split(" ")[1];
         }
 
         if (!token) {
