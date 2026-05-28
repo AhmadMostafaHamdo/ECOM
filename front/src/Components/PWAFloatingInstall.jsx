@@ -77,7 +77,7 @@ const PWAFloatingInstall = ({ pwaInstall }) => {
                 <Download size={18} aria-hidden="true" />
               )}
             </span>
-            <span className="drop-shadow-sm">{t("pwa.installAction", "Install App")}</span>
+            <span className="drop-shadow-sm px-2">{t("pwa.installAction", "Install App")}</span>
           </button>
         </motion.div>
       )}
