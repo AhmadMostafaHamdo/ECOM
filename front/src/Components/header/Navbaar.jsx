@@ -92,17 +92,20 @@ const Navbaar = React.memo(({ onSearch }) => {
   const logoutuser = useCallback(async () => {
     setIsLoggingOut(true);
 
+    // Clear auth state FIRST so no further protected requests are made
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("authUser");
+    setAccount(false);
+    setAnchorEl(null);
+
     try {
       await axiosInstance.post("/logout");
     } catch (err) {
+      // Ignore logout API errors — user is already logged out locally
       console.error("Logout error:", err);
     } finally {
       setIsLoggingOut(false);
       setIsLogoutDialogOpen(false);
-      setAccount(false);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setAnchorEl(null);
       toast.success(t("auth.logoutSuccess") || "Logged out");
       navigate("/");
     }

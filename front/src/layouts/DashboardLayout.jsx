@@ -50,16 +50,20 @@ const DashboardLayout = () => {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
+
+    // Clear auth state FIRST so no further protected requests are made
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("authUser");
+    setAccount(false);
+
     try {
       await axiosInstance.post("/logout");
     } catch (error) {
-      console.error("Logout failed:", error);
+      // Ignore logout API errors — user is already logged out locally
+      console.error("Logout API failed:", error);
     } finally {
       setIsLoggingOut(false);
       setLogoutDialogOpen(false);
-      setAccount(false);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
       toast.success(t("auth.logoutSuccess"));
       navigate("/login");
     }

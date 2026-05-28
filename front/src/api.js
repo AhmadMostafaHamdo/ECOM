@@ -4,8 +4,6 @@ import axios from 'axios';
 export const ROOT_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5007').replace(/\/$/, '');
 const baseURL = `${ROOT_URL}/api`;
 
-
-
 /**
  * Pre-configured Axios instance for application-wide use.
  */
@@ -41,7 +39,10 @@ export const getCookie = (name) => {
     return result;
 };
 
-// Request interceptor to add CSRF token and Auth token manually
+// Flag to prevent duplicate 401 redirect/toast when multiple requests fail at once
+let isRedirectingTo401 = false;
+
+// Request interceptor: attach CSRF token and Bearer token on every request
 axiosInstance.interceptors.request.use((config) => {
     config.headers = config.headers || {};
 
@@ -51,10 +52,10 @@ axiosInstance.interceptors.request.use((config) => {
         config.headers['x-csrf-token'] = csrfToken;
     }
 
-    // Add Auth Token from localStorage as fallback for cookies
-    const authToken = localStorage.getItem('token');
-    if (authToken) {
-        config.headers['Authorization'] = `Bearer ${authToken}`;
+    // Read the latest token from localStorage on every request
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken && accessToken !== 'undefined' && accessToken !== 'null') {
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
     }
 
     return config;
@@ -62,22 +63,46 @@ axiosInstance.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Response interceptor to handle 401 Unauthorized
+// Response interceptor: handle 401 for protected requests only (not login/register)
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+        const requestUrl = error.config?.url || '';
+
+        // Identify auth endpoints that should NOT trigger "session expired" behavior
+        const isAuthEndpoint = ['/login', '/register'].some(
+            (ep) => requestUrl === ep || requestUrl.endsWith(ep)
+        );
+
+        if (
+            error.response &&
+            error.response.status === 401 &&
+            !isAuthEndpoint &&
+            !isRedirectingTo401
+        ) {
+            // A protected request returned 401 → session is invalid
+            isRedirectingTo401 = true;
+
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('authUser');
+
+            // Only show toast and redirect if we're not already on /login
             if (window.location.pathname !== '/login') {
                 import('react-toastify').then(({ toast }) => {
-                    toast.error("Session expired or invalid. Please login again.");
+                    toast.error("Session expired or invalid. Please login again.", {
+                        toastId: 'session-expired', // prevent duplicate toasts
+                    });
                 });
                 setTimeout(() => {
                     window.location.href = '/login';
-                }, 1500);
+                    // Reset flag after redirect completes
+                    setTimeout(() => { isRedirectingTo401 = false; }, 2000);
+                }, 1200);
+            } else {
+                isRedirectingTo401 = false;
             }
         }
+
         return Promise.reject(error);
     }
 );

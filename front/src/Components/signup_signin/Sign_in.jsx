@@ -51,28 +51,39 @@ const Sign_in = () => {
 
       const data = res.data;
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("Login Response:", data);
+      if (import.meta.env.DEV) {
+        console.log("Login response:", data);
       }
 
+      // Extract token from whichever path the backend uses
       const token = data?.token || data?.data?.token || data?.user?.token;
-      if (token) {
-        localStorage.setItem("token", token);
+
+      if (!token) {
+        console.error("Login response did not contain a token:", data);
+        toast.error("Login failed: no token received from server.", { position: "top-center" });
+        return;
       }
 
+      // Step 1: Save token and user BEFORE updating React state
+      localStorage.setItem("accessToken", token);
+
+      // Build user data object without the token embedded
       const userData = { ...data };
       delete userData.token;
-      if (userData.data?.token) delete userData.data.token;
-      if (userData.user?.token) delete userData.user.token;
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("authUser", JSON.stringify(userData));
 
+      // Step 2: Update React context — this triggers route guards
       setAccount(data);
       setShowLoginPrompt(false);
       setData({ email: "", password: "" });
+
+      // Step 3: Show success toast and navigate
       toast.success(t("auth.loginSuccess"), { position: "top-center" });
       const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
       setTimeout(() => navigate(nextRoute), 300);
+
     } catch (error) {
+      // Login-specific error handling — the 401 interceptor skips /login
       console.log("Login error:", error.message);
       let errData = error.response?.data;
       if (typeof errData === "string") errData = { error: errData };

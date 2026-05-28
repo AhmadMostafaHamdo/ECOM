@@ -17,7 +17,8 @@ const LogoutExample = () => {
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       // Clear user session/token
-      localStorage.removeItem('userToken')
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('authUser')
       sessionStorage.clear()
       
       // Redirect to login page or home
