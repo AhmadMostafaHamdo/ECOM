@@ -37,13 +37,13 @@ const JobCard = ({ job }) => {
       </div>
 
       <div className="job-card__meta">
-        <span>
+        <span className="job-card__meta-item">
           <Briefcase size={16} /> {job.job_type?.replace(/_/g, " ")}
         </span>
-        <span>
+        <span className="job-card__meta-item">
           <MapPin size={16} /> {job.location || "—"}
         </span>
-        <span>
+        <span className="job-card__meta-item">
           <Building2 size={16} /> {categoryLabel || "—"}
         </span>
       </div>
