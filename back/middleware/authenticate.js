@@ -58,24 +58,19 @@ const clearAuthCookie = (res) => {
 
 const authenicate = async (req, res, next) => {
     try {
-        let token = req.cookies.eccomerce;
-        
-        // Fallback to Authorization header if cookie is missing
-        if (!token && req.headers.authorization) {
-            const authHeader = req.headers.authorization;
-            if (authHeader.startsWith('Bearer ')) {
-                token = authHeader.substring(7);
-            }
-        }
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.startsWith("Bearer ")
+            ? authHeader.split(" ")[1]
+            : null;
 
         if (!token) {
-            console.log("Auth failed: eccomerce cookie missing. Cookies received:", req.cookies);
+            console.log("Auth failed: Authorization header missing or malformed.");
             return res.status(401).json({ error: "Unauthorized: token missing" });
         }
 
-        const verifyToken = jwt.verify(token, keysecret);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || process.env.KEY);
 
-        const rootUser = await User.findOne({ _id: verifyToken._id, "tokens.token": token });
+        const rootUser = await User.findOne({ _id: decoded.id, "tokens.token": token });
 
         if (!rootUser) {
             clearAuthCookie(res);
@@ -93,6 +88,10 @@ const authenicate = async (req, res, next) => {
         }
 
         req.token = token;
+        // Attach decoded to req.user as per user's request
+        req.user = decoded;
+        
+        // Retain req.rootUser and req.userID for backward compatibility with other routes
         req.rootUser = rootUser;
         req.userID = rootUser._id;
 
@@ -107,21 +106,17 @@ const authenicate = async (req, res, next) => {
 
 const optionalAuthenticate = async (req, res, next) => {
     try {
-        let token = req.cookies.eccomerce;
-
-        if (!token && req.headers.authorization) {
-            const authHeader = req.headers.authorization;
-            if (authHeader.startsWith('Bearer ')) {
-                token = authHeader.substring(7);
-            }
-        }
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.startsWith("Bearer ")
+            ? authHeader.split(" ")[1]
+            : null;
 
         if (!token) {
             return next();
         }
 
-        const verifyToken = jwt.verify(token, keysecret);
-        const rootUser = await User.findOne({ _id: verifyToken._id, "tokens.token": token });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || process.env.KEY);
+        const rootUser = await User.findOne({ _id: decoded.id, "tokens.token": token });
 
         if (!rootUser || rootUser.isBanned) {
             clearAuthCookie(res);
@@ -129,6 +124,7 @@ const optionalAuthenticate = async (req, res, next) => {
         }
 
         req.token = token;
+        req.user = decoded;
         req.rootUser = rootUser;
         req.userID = rootUser._id;
         return next();

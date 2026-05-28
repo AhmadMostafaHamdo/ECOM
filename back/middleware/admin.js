@@ -2,7 +2,7 @@ const User = require("../models/userSchema");
 
 const requireAdmin = async (req, res, next) => {
     try {
-        if (req.rootUser?.role === "admin") {
+        if (req.rootUser?.role === "admin" || req.user?.role === "admin") {
             return next();
         }
 
