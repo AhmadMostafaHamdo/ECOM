@@ -5,7 +5,7 @@ import { Logincontext } from "../Components/context/Contextprovider";
 import JobForm from "../Components/dashboard/jobs/JobForm";
 import { fetchJobCategories, createJob } from "../services/jobService";
 import { toast } from "react-toastify";
-import "../components/jobs/jobs.css";
+import "../Components/jobs/jobs.css";
 
 const initialForm = {
   title: "",
