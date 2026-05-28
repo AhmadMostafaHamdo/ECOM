@@ -3,12 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Logincontext } from "../Components/context/Contextprovider";
 import { fetchJobCategories, fetchJobs } from "../services/jobService";
-import JobFilters from "../components/jobs/JobFilters";
-import JobCard from "../components/jobs/JobCard";
+import JobFilters from "../Components/jobs/JobFilters";
+import JobCard from "../Components/jobs/JobCard";
 import Pagination from "../Components/common/Pagination";
 import Button from "../Components/common/Button";
 import { toast } from "react-toastify";
-import "../components/jobs/jobs.css";
+import "../Components/jobs/jobs.css";
 
 const JobsPage = () => {
   const { t } = useTranslation();
