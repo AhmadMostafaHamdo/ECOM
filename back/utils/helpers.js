@@ -119,7 +119,7 @@ const toSessionUser = (userDoc, token = null) => {
         mobile: user.mobile,
         role: user.role || "user",
         country: user.country || "",
-        token: token || (user.tokens && user.tokens.length > 0 ? user.tokens[user.tokens.length - 1].token : null),
+        token: token,
         carts: Array.isArray(user.carts) ? user.carts : [],
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,

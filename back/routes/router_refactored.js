@@ -1537,12 +1537,7 @@ router.get("/validuser", authenicate, async (req, res) => {
 
 router.get("/logout", authenicate, async (req, res) => {
   try {
-    req.rootUser.tokens = req.rootUser.tokens.filter((curelem) => {
-      return curelem.token !== req.token;
-    });
-
     res.clearCookie("eccomerce", { path: "/" });
-    req.rootUser.save();
     res.status(201).json({ success: true });
     console.log("user logout");
   } catch (error) {
@@ -2731,8 +2726,7 @@ router.patch("/admin/users/:id/ban", authenicate, requireAdmin, async (req, res)
     user.isBanned = true;
     user.banReason = reason || "Violation of terms of service";
     user.bannedAt = new Date();
-    // Invalidate all sessions
-    user.tokens = [];
+    // With pure cookie auth, sessions are checked dynamically.
     await user.save();
 
     res.status(200).json({ message: "User banned successfully", user: toPublicUser(user) });

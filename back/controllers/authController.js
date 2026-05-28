@@ -130,13 +130,7 @@ exports.login = asyncHandler(async (req, res) => {
 });
 
 exports.logout = asyncHandler(async (req, res) => {
-  req.rootUser.tokens = req.rootUser.tokens.filter((curelem) => {
-    return curelem.token !== req.token;
-  });
-
   res.clearCookie("eccomerce", buildClearCookieOptions());
-  await req.rootUser.save();
-
   return res.status(200).json({ success: true });
 });
 

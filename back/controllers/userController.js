@@ -1,10 +1,10 @@
- const User = require("../models/userSchema");
+const User = require("../models/userSchema");
 const products = require("../models/productsSchema");
 const mongoose = require("mongoose");
 const { asyncHandler } = require("../middleware/errorMiddleware");
 
-// Safe user projection — never return passwords or tokens
-const SAFE_SELECT = "-password -tokens -cpassword";
+// Safe user projection — never return passwords
+const SAFE_SELECT = "-password -cpassword";
 
 // Sanitize user output for admin views
 const toPublicUser = (user) => ({
@@ -349,7 +349,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
     );
 
     // Re-fetch fresh from DB to guarantee the returned document is up-to-date
-    const updatedUser = await User.findById(req.params.id).select("-password -tokens -cpassword");
+    const updatedUser = await User.findById(req.params.id).select("-password -cpassword");
 
     res.status(200).json({ success: true, data: toPublicUser(updatedUser) });
 });
@@ -411,10 +411,7 @@ exports.banUser = asyncHandler(async (req, res) => {
     user.banReason = isBanned ? (banReason ? banReason.toString().trim().substring(0, 500) : "Violation of terms of service") : "";
     user.bannedAt = isBanned ? new Date() : null;
 
-    // Revoke all sessions when banning
-    if (isBanned) {
-        user.tokens = [];
-    }
+    // With cookie-based auth, ban is checked on every request in middleware.
 
     await user.save();
     // Return only safe fields — never return tokens/password

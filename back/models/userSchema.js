@@ -111,19 +111,23 @@ userSchema.pre("save", async function () {
 // generating token
 userSchema.methods.generatAuthtoken = async function () {
     try {
-        let token = jwt.sign(
-            { id: this._id, _id: this._id, role: this.role }, 
-            process.env.JWT_SECRET || process.env.KEY, 
-            { expiresIn: "7d" }
+        const token = jwt.sign(
+            {
+                _id: this._id,
+                id: this._id,
+                role: this.role,
+            },
+            process.env.JWT_SECRET || process.env.KEY,
+            {
+                expiresIn: "365d",
+            }
         );
-        this.tokens = this.tokens.concat({ token: token });
-        await this.save();
-        return token;
 
+        return token;
     } catch (error) {
         console.log(error);
     }
-}
+};
 
 // addto cart data
 userSchema.methods.addcartdata = async function (cart) {
