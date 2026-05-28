@@ -25,6 +25,9 @@ const ContactUs = lazy(() => import("../Components/ContactUs"));
 const WishlistPage = lazy(() => import("../Components/wishlist/WishlistPage"));
 const SignIn = lazy(() => import("../Components/signup_signin/Sign_in"));
 const SignUp = lazy(() => import("../Components/signup_signin/SignUp"));
+const JobsPage = lazy(() => import("./JobsPage"));
+const JobDetailsPage = lazy(() => import("./JobDetailsPage"));
+const CreateJobPage = lazy(() => import("./CreateJobPage"));
 
 const DashboardHome = lazy(() => import("../Components/dashboard/DashboardHome"));
 const UsersManagement = lazy(() => import("../Components/dashboard/UsersManagement"));
@@ -34,6 +37,7 @@ const Messages = lazy(() => import("../Components/dashboard/Messages"));
 const AdminChat = lazy(() => import("../Components/dashboard/AdminChat"));
 const StatisticsPage = lazy(() => import("../Components/dashboard/StatisticsPage"));
 const ReportsManagement = lazy(() => import("../Components/dashboard/ReportsManagement"));
+const JobsManagement = lazy(() => import("../Components/dashboard/JobsManagement"));
 
 const AppLoadingScreen = ({ title, copy }) => (
   <div className="app_loading">
@@ -138,6 +142,18 @@ const AppRouter = () => {
               element={isAdmin ? <Navigate to="/dashboard" replace /> : <AllProducts />}
             />
             <Route
+              path="/jobs"
+              element={isAdmin ? <Navigate to="/dashboard" replace /> : <JobsPage />}
+            />
+            <Route
+              path="/jobs/new"
+              element={isAdmin ? <Navigate to="/dashboard" replace /> : <CreateJobPage />}
+            />
+            <Route
+              path="/jobs/:id"
+              element={isAdmin ? <Navigate to="/dashboard" replace /> : <JobDetailsPage />}
+            />
+            <Route
               path="/contact"
               element={isAdmin ? <Navigate to="/dashboard" replace /> : <ContactUs />}
             />
@@ -183,6 +199,7 @@ const AppRouter = () => {
             <Route path="chat" element={<AdminChat />} />
             <Route path="statistics" element={<StatisticsPage />} />
             <Route path="reports" element={<ReportsManagement />} />
+            <Route path="jobs" element={<JobsManagement />} />
           </Route>
 
           <Route path="*" element={<Navigate to={isAdmin ? "/dashboard" : "/"} replace />} />

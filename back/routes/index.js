@@ -13,6 +13,8 @@ const commentRoutes = require("./commentRoutes");
 const reportRoutes = require("./reportRoutes");
 const conversationRoutes = require("./conversationRoutes");
 const uploadRoutes = require("./uploadRoutes");
+const jobRoutes = require("./jobRoutes");
+const jobCategoryRoutes = require("./jobCategoryRoutes");
 
 // Mounting routes
 router.use(authRoutes);
@@ -27,5 +29,7 @@ router.use(commentRoutes);
 router.use(reportRoutes);
 router.use("/conversations", conversationRoutes);
 router.use(uploadRoutes);
+router.use(jobRoutes);
+router.use(jobCategoryRoutes);
 
 module.exports = router;

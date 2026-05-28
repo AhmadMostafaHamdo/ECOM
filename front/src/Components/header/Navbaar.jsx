@@ -176,6 +176,9 @@ const Navbaar = React.memo(({ onSearch }) => {
           <div className="desktop_items">
 
             <LanguageSwitcher />
+            <NavLink to="/jobs" className="nav_pill_btn">
+              {t("navigation.jobOpportunities", "Job Opportunities")}
+            </NavLink>
             <NavLink to="/contact" className="nav_pill_btn">
               {t("navigation.contact")}
             </NavLink>

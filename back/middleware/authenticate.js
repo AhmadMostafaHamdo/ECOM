@@ -98,7 +98,6 @@ const authenicate = async (req, res, next) => {
 
         next();
 
-
     } catch (error) {
         clearAuthCookie(res);
         res.status(401).json({ error: "Unauthorized: token invalid or expired" });
@@ -106,4 +105,38 @@ const authenicate = async (req, res, next) => {
     }
 };
 
+const optionalAuthenticate = async (req, res, next) => {
+    try {
+        let token = req.cookies.eccomerce;
+
+        if (!token && req.headers.authorization) {
+            const authHeader = req.headers.authorization;
+            if (authHeader.startsWith('Bearer ')) {
+                token = authHeader.substring(7);
+            }
+        }
+
+        if (!token) {
+            return next();
+        }
+
+        const verifyToken = jwt.verify(token, keysecret);
+        const rootUser = await User.findOne({ _id: verifyToken._id, "tokens.token": token });
+
+        if (!rootUser || rootUser.isBanned) {
+            clearAuthCookie(res);
+            return next();
+        }
+
+        req.token = token;
+        req.rootUser = rootUser;
+        req.userID = rootUser._id;
+        return next();
+    } catch (error) {
+        clearAuthCookie(res);
+        return next();
+    }
+};
+
+authenicate.optional = optionalAuthenticate;
 module.exports = authenicate;
