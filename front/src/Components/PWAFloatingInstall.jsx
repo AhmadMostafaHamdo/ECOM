@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, Share2, Smartphone } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const PWAFloatingInstall = ({ pwaInstall }) => {
+  const { t } = useTranslation();
   const [direction, setDirection] = useState("rtl");
   const [showIOSHint, setShowIOSHint] = useState(false);
 
@@ -55,7 +57,7 @@ const PWAFloatingInstall = ({ pwaInstall }) => {
               >
                 <div className="flex items-start gap-3">
                   <Share2 className="mt-1 shrink-0 text-[var(--primary)]" size={18} aria-hidden="true" />
-                  <p>On iPhone: Press Share → Add to Home Screen</p>
+                  <p>{t("pwa.iosInstructions", "On iPhone: Press Share → Add to Home Screen")}</p>
                 </div>
               </motion.div>
             )}
@@ -65,8 +67,8 @@ const PWAFloatingInstall = ({ pwaInstall }) => {
             type="button"
             onClick={handleInstall}
             className="inline-flex min-h-14 items-center justify-center gap-3 rounded-full border-2 border-[var(--surface-1)] bg-[var(--primary)] px-6 text-sm font-extrabold text-white shadow-2xl transition hover:-translate-y-1 hover:bg-[var(--primary-dark)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Install app"
-            aria-label="Install Studio Commerce app"
+            title={t("pwa.installAction", "Install app")}
+            aria-label={`${t("pwa.installAction", "Install App")} ${t("pwa.appTitle", "Studio Commerce")}`}
           >
             <span className="grid h-8 w-8 place-items-center rounded-full bg-white/20">
               {pwaInstall.isIOSInstallCapable ? (
@@ -75,7 +77,7 @@ const PWAFloatingInstall = ({ pwaInstall }) => {
                 <Download size={18} aria-hidden="true" />
               )}
             </span>
-            <span className="drop-shadow-sm">تثبيت التطبيق</span>
+            <span className="drop-shadow-sm">{t("pwa.installAction", "Install App")}</span>
           </button>
         </motion.div>
       )}
