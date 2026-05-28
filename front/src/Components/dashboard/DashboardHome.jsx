@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { axiosInstance } from "../../api";
 import { useTranslation } from "react-i18next";
+import { Logincontext } from "../context/Contextprovider";
 
 import GroupIcon from "@mui/icons-material/Group";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -12,6 +13,7 @@ import DashboardCharts from "./DashboardCharts";
 
 const DashboardHome = () => {
   const { t } = useTranslation();
+  const { authReady } = useContext(Logincontext);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalAdmins: 0,
@@ -22,6 +24,12 @@ const DashboardHome = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Do not call protected APIs until auth is fully initialized
+    if (!authReady) return;
+
+    const token = localStorage.getItem("accessToken");
+    if (!token) return; // No token = no point calling protected API
+
     const fetchStats = async () => {
       setLoading(true);
       try {
@@ -52,7 +60,7 @@ const DashboardHome = () => {
     };
 
     fetchStats();
-  }, []);
+  }, [authReady]);
 
   const summaryCards = [
     {

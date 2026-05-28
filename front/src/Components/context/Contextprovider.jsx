@@ -1,4 +1,4 @@
-import React, { createContext, useState, useMemo } from 'react'
+import React, { createContext, useState, useMemo, useCallback } from 'react'
 
 export const Logincontext = createContext(null);
 
@@ -10,12 +10,10 @@ const getInitialAccount = () => {
     try {
         const savedUser = localStorage.getItem('authUser');
         const savedToken = localStorage.getItem('accessToken');
-        // Only restore if both token and user data exist
         if (savedUser && savedToken && savedToken !== 'undefined' && savedToken !== 'null') {
             return JSON.parse(savedUser);
         }
     } catch {
-        // Corrupted data — clean up
         localStorage.removeItem('authUser');
         localStorage.removeItem('accessToken');
     }
@@ -25,13 +23,23 @@ const getInitialAccount = () => {
 const Contextprovider = ({ children }) => {
     const [account, setAccount] = useState(getInitialAccount);
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+    // authReady starts as true if we restored from localStorage, false if no saved session
+    const [authReady, setAuthReady] = useState(() => !!getInitialAccount());
+
+    // Wrap setAccount so that whenever account is set, authReady becomes true
+    const setAccountAndReady = useCallback((newAccount) => {
+        setAccount(newAccount);
+        setAuthReady(true);
+    }, []);
 
     const value = useMemo(() => ({ 
         account, 
-        setAccount,
+        setAccount: setAccountAndReady,
+        authReady,
+        setAuthReady,
         showLoginPrompt,
         setShowLoginPrompt
-    }), [account, showLoginPrompt]);
+    }), [account, authReady, showLoginPrompt, setAccountAndReady]);
 
     return (
         <Logincontext.Provider value={value}>

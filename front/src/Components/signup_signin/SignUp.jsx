@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
 import { toast } from "react-toastify";
-import { axiosInstance } from "../../api";
+import { axiosInstance, setAuthenticating } from "../../api";
 import { useNavigate } from "react-router-dom";
 import "./signup.css";
 import PhoneInput from "../ui/PhoneInput";
@@ -72,6 +72,7 @@ const Signup = () => {
 
     setErrors({});
     setLoading(true);
+    setAuthenticating(true); // Suppress 401 interceptor during registration
     try {
       abortRef.current?.abort();
       abortRef.current = new AbortController();
@@ -100,8 +101,7 @@ const Signup = () => {
       setShowLoginPrompt(false);
       setUdata({ fname: "", email: "", mobile: "", password: "", cpassword: "", country: "" });
       toast.success(t("auth.signupSuccess"), { position: "top-center" });
-      const nextRoute = "/";
-      setTimeout(() => navigate(nextRoute), 300);
+      navigate("/", { replace: true });
     } catch (error) {
       if (error.name === "CanceledError" || error.name === "AbortError") return;
       console.log("Signup error:", error.message);
@@ -123,6 +123,7 @@ const Signup = () => {
         abortRef.current = null;
         setLoading(false);
       }
+      setTimeout(() => setAuthenticating(false), 1000);
     }
   };
 

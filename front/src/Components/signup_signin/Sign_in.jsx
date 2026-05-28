@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 import { Logincontext } from "../context/Contextprovider";
 import { toast } from "react-toastify";
-import { axiosInstance } from "../../api";
+import { axiosInstance, setAuthenticating } from "../../api";
 import { useNavigate } from "react-router-dom";
 import "./signin.css";
 
@@ -46,45 +46,50 @@ const Sign_in = () => {
 
     setErrors({});
     setLoading(true);
+
+    // Tell the 401 interceptor to stand down during the entire login flow
+    setAuthenticating(true);
+
     try {
       const res = await axiosInstance.post("/login", { email: trimmedEmail, password });
-
       const data = res.data;
 
       if (import.meta.env.DEV) {
-        console.log("Login response:", data);
+        console.log("[Login] Response data:", data);
       }
 
       // Extract token from whichever path the backend uses
       const token = data?.token || data?.data?.token || data?.user?.token;
 
       if (!token) {
-        console.error("Login response did not contain a token:", data);
+        console.error("[Login] No token in response:", data);
         toast.error("Login failed: no token received from server.", { position: "top-center" });
         return;
       }
 
-      // Step 1: Save token and user BEFORE updating React state
+      if (import.meta.env.DEV) {
+        console.log("[Login] Token extracted:", token.substring(0, 30) + "...");
+      }
+
+      // Step 1: Save token and user to localStorage FIRST
       localStorage.setItem("accessToken", token);
 
-      // Build user data object without the token embedded
       const userData = { ...data };
       delete userData.token;
       localStorage.setItem("authUser", JSON.stringify(userData));
 
-      // Step 2: Update React context — this triggers route guards
+      // Step 2: Update React state (this triggers route guards / re-renders)
       setAccount(data);
       setShowLoginPrompt(false);
       setData({ email: "", password: "" });
 
-      // Step 3: Show success toast and navigate
+      // Step 3: Show success and navigate — use replace to prevent back-to-login
       toast.success(t("auth.loginSuccess"), { position: "top-center" });
       const nextRoute = data?.role === "admin" ? "/dashboard" : "/";
-      setTimeout(() => navigate(nextRoute), 300);
+      navigate(nextRoute, { replace: true });
 
     } catch (error) {
-      // Login-specific error handling — the 401 interceptor skips /login
-      console.log("Login error:", error.message);
+      console.log("[Login] Error:", error.message);
       let errData = error.response?.data;
       if (typeof errData === "string") errData = { error: errData };
 
@@ -97,6 +102,9 @@ const Sign_in = () => {
       }
     } finally {
       setLoading(false);
+      // Re-enable 401 interceptor after login flow completes
+      // Small delay ensures any in-flight requests from login don't trigger it
+      setTimeout(() => setAuthenticating(false), 1000);
     }
   };
 

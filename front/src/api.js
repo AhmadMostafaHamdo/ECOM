@@ -19,12 +19,8 @@ export const axiosInstance = axios.create({
 // Helper to get cookie value by name
 export const getCookie = (name) => {
     if (typeof document === "undefined") return null;
-
-    // `document.cookie` can contain multiple cookies with the same name (different Path/Domain).
-    // Do not assume uniqueness; return the last matching occurrence.
     const cookies = (document.cookie || "").split(";");
     let result = null;
-
     for (const raw of cookies) {
         const [rawName, ...rawValueParts] = raw.trim().split("=");
         if (!rawName || rawName !== name) continue;
@@ -35,27 +31,48 @@ export const getCookie = (name) => {
             result = rawValue;
         }
     }
-
     return result;
 };
 
-// Flag to prevent duplicate 401 redirect/toast when multiple requests fail at once
-let isRedirectingTo401 = false;
+// ─── Global auth flags ──────────────────────────────────────────────
+// Prevents duplicate "session expired" toasts/redirects when multiple
+// requests fail with 401 simultaneously.
+let isHandlingUnauthorized = false;
 
-// Request interceptor: attach CSRF token and Bearer token on every request
+// Set to true briefly during login/register so the 401 interceptor
+// does not interfere with in-flight auth requests.
+let isAuthenticating = false;
+
+// Called by login/register to suppress 401 handling during auth flow
+export const setAuthenticating = (value) => { isAuthenticating = value; };
+
+// Called after the 401 redirect completes to reset the flag
+export const resetUnauthorizedFlag = () => { isHandlingUnauthorized = false; };
+
+// ─── Request interceptor ────────────────────────────────────────────
 axiosInstance.interceptors.request.use((config) => {
     config.headers = config.headers || {};
 
-    // Add CSRF Token
+    // CSRF token from cookie
     const csrfToken = getCookie('csrfToken');
     if (csrfToken) {
         config.headers['x-csrf-token'] = csrfToken;
     }
 
-    // Read the latest token from localStorage on every request
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken && accessToken !== 'undefined' && accessToken !== 'null') {
-        config.headers['Authorization'] = `Bearer ${accessToken}`;
+    // Read token fresh from localStorage on every request
+    const token = localStorage.getItem('accessToken');
+
+    // Only attach if it's a real JWT string
+    if (token && token !== 'undefined' && token !== 'null' && typeof token === 'string') {
+        config.headers['Authorization'] = `Bearer ${token}`;
+    } else {
+        // Remove Authorization header if no valid token
+        delete config.headers['Authorization'];
+    }
+
+    // Dev-only: log what token is being sent
+    if (import.meta.env.DEV) {
+        console.log('[Axios Request]', config.method?.toUpperCase(), config.url, '| TOKEN:', token ? `${token.substring(0, 20)}...` : 'NONE');
     }
 
     return config;
@@ -63,30 +80,39 @@ axiosInstance.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Response interceptor: handle 401 for protected requests only (not login/register)
+// ─── Response interceptor ───────────────────────────────────────────
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
+        const status = error.response?.status;
         const requestUrl = error.config?.url || '';
 
-        // Identify auth endpoints that should NOT trigger "session expired" behavior
+        // Dev-only: log 401s to help debug
+        if (import.meta.env.DEV && status === 401) {
+            console.warn('[Axios 401]', requestUrl, '| isAuthenticating:', isAuthenticating, '| isHandlingUnauthorized:', isHandlingUnauthorized);
+        }
+
+        // Skip 401 handling entirely if we're in the middle of login/register
+        if (isAuthenticating) {
+            return Promise.reject(error);
+        }
+
+        // Skip 401 handling for auth endpoints (login, register)
         const isAuthEndpoint = ['/login', '/register'].some(
             (ep) => requestUrl === ep || requestUrl.endsWith(ep)
         );
 
         if (
-            error.response &&
-            error.response.status === 401 &&
+            status === 401 &&
             !isAuthEndpoint &&
-            !isRedirectingTo401
+            !isHandlingUnauthorized
         ) {
-            // A protected request returned 401 → session is invalid
-            isRedirectingTo401 = true;
+            isHandlingUnauthorized = true;
 
             localStorage.removeItem('accessToken');
             localStorage.removeItem('authUser');
 
-            // Only show toast and redirect if we're not already on /login
+            // Only show toast + redirect if not already on /login
             if (window.location.pathname !== '/login') {
                 import('react-toastify').then(({ toast }) => {
                     toast.error("Session expired or invalid. Please login again.", {
@@ -95,11 +121,10 @@ axiosInstance.interceptors.response.use(
                 });
                 setTimeout(() => {
                     window.location.href = '/login';
-                    // Reset flag after redirect completes
-                    setTimeout(() => { isRedirectingTo401 = false; }, 2000);
+                    setTimeout(() => { isHandlingUnauthorized = false; }, 3000);
                 }, 1200);
             } else {
-                isRedirectingTo401 = false;
+                isHandlingUnauthorized = false;
             }
         }
 
