@@ -58,22 +58,15 @@ const Sign_in = () => {
         console.log("[Login] Response data:", data);
       }
 
-      // Extract token from whichever path the backend uses
-      const token = data?.token || data?.data?.token || data?.user?.token;
+      // Tokens are now stored as HttpOnly cookies by the backend.
+      // We explicitly clear any old tokens from localStorage to prevent mixing.
+      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("jwt");
 
-      if (!token) {
-        console.error("[Login] No token in response:", data);
-        toast.error("Login failed: no token received from server.", { position: "top-center" });
-        return;
-      }
-
-      if (import.meta.env.DEV) {
-        console.log("[Login] Token extracted:", token.substring(0, 30) + "...");
-      }
-
-      // Step 1: Save token and user to localStorage FIRST
-      localStorage.setItem("accessToken", token);
-
+      // Step 1: Save safe user data to localStorage
       const userData = { ...data };
       delete userData.token;
       localStorage.setItem("authUser", JSON.stringify(userData));

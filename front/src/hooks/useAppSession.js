@@ -10,18 +10,8 @@ export const useAppSession = () => {
     let mounted = true;
 
     const loadSession = async () => {
-      const storedToken = localStorage.getItem("accessToken");
-
-      // No token → user is not logged in, skip /validuser API call entirely
-      if (!storedToken || storedToken === "undefined" || storedToken === "null") {
-        if (mounted) {
-          setAuthReady(true);
-          setAuthChecked(true);
-        }
-        return;
-      }
-
-      // Token exists in localStorage → validate it with the server
+      // Tokens are now stored as HttpOnly cookies.
+      // We must ALWAYS ask the server if the session is valid.
       try {
         const response = await axiosInstance.get("/validuser");
 
@@ -31,12 +21,7 @@ export const useAppSession = () => {
           const payload = response.data;
           setAccount(payload); // this also sets authReady = true
 
-          // Refresh stored token if server returned a new one
-          if (payload?.token) {
-            localStorage.setItem("accessToken", payload.token);
-          }
-
-          // Keep authUser in sync
+          // Keep authUser in sync for UI purposes
           const userData = { ...payload };
           delete userData.token;
           localStorage.setItem("authUser", JSON.stringify(userData));
@@ -46,17 +31,28 @@ export const useAppSession = () => {
         // Unexpected response → clear auth
         if (mounted) {
           setAccount("");
-          localStorage.removeItem("accessToken");
           localStorage.removeItem("authUser");
+          
+          // Clear any legacy tokens
+          localStorage.removeItem("token");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("userToken");
+          localStorage.removeItem("jwt");
         }
       } catch {
         // /validuser failed (401 or network error)
         // The 401 interceptor will handle redirect if needed.
-        // Here we only clear React state so UI is consistent.
         if (mounted) {
           setAccount("");
-          localStorage.removeItem("accessToken");
           localStorage.removeItem("authUser");
+
+          // Clear any legacy tokens
+          localStorage.removeItem("token");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("userToken");
+          localStorage.removeItem("jwt");
         }
       } finally {
         if (mounted) {

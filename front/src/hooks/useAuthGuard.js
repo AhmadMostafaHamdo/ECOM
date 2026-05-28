@@ -2,20 +2,20 @@ import { useContext } from "react";
 import { Logincontext } from "../Components/context/Contextprovider";
 
 /**
- * Hook that returns { authReady, hasToken } for dashboard components
+ * Hook that returns { authReady, isAuthenticated } for dashboard components
  * to guard their protected API calls.
  *
  * Usage:
- *   const { authReady, hasToken } = useAuthGuard();
+ *   const { authReady, isAuthenticated } = useAuthGuard();
  *   useEffect(() => {
- *     if (!authReady || !hasToken) return;
+ *     if (!authReady || !isAuthenticated) return;
  *     // ... make protected API call
- *   }, [authReady, hasToken]);
+ *   }, [authReady, isAuthenticated]);
  */
 export const useAuthGuard = () => {
-  const { authReady } = useContext(Logincontext);
-  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-  const hasToken = !!(token && token !== "undefined" && token !== "null");
+  const { authReady, account } = useContext(Logincontext);
+  const isAuthenticated = !!account;
 
-  return { authReady, hasToken };
+  // Keeping hasToken alias for backward compatibility with existing components
+  return { authReady, isAuthenticated, hasToken: isAuthenticated };
 };

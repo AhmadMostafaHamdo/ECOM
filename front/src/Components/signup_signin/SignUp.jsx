@@ -86,12 +86,13 @@ const Signup = () => {
       const data = res.data;
       if (unmountedRef.current) return;
 
-      // Extract token from whichever path the backend uses
-      const token = data?.token || data?.data?.token || data?.user?.token;
-
-      // Save token and user BEFORE updating React state
-      if (token) {
-      }
+      // Tokens are now stored as HttpOnly cookies by the backend.
+      // We explicitly clear any old tokens from localStorage to prevent mixing.
+      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("jwt");
       const userData = { ...data };
       delete userData.token;
       localStorage.setItem("authUser", JSON.stringify(userData));

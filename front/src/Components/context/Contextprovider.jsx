@@ -9,13 +9,17 @@ export const Logincontext = createContext(null);
 const getInitialAccount = () => {
     try {
         const savedUser = localStorage.getItem('authUser');
-        const savedToken = localStorage.getItem('accessToken');
-        if (savedUser && savedToken && savedToken !== 'undefined' && savedToken !== 'null') {
+        if (savedUser) {
             return JSON.parse(savedUser);
         }
     } catch {
         localStorage.removeItem('authUser');
-        localStorage.removeItem('accessToken');
+        // Clear any legacy tokens
+        localStorage.removeItem("token");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("jwt");
     }
     return "";
 };

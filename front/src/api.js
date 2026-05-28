@@ -106,8 +106,12 @@ axiosInstance.interceptors.response.use(
         ) {
             isHandlingUnauthorized = true;
 
-            localStorage.removeItem('accessToken');
             localStorage.removeItem('authUser');
+            localStorage.removeItem('token');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('jwt');
 
             // Only show toast + redirect if not already on /login
             if (window.location.pathname !== '/login') {

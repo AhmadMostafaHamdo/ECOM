@@ -93,8 +93,15 @@ const Navbaar = React.memo(({ onSearch }) => {
     setIsLoggingOut(true);
 
     // Clear auth state FIRST so no further protected requests are made
-    localStorage.removeItem("accessToken");
     localStorage.removeItem("authUser");
+    
+    // Clear any legacy tokens
+    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("jwt");
+    
     setAccount(false);
     setAnchorEl(null);
 

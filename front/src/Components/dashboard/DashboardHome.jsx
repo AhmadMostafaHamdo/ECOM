@@ -13,7 +13,7 @@ import DashboardCharts from "./DashboardCharts";
 
 const DashboardHome = () => {
   const { t } = useTranslation();
-  const { authReady } = useContext(Logincontext);
+  const { authReady, account } = useContext(Logincontext);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalAdmins: 0,
@@ -25,10 +25,7 @@ const DashboardHome = () => {
 
   useEffect(() => {
     // Do not call protected APIs until auth is fully initialized
-    if (!authReady) return;
-
-    const token = localStorage.getItem("accessToken");
-    if (!token) return; // No token = no point calling protected API
+    if (!authReady || !account) return;
 
     const fetchStats = async () => {
       setLoading(true);
