@@ -1,16 +1,14 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userSchema");
-const keysecret = process.env.KEY
 
 const isProduction = process.env.NODE_ENV === "production";
-
 const cookieDomain = process.env.COOKIE_DOMAIN ? process.env.COOKIE_DOMAIN.trim() : undefined;
 
 const clearAuthCookie = (res) => {
     const options = {
         httpOnly: true,
-        sameSite: "none",
-        secure: "none",
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
         path: "/",
     };
 
@@ -23,30 +21,18 @@ const clearAuthCookie = (res) => {
 
 const authenicate = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-        let token = req.cookies?.eccomerce;
-        
-        if (!token && authHeader?.startsWith("Bearer ")) {
-            token = authHeader.split(" ")[1];
-        }
-
-        console.log("[AUTH MIDDLEWARE] URL:", req.url);
-        console.log("[AUTH MIDDLEWARE] Auth header present:", !!authHeader);
-        console.log("[AUTH MIDDLEWARE] Header starts with Bearer:", authHeader?.startsWith("Bearer "));
-        console.log("[AUTH MIDDLEWARE] Token extracted:", token ? `${token.substring(0, 15)}...` : "NONE");
+        const token = req.cookies?.eccomerce;
 
         if (!token) {
-            console.log("Auth failed: Authorization header missing or malformed.");
+            console.log("Auth failed: Cookie missing.");
             return res.status(401).json({ error: "Unauthorized: token missing" });
         }
 
         const secret = process.env.JWT_SECRET || process.env.KEY;
-        console.log("[AUTH MIDDLEWARE] Secret used for verify (first 5 chars):", secret ? secret.substring(0,5) : "NONE");
         
         let decoded;
         try {
             decoded = jwt.verify(token, secret);
-            console.log("[AUTH MIDDLEWARE] Token decoded successfully:", decoded);
         } catch (verifyErr) {
             console.log("[AUTH MIDDLEWARE] JWT Verify Error:", verifyErr.message);
             throw verifyErr;
@@ -54,20 +40,12 @@ const authenicate = async (req, res, next) => {
 
         const userId = decoded.id || decoded._id;
 
-        const rootUser = await User.findOne({ _id: userId, "tokens.token": token });
+        const rootUser = await User.findById(userId);
 
         if (!rootUser) {
-            console.log(`[AUTH MIDDLEWARE] User not found for id: ${userId} AND token match.`);
-            const userWithoutToken = await User.findOne({ _id: decoded.id });
-            console.log(`[AUTH MIDDLEWARE] Does user exist at all? ${!!userWithoutToken}`);
-            if (userWithoutToken) {
-                console.log(`[AUTH MIDDLEWARE] User tokens length: ${userWithoutToken.tokens?.length}`);
-                if (userWithoutToken.tokens?.length > 0) {
-                    console.log(`[AUTH MIDDLEWARE] First token starts with: ${userWithoutToken.tokens[0].token.substring(0,15)}...`);
-                }
-            }
+            console.log(`[AUTH MIDDLEWARE] User not found for id: ${userId}`);
             clearAuthCookie(res);
-            return res.status(401).json({ error: "Unauthorized: invalid token" });
+            return res.status(401).json({ error: "Unauthorized: invalid user" });
         }
 
         // Check if user is banned
@@ -81,17 +59,12 @@ const authenicate = async (req, res, next) => {
             });
         }
 
-        console.log("[AUTH MIDDLEWARE] Authentication successful for user:", rootUser.email);
         req.token = token;
-        // Attach decoded to req.user as per user's request
         req.user = decoded;
-        
-        // Retain req.rootUser and req.userID for backward compatibility with other routes
         req.rootUser = rootUser;
         req.userID = rootUser._id;
 
         next();
-
     } catch (error) {
         console.log("[AUTH MIDDLEWARE] Final catch block error:", error.message);
         clearAuthCookie(res);
@@ -101,12 +74,7 @@ const authenicate = async (req, res, next) => {
 
 const optionalAuthenticate = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-        let token = req.cookies?.eccomerce;
-        
-        if (!token && authHeader?.startsWith("Bearer ")) {
-            token = authHeader.split(" ")[1];
-        }
+        const token = req.cookies?.eccomerce;
 
         if (!token) {
             return next();
@@ -114,7 +82,7 @@ const optionalAuthenticate = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || process.env.KEY);
         const userId = decoded.id || decoded._id;
-        const rootUser = await User.findOne({ _id: userId, "tokens.token": token });
+        const rootUser = await User.findById(userId);
 
         if (!rootUser || rootUser.isBanned) {
             clearAuthCookie(res);

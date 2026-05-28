@@ -91,7 +91,6 @@ const Signup = () => {
 
       // Save token and user BEFORE updating React state
       if (token) {
-        localStorage.setItem("accessToken", token);
       }
       const userData = { ...data };
       delete userData.token;

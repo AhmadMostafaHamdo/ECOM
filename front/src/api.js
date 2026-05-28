@@ -59,20 +59,17 @@ axiosInstance.interceptors.request.use((config) => {
         config.headers['x-csrf-token'] = csrfToken;
     }
 
-    // Read token fresh from localStorage on every request
-    const token = localStorage.getItem('accessToken');
-
-    // Only attach if it's a real JWT string
-    if (token && token !== 'undefined' && token !== 'null' && typeof token === 'string') {
-        config.headers['Authorization'] = `Bearer ${token}`;
-    } else {
-        // Remove Authorization header if no valid token
-        delete config.headers['Authorization'];
+    // Remove any Authorization header if it somehow gets added elsewhere
+    if (config.headers.Authorization) {
+        delete config.headers.Authorization;
+    }
+    if (config.headers.authorization) {
+        delete config.headers.authorization;
     }
 
-    // Dev-only: log what token is being sent
+    // Dev-only: log what is being sent
     if (import.meta.env.DEV) {
-        console.log('[Axios Request]', config.method?.toUpperCase(), config.url, '| TOKEN:', token ? `${token.substring(0, 20)}...` : 'NONE');
+        console.log('[Axios Request]', config.method?.toUpperCase(), config.url, '| COOKIES ONLY');
     }
 
     return config;
