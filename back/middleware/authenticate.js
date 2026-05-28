@@ -4,42 +4,7 @@ const keysecret = process.env.KEY
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const normalizeCookieDomain = (domain) => {
-    if (!domain) return undefined;
-    const trimmed = domain.trim();
-    if (!trimmed) return undefined;
-    if (trimmed === "localhost" || trimmed.endsWith(".localhost")) return undefined;
-    if (!trimmed.includes(".")) return undefined;
-    return trimmed.startsWith(".") ? trimmed : `.${trimmed}`;
-};
-
-const deriveCookieDomainFromOrigins = () => {
-    const origins = (process.env.CLIENT_ORIGINS || "")
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean);
-
-    const candidates = [];
-    for (const origin of origins) {
-        try {
-            const url = new URL(origin);
-            let host = url.hostname;
-            if (!host || host === "localhost" || host === "127.0.0.1") continue;
-            if (host.startsWith("www.")) host = host.slice(4);
-            const normalized = normalizeCookieDomain(host);
-            if (normalized) candidates.push(normalized);
-        } catch {
-            // ignore invalid origins
-        }
-    }
-
-    candidates.sort((a, b) => a.length - b.length);
-    return candidates[0];
-};
-
-const authCookieDomain =
-    normalizeCookieDomain(process.env.COOKIE_DOMAIN) ||
-    (isProduction ? deriveCookieDomainFromOrigins() : undefined);
+const cookieDomain = process.env.COOKIE_DOMAIN ? process.env.COOKIE_DOMAIN.trim() : undefined;
 
 const clearAuthCookie = (res) => {
     const options = {
@@ -49,8 +14,8 @@ const clearAuthCookie = (res) => {
         path: "/",
     };
 
-    if (authCookieDomain) {
-        options.domain = authCookieDomain;
+    if (cookieDomain) {
+        options.domain = cookieDomain;
     }
 
     res.clearCookie("eccomerce", options);
