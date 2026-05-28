@@ -100,7 +100,8 @@ const Navbaar = React.memo(({ onSearch }) => {
       setIsLoggingOut(false);
       setIsLogoutDialogOpen(false);
       setAccount(false);
-      localStorage.removeItem("auth_token");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setAnchorEl(null);
       toast.success(t("auth.logoutSuccess") || "Logged out");
       navigate("/");

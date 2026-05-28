@@ -50,9 +50,22 @@ const Sign_in = () => {
       const res = await axiosInstance.post("/login", { email: trimmedEmail, password });
 
       const data = res.data;
-      if (data && data.token) {
-        localStorage.setItem("auth_token", data.token);
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("Login Response:", data);
       }
+
+      const token = data?.token || data?.data?.token || data?.user?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+
+      const userData = { ...data };
+      delete userData.token;
+      if (userData.data?.token) delete userData.data.token;
+      if (userData.user?.token) delete userData.user.token;
+      localStorage.setItem("user", JSON.stringify(userData));
+
       setAccount(data);
       setShowLoginPrompt(false);
       setData({ email: "", password: "" });

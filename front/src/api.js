@@ -52,7 +52,7 @@ axiosInstance.interceptors.request.use((config) => {
     }
 
     // Add Auth Token from localStorage as fallback for cookies
-    const authToken = localStorage.getItem('auth_token');
+    const authToken = localStorage.getItem('token');
     if (authToken) {
         config.headers['Authorization'] = `Bearer ${authToken}`;
     }
@@ -61,5 +61,25 @@ axiosInstance.interceptors.request.use((config) => {
 }, (error) => {
     return Promise.reject(error);
 });
+
+// Response interceptor to handle 401 Unauthorized
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            if (window.location.pathname !== '/login') {
+                import('react-toastify').then(({ toast }) => {
+                    toast.error("Session expired or invalid. Please login again.");
+                });
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default axiosInstance;

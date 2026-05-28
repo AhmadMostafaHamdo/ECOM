@@ -64,7 +64,6 @@ const Signup = () => {
     } else if (password !== cpassword) {
       newErrors.cpassword = t("auth.passwordMismatch");
     }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -85,9 +84,17 @@ const Signup = () => {
       const data = res.data;
       if (unmountedRef.current) return;
 
-      if (data.token) {
-        localStorage.setItem("auth_token", data.token);
+      const token = data?.token || data?.data?.token || data?.user?.token;
+      if (token) {
+        localStorage.setItem("token", token);
       }
+
+      const userData = { ...data };
+      delete userData.token;
+      if (userData.data?.token) delete userData.data.token;
+      if (userData.user?.token) delete userData.user.token;
+      localStorage.setItem("user", JSON.stringify(userData));
+
       setAccount(data);
       setShowLoginPrompt(false);
       setUdata({ fname: "", email: "", mobile: "", password: "", cpassword: "", country: "" });

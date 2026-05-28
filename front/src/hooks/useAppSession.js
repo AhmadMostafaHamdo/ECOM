@@ -22,18 +22,20 @@ export const useAppSession = () => {
           setAccount(payload);
 
           if (payload?.token) {
-            localStorage.setItem("auth_token", payload.token);
+            localStorage.setItem("token", payload.token);
           }
 
           return;
         }
 
         setAccount(false);
-        localStorage.removeItem("auth_token");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       } catch {
         if (mounted) {
           setAccount(false);
-          localStorage.removeItem("auth_token");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
         }
       } finally {
         if (mounted) {

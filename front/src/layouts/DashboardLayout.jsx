@@ -58,7 +58,8 @@ const DashboardLayout = () => {
       setIsLoggingOut(false);
       setLogoutDialogOpen(false);
       setAccount(false);
-      localStorage.removeItem("auth_token");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       toast.success(t("auth.logoutSuccess"));
       navigate("/login");
     }
