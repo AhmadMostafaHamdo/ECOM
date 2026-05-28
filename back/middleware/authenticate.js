@@ -58,10 +58,13 @@ const clearAuthCookie = (res) => {
 
 const authenicate = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-        const token = authHeader?.startsWith("Bearer ")
-            ? authHeader.split(" ")[1]
-            : null;
+        let token = req.cookies.eccomerce;
+        if (!token && req.headers.authorization) {
+            const authHeader = req.headers.authorization;
+            if (authHeader.startsWith("Bearer ")) {
+                token = authHeader.split(" ")[1];
+            }
+        }
 
         console.log("[AUTH MIDDLEWARE] URL:", req.url);
         console.log("[AUTH MIDDLEWARE] Auth header present:", !!authHeader);
@@ -134,10 +137,13 @@ const authenicate = async (req, res, next) => {
 
 const optionalAuthenticate = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-        const token = authHeader?.startsWith("Bearer ")
-            ? authHeader.split(" ")[1]
-            : null;
+        let token = req.cookies.eccomerce;
+        if (!token && req.headers.authorization) {
+            const authHeader = req.headers.authorization;
+            if (authHeader.startsWith("Bearer ")) {
+                token = authHeader.split(" ")[1];
+            }
+        }
 
         if (!token) {
             return next();
