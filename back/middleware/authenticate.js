@@ -9,8 +9,8 @@ const cookieDomain = process.env.COOKIE_DOMAIN ? process.env.COOKIE_DOMAIN.trim(
 const clearAuthCookie = (res) => {
     const options = {
         httpOnly: true,
-        sameSite: isProduction ? "none" : "lax",
-        secure: isProduction,
+        sameSite: "none",
+        secure: "none",
         path: "/",
     };
 
