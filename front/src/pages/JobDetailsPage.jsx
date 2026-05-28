@@ -3,9 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchJobById } from "../services/jobService";
 import Button from "../Components/common/Button";
-import JobStatusBadge from "../components/jobs/JobStatusBadge";
+import JobStatusBadge from "../Components/jobs/JobStatusBadge";
 import { getLocalizedName, getActiveLanguage } from "../utils/categoryUtils";
-import "../components/jobs/jobs.css";
+import "../Components/jobs/jobs.css";
 import { toast } from "react-toastify";
 
 const JobDetailsPage = () => {
