@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, Plus, Share2, Smartphone, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SHOW_DELAY_MS = 4000;
 
 const PWAInstallPrompt = ({ pwaInstall }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [direction, setDirection] = useState("rtl");
 
@@ -80,13 +82,13 @@ const PWAInstallPrompt = ({ pwaInstall }) => {
 
               <div className="min-w-0 flex-1">
                 <p className="mb-1 text-xs font-bold uppercase tracking-[0.08em] text-[var(--primary)]">
-                  Studio Commerce
+                  {t("pwa.appTitle", "Studio Commerce")}
                 </p>
                 <h2 id="pwa-install-title" className="text-lg font-extrabold leading-snug">
-                  ثبّت التطبيق على جهازك
+                  {t("pwa.installTitle", "Install our App")}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-[var(--text-2)]">
-                  افتح المتجر بسرعة، استخدمه كتطبيق مستقل، واستفد من تجربة أسرع حتى عند ضعف الاتصال.
+                  {t("pwa.installDesc", "Open the store quickly, use it as a standalone app, and enjoy a faster experience even with a weak connection.")}
                 </p>
               </div>
 
@@ -105,7 +107,7 @@ const PWAInstallPrompt = ({ pwaInstall }) => {
                 <div className="flex items-start gap-3 text-sm leading-6 text-[var(--text-2)]">
                   <Share2 className="mt-1 shrink-0 text-[var(--primary)]" size={18} aria-hidden="true" />
                   <p>
-                    On iPhone: Press Share → Add to Home Screen
+                    {t("pwa.iosInstructions", "On iPhone: Press Share → Add to Home Screen")}
                   </p>
                 </div>
               </div>
@@ -117,7 +119,7 @@ const PWAInstallPrompt = ({ pwaInstall }) => {
                 onClick={handleLater}
                 className="min-h-11 rounded-[14px] border border-[var(--border)] px-5 text-sm font-bold text-[var(--text-2)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--text-1)]"
               >
-                لاحقاً
+                {t("pwa.later", "Later")}
               </button>
 
               <button
@@ -130,7 +132,9 @@ const PWAInstallPrompt = ({ pwaInstall }) => {
                 ) : (
                   <Download size={18} aria-hidden="true" />
                 )}
-                <span className="drop-shadow-sm">{pwaInstall.isIOSInstallCapable ? "فهمت" : "تثبيت التطبيق"}</span>
+                <span className="drop-shadow-sm">
+                  {pwaInstall.isIOSInstallCapable ? t("pwa.gotIt", "Got it") : t("pwa.installAction", "Install App")}
+                </span>
               </button>
             </div>
           </motion.section>

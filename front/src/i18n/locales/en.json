@@ -658,6 +658,15 @@
     "selectCategory": "Select category…",
     "salaryNotSpecified": "Salary not specified"
   },
+  "pwa": {
+    "appTitle": "Studio Commerce",
+    "installTitle": "Install our App",
+    "installDesc": "Open the store quickly, use it as a standalone app, and enjoy a faster experience even with a weak connection.",
+    "iosInstructions": "On iPhone: Press Share → Add to Home Screen",
+    "later": "Later",
+    "gotIt": "Got it",
+    "installAction": "Install App"
+  },
   "pagination": {
     "first": "First",
     "items": "items",
