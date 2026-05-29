@@ -9,7 +9,7 @@ import "./CategoriesManagement.css";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { toast } from "react-toastify";
-import { getActiveLanguage, getCategoryValue, getLocalizedName } from "../../utils/categoryUtils";
+import { getActiveLanguage, getCategoryValue, getLocalizedName, isDefaultUncategorizedCategory } from "../../utils/categoryUtils";
 
 const emptyDraft = {
   nameEn: "",
@@ -310,7 +310,7 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
           </div>
 
           <DynamicTable
-            data={categories}
+            data={categories.filter(cat => !isDefaultUncategorizedCategory(cat))}
             loading={loading}
             emptyMessage={t("admin.noSegmentsFound")}
             loadingMessage={t("admin.mappingSectors")}

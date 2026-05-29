@@ -3,6 +3,18 @@ import { ROOT_URL } from "../api";
 export const CATEGORY_ALL_VALUE = "All Categories";
 export const PLACEHOLDER_IMAGE = "/logo192.png";
 
+export const isDefaultUncategorizedCategory = (category) => {
+  const name =
+    typeof category?.name === "string"
+      ? category.name
+      : category?.name?.en || category?.name?.ar || "";
+
+  return (
+    name.trim().toLowerCase() === "uncategorized" ||
+    category?.slug?.trim?.().toLowerCase() === "uncategorized"
+  );
+};
+
 export const getActiveLanguage = (i18n) =>
   (i18n?.language || "en").toLowerCase().startsWith("ar") ? "ar" : "en";
 

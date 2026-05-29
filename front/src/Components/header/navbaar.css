@@ -128,6 +128,9 @@
 }
 
 .nav_pill_btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   text-decoration: none;
   color: var(--text-2);
   font-size: 14px;
@@ -152,6 +155,27 @@
 .nav_pill_btn.primary:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
+}
+
+/* Jobs — amber/orange tint */
+.nav_pill_btn--jobs:hover,
+.nav_pill_btn--jobs.active {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+/* Contact — blue tint */
+.nav_pill_btn--contact:hover,
+.nav_pill_btn--contact.active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+
+/* Dashboard — violet tint */
+.nav_pill_btn--dashboard:hover,
+.nav_pill_btn--dashboard.active {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
 }
 
 /* Wishlist Icon Button in Nav */

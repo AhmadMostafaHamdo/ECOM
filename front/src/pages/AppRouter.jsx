@@ -93,8 +93,8 @@ const AppRouter = () => {
             element={
               <StorefrontLayout
                 categories={storefront.categories}
-                selectedCategory={storefront.selectedCategory}
-                selectedSubCategory={storefront.selectedSubCategory}
+                selectedCategory={storefront.selectedCategoryId}
+                selectedSubCategory={storefront.selectedSubCategoryId}
                 onCategoryChange={storefront.setSelectedCategory}
                 onSubCategoryChange={storefront.setSelectedSubCategory}
                 onApplyFilters={storefront.handleFilterApply}

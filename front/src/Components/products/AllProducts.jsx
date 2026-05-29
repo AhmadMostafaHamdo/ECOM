@@ -414,7 +414,13 @@ const AllProducts = () => {
                                             <div className="card_details">
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <span className="product_category">
-                                                        {product.subCategory ? `${product.category} / ${product.subCategory}` : product.category}
+                                                        {(() => {
+                                                            const { isDefaultUncategorizedCategory } = require("../../utils/categoryUtils");
+                                                            if (isDefaultUncategorizedCategory({ name: product.category })) {
+                                                                return product.subCategory || t('product.noCategory', 'No category');
+                                                            }
+                                                            return product.subCategory ? `${product.category} / ${product.subCategory}` : product.category;
+                                                        })()}
                                                     </span>
                                                     {product.locationDetail && (product.locationDetail.country || product.locationDetail.city) && (
                                                         <span className="product_location" style={{ fontSize: '11px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '4px' }}>

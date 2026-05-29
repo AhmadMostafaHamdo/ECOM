@@ -3,13 +3,17 @@ import { useTranslation } from "react-i18next";
 import Banner from "./Banner";
 
 import "../home/home.css";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import VerifiedIcon from "@mui/icons-material/Verified";
-import SupportAgentIcon from "@mui/icons-material/SupportAgent";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-
+import {
+  ShieldCheck,
+  Store,
+  Headphones,
+  ArrowLeftRight,
+  Tag,
+  Star,
+  Eye,
+  ArrowRight,
+} from "lucide-react";
 import { axiosInstance, ROOT_URL } from "../../api";
-
 import { ProductSkeletonList } from "../common/ProductSkeleton";
 import { Logincontext } from "../context/Contextprovider";
 import { useContext } from "react";
@@ -17,9 +21,8 @@ import { useNavigate } from "react-router-dom";
 import { useLocalize } from "../context/LocalizeContext";
 import { formatCurrency } from "../../utils/localizeUtils";
 import { motion, AnimatePresence } from "framer-motion";
-import { LocalOffer, StarRate, Visibility, ArrowForward } from "@mui/icons-material";
 import Pagination from "../common/Pagination";
-import { getCategoryValue } from "../../utils/categoryUtils";
+import { getCategoryValue, isDefaultUncategorizedCategory } from "../../utils/categoryUtils";
 
 const CATEGORY_ALL = "All Categories";
 
@@ -27,10 +30,10 @@ const CATEGORY_ALL = "All Categories";
 const TrustBar = () => {
   const { t } = useTranslation();
   const items = [
-    { icon: <VerifiedIcon />, title: t("home.verifiedQuality", "Authentic Goods"), sub: t("home.verifiedQualityDesc", "High quality guaranteed products.") },
-    { icon: <StorefrontIcon />, title: t("home.expressDelivery", "Store Pickup"), sub: t("home.expressDeliveryDesc", "Pick up your items from our branch.") },
-    { icon: <SupportAgentIcon />, title: t("home.support247", "Direct Support"), sub: t("home.supportDesc", "Visit us for any assistance.") },
-    { icon: <SwapHorizIcon />, title: t("home.easyReturns", "In-Store Exchange"), sub: t("home.returnsDesc", "Easy exchange at our store.") },
+    { icon: <ShieldCheck size={22} />, title: t("home.verifiedQuality", "Authentic Goods"), sub: t("home.verifiedQualityDesc", "High quality guaranteed products.") },
+    { icon: <Store size={22} />, title: t("home.expressDelivery", "Store Pickup"), sub: t("home.expressDeliveryDesc", "Pick up your items from our branch.") },
+    { icon: <Headphones size={22} />, title: t("home.support247", "Direct Support"), sub: t("home.supportDesc", "Visit us for any assistance.") },
+    { icon: <ArrowLeftRight size={22} />, title: t("home.easyReturns", "In-Store Exchange"), sub: t("home.returnsDesc", "Easy exchange at our store.") },
   ];
 
   return (
@@ -111,7 +114,7 @@ const ProductCard = ({ product, onLoginRequired }) => {
         </div>
         {product.discount && product.discount !== "0%" && (
           <div className="home_card_discount">
-            <LocalOffer style={{ fontSize: 11 }} />
+            <Tag size={11} />
             {product.discount}
           </div>
         )}
@@ -119,18 +122,23 @@ const ProductCard = ({ product, onLoginRequired }) => {
 
       <div className="home_card_body">
         <span className="home_card_category">
-          {product.subCategory ? `${product.category} / ${product.subCategory}` : product.category}
+          {(() => {
+             if (isDefaultUncategorizedCategory({ name: product.category })) {
+                 return product.subCategory || "No category";
+             }
+             return product.subCategory ? `${product.category} / ${product.subCategory}` : product.category;
+          })()}
         </span>
         <h3 className="home_card_title">{product?.title?.shortTitle || "Untitled"}</h3>
         {product.tagline && <p className="home_card_tagline">{product.tagline}</p>}
 
         <div className="home_card_meta">
           <span className="home_card_rating">
-            <StarRate style={{ fontSize: 13 }} />
+            <Star size={13} />
             {Number(product.rating || 0).toFixed(1)}
           </span>
           <span className="home_card_views">
-            <Visibility style={{ fontSize: 13 }} />
+            <Eye size={13} />
             {product.views || 0}
           </span>
         </div>
@@ -312,7 +320,7 @@ const Maincomp = React.memo(
               </div>
               <button className="home_viewall_btn" onClick={handleExploreClick}>
                 <span>{t("product.viewAll", "View All")}</span>
-                <ArrowForward style={{ fontSize: 18 }} />
+                <ArrowRight size={18} />
               </button>
             </div>
 

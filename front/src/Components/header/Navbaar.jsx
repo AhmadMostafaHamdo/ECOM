@@ -30,6 +30,7 @@ import LanguageSwitcher from "../common/LanguageSwitcher";
 import { useTheme } from "../context/ThemeContext";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { Briefcase, Mail, LayoutDashboard, LogIn } from "lucide-react";
 
 
 const Navbaar = React.memo(({ onSearch }) => {
@@ -187,19 +188,23 @@ const Navbaar = React.memo(({ onSearch }) => {
           <div className="desktop_items">
 
             <LanguageSwitcher />
-            <NavLink to="/jobs" className="nav_pill_btn">
-              {t("navigation.jobOpportunities", "Job Opportunities")}
+            <NavLink to="/jobs" className={({ isActive }) => `nav_pill_btn${isActive ? ' nav_pill_btn--jobs active' : ''}`}>
+              <Briefcase size={16} />
+              {t("navigation.jobOpportunities", "Jobs")}
             </NavLink>
-            <NavLink to="/contact" className="nav_pill_btn">
+            <NavLink to="/contact" className={({ isActive }) => `nav_pill_btn${isActive ? ' nav_pill_btn--contact active' : ''}`}>
+              <Mail size={16} />
               {t("navigation.contact")}
             </NavLink>
             {isAdmin && (
-              <NavLink to="/dashboard" className="nav_pill_btn">
+              <NavLink to="/dashboard" className={({ isActive }) => `nav_pill_btn${isActive ? ' nav_pill_btn--dashboard active' : ''}`}>
+                <LayoutDashboard size={16} />
                 {t("navigation.dashboard")}
               </NavLink>
             )}
             {!account && (
               <NavLink to="/login" className="nav_pill_btn primary">
+                <LogIn size={16} />
                 {t("auth.login")}
               </NavLink>
             )}
