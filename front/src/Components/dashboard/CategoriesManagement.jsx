@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { axiosInstance } from "../../api";
 import DynamicTable from "./DynamicTable";
-import { Pencil, Trash2, Plus, Layers, Package, Activity } from "lucide-react";
+import { Pencil, Trash2, Plus, Layers, Package, Activity, X } from "lucide-react";
 import CategoryForm from "./categories/CategoryForm";
 import "./admin-dashboard.css";
 import "./CategoriesManagement.css";
@@ -95,6 +95,10 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategorySubcategories, setSelectedCategorySubcategories] = useState([]);
+  const [isLoadingSubcategories, setIsLoadingSubcategories] = useState(false);
 
   const loadCategories = useCallback(async (search = "", page = 1, limit = 10) => {
     setLoading(true);
@@ -140,6 +144,47 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
     (newSize) => loadCategories("", 1, newSize),
     [loadCategories],
   );
+
+  const fetchSubcategoriesByCategory = async (categoryId, categoryObj) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("selectedCategory._id:", categoryId);
+    }
+    
+    setIsLoadingSubcategories(true);
+    try {
+      let fetchedSubcategories = [];
+      
+      if (categoryObj && Array.isArray(categoryObj.subCategories) && categoryObj.subCategories.length > 0) {
+        fetchedSubcategories = categoryObj.subCategories;
+      } else {
+        const response = await axiosInstance.get(`/admin/categories/${categoryId}`);
+        if (response.status === 200 && response.data?.subCategories) {
+          fetchedSubcategories = response.data.subCategories;
+        }
+      }
+      
+      if (process.env.NODE_ENV === "development") {
+        console.log("fetched subcategories response:", fetchedSubcategories);
+      }
+      
+      const filtered = fetchedSubcategories.filter((sub) => {
+        if (!sub.category) return true;
+        return sub.category === categoryId || sub.category._id === categoryId;
+      });
+      
+      setSelectedCategorySubcategories(filtered);
+    } catch (err) {
+      console.error("Error fetching subcategories:", err);
+      setSelectedCategorySubcategories([]);
+    } finally {
+      setIsLoadingSubcategories(false);
+    }
+  };
+
+  const handleCategoryClick = useCallback((category) => {
+    setSelectedCategory(category);
+    fetchSubcategoriesByCategory(category._id, category);
+  }, []);
 
   const closeForm = () => {
     setShowForm(false);
@@ -336,8 +381,64 @@ const CategoriesManagement = ({ onCategoriesChanged = () => { } }) => {
                 isVisible: (cat) => getCategoryValue(cat) !== "Uncategorized",
               },
             ]}
+            onRowClick={handleCategoryClick}
           />
         </section>
+
+        {selectedCategory && (
+          <section className="dashboard-section" style={{ marginTop: "24px" }}>
+            <div className="dashboard-header" style={{ border: "none", paddingBottom: "16px" }}>
+              <div className="dashboard-title">
+                <span style={{ fontSize: "18px", fontWeight: "700" }}>
+                  {t("admin.subCategories", "Subcategories")} - {getLocalizedName(selectedCategory.name, language)}
+                </span>
+                <span className="user-id" style={{ marginLeft: "12px", background: "var(--brand-light)", color: "var(--brand)", border: "none" }}>
+                  {selectedCategorySubcategories.length} {t("admin.total")}
+                </span>
+              </div>
+              <button
+                className="admin-icon-button"
+                onClick={() => setSelectedCategory(null)}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            {isLoadingSubcategories ? (
+              <div className="admin-table__loading">{t("common.loading", "Loading...")}</div>
+            ) : selectedCategorySubcategories.length === 0 ? (
+              <div className="admin-table__empty">No subcategories found for this category</div>
+            ) : (
+              <DynamicTable
+                data={selectedCategorySubcategories}
+                columns={[
+                  {
+                    key: "name",
+                    title: t("admin.subCategoryName", "Subcategory Name"),
+                    type: "avatar",
+                    getAvatarText: (sub) => getLocalizedName(sub.name, language)?.[0]?.toUpperCase() || "?",
+                    getAvatarImage: (sub) => sub.image,
+                    getName: (sub) => getLocalizedName(sub.name, language) || "-",
+                    sortable: true,
+                  },
+                  {
+                    key: "active",
+                    title: t("common.status"),
+                    type: "status",
+                    getStatusClass: (val) => (val !== false ? "active" : "inactive"),
+                    getStatusText: (val) => (val !== false ? t("common.active", "Active") : t("common.inactive", "Inactive")),
+                    align: "center",
+                  }
+                ]}
+                searchable={true}
+                searchMode="client"
+                searchKeys={["name.en", "name.ar"]}
+                emptyMessage="No subcategories found for this category"
+              />
+            )}
+          </section>
+        )}
 
         <Dialog open={showForm} onOpenChange={(open) => (open ? setShowForm(true) : closeForm())}>
           <DialogContent className="admin_dialog_content admin_dialog_large">

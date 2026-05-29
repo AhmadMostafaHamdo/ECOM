@@ -116,6 +116,7 @@ const DynamicTable = ({
   title = "",
   subtitle = "",
   headerActions = null,
+  onRowClick = null,
   ...props
 }) => {
   const { t } = useTranslation();
@@ -345,7 +346,10 @@ const DynamicTable = ({
                     className={`admin-icon-button admin-icon-button--${variant}`}
                     aria-label={action.label}
                     title={action.label}
-                    onClick={() => action.onClick(item)}
+                    onClick={(e) => {
+                      if (onRowClick) e.stopPropagation();
+                      action.onClick(item);
+                    }}
                     disabled={action.isDisabled?.(item) || false}
                   >
                     <Icon size={16} />
@@ -465,7 +469,12 @@ const DynamicTable = ({
               <SkeletonRows columns={columns} />
             ) : processedData.length > 0 ? (
               processedData.map((item, index) => (
-                <tr key={item._id ?? index}>
+                <tr 
+                  key={item._id ?? index}
+                  onClick={onRowClick ? () => onRowClick(item) : undefined}
+                  style={onRowClick ? { cursor: "pointer" } : {}}
+                  className={cn(onRowClick ? "admin-table__row--clickable" : "")}
+                >
                   {columns.map((column) => (
                     <td
                       key={`${column.key}-${item._id ?? index}`}
@@ -557,6 +566,7 @@ DynamicTable.propTypes = {
   title: PropTypes.string,
   subtitle: PropTypes.string,
   headerActions: PropTypes.node,
+  onRowClick: PropTypes.func,
 };
 
 export { tableCache };
