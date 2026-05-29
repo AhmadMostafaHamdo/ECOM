@@ -1,7 +1,7 @@
 const User = require("../models/userSchema");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
-const { toSessionUser, ONE_YEAR_MS } = require("../utils/helpers");
+const { toSessionUser, ONE_YEAR_MS, clearAuthCookie } = require("../utils/helpers");
 const { asyncHandler } = require("../middleware/errorMiddleware");
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -19,11 +19,6 @@ const buildCookieOptions = () => {
   const cookieDomain = process.env.COOKIE_DOMAIN?.trim();
   if (cookieDomain) options.domain = cookieDomain;
 
-  return options;
-};
-
-const buildClearCookieOptions = () => {
-  const { expires, maxAge, ...options } = buildCookieOptions();
   return options;
 };
 
@@ -111,6 +106,7 @@ exports.login = asyncHandler(async (req, res) => {
   }
 
   if (userlogin.isBanned) {
+    clearAuthCookie(res);
     return res.status(403).json({
       error: "Account suspended",
       message: `Your account is suspended. Reason: ${userlogin.banReason || "Violation of terms of service"}`,
@@ -130,7 +126,7 @@ exports.login = asyncHandler(async (req, res) => {
 });
 
 exports.logout = asyncHandler(async (req, res) => {
-  res.clearCookie("eccomerce", buildClearCookieOptions());
+  clearAuthCookie(res);
   return res.status(200).json({ success: true });
 });
 

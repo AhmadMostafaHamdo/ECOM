@@ -70,6 +70,27 @@ const getViewerIdentity = (req, res) => {
     return viewer;
 };
 
+const clearAuthCookie = (res) => {
+    const isProduction = process.env.NODE_ENV === "production";
+    const cookieDomain = process.env.COOKIE_DOMAIN ? process.env.COOKIE_DOMAIN.trim() : undefined;
+
+    const baseOptions = {
+        httpOnly: true,
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
+        path: "/",
+    };
+
+    res.clearCookie("eccomerce", baseOptions);
+
+    if (cookieDomain) {
+        res.clearCookie("eccomerce", {
+            ...baseOptions,
+            domain: cookieDomain,
+        });
+    }
+};
+
 const escapeRegex = (value = "") =>
     value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -276,6 +297,7 @@ module.exports = {
     generateSessionId,
     getClientIp,
     getViewerIdentity,
+    clearAuthCookie,
     escapeRegex,
     generateProductId,
     buildTextFilterClause,

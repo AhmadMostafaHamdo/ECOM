@@ -1,27 +1,31 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userSchema");
+const { clearAuthCookie } = require("../utils/helpers");
 
-const isProduction = process.env.NODE_ENV === "production";
-const cookieDomain = process.env.COOKIE_DOMAIN ? process.env.COOKIE_DOMAIN.trim() : undefined;
+const getLatestAuthToken = (req) => {
+    const rawCookie = req.headers.cookie || "";
 
-const clearAuthCookie = (res) => {
-    const options = {
-        httpOnly: true,
-        sameSite: isProduction ? "none" : "lax",
-        secure: isProduction,
-        path: "/",
-    };
+    const tokens = rawCookie
+        .split(";")
+        .map((item) => item.trim())
+        .filter((item) => item.startsWith("eccomerce="))
+        .map((item) => decodeURIComponent(item.split("=").slice(1).join("=")))
+        .filter(Boolean);
 
-    if (cookieDomain) {
-        options.domain = cookieDomain;
-    }
-
-    res.clearCookie("eccomerce", options);
+    return tokens.length ? tokens[tokens.length - 1] : req.cookies?.eccomerce;
 };
 
 const authenicate = async (req, res, next) => {
     try {
-        const token = req.cookies?.eccomerce;
+        const token = getLatestAuthToken(req);
+
+        console.log("[AUTH DEBUG]", {
+            hasCookieHeader: Boolean(req.headers.cookie),
+            parsedCookie: Boolean(req.cookies?.eccomerce),
+            selectedTokenStart: token?.slice(0, 25),
+            origin: req.headers.origin,
+            cookieDomain: process.env.COOKIE_DOMAIN,
+        });
 
         if (!token) {
             console.log("Auth failed: Cookie missing.");
@@ -29,7 +33,7 @@ const authenicate = async (req, res, next) => {
         }
 
         const secret = process.env.JWT_SECRET || process.env.KEY;
-        
+
         let decoded;
         try {
             decoded = jwt.verify(token, secret);
@@ -39,7 +43,6 @@ const authenicate = async (req, res, next) => {
         }
 
         const userId = decoded.id || decoded._id;
-
         const rootUser = await User.findById(userId);
 
         if (!rootUser) {
@@ -48,14 +51,12 @@ const authenicate = async (req, res, next) => {
             return res.status(401).json({ error: "Unauthorized: invalid user" });
         }
 
-        // Check if user is banned
         if (rootUser.isBanned) {
-            console.log("[AUTH MIDDLEWARE] User is banned.");
             clearAuthCookie(res);
             return res.status(403).json({
                 error: "Account suspended",
                 message: `حسابك محظور. السبب: ${rootUser.banReason || "انتهاك شروط الخدمة"}`,
-                banned: true
+                banned: true,
             });
         }
 
@@ -64,17 +65,17 @@ const authenicate = async (req, res, next) => {
         req.rootUser = rootUser;
         req.userID = rootUser._id;
 
-        next();
+        return next();
     } catch (error) {
         console.log("[AUTH MIDDLEWARE] Final catch block error:", error.message);
         clearAuthCookie(res);
-        res.status(401).json({ error: "Unauthorized: token invalid or expired" });
+        return res.status(401).json({ error: "Unauthorized: token invalid or expired" });
     }
 };
 
 const optionalAuthenticate = async (req, res, next) => {
     try {
-        const token = req.cookies?.eccomerce;
+        const token = getLatestAuthToken(req);
 
         if (!token) {
             return next();
@@ -93,6 +94,7 @@ const optionalAuthenticate = async (req, res, next) => {
         req.user = decoded;
         req.rootUser = rootUser;
         req.userID = rootUser._id;
+
         return next();
     } catch (error) {
         clearAuthCookie(res);
