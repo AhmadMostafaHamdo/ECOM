@@ -4,6 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const authenticate = require("../middleware/authenticate");
+const { imageFileFilter } = require("../utils/imageUploadConfig");
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, "..", "uploads");
@@ -25,16 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|jfif|png|webp/;
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error("Error: File upload only supports the following filetypes - " + filetypes));
-  },
+  fileFilter: imageFileFilter,
 });
 
 /**

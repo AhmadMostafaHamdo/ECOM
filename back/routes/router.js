@@ -15,6 +15,7 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { optimizeImage } = require("../utils/helpers");
 const categoryController = require("../controllers/categoryController");
+const { imageFileFilter } = require("../utils/imageUploadConfig");
 
 const keysecret = process.env.KEY;
 const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
@@ -25,13 +26,7 @@ const upload = multer({
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit
   },
-  fileFilter: function (req, file, cb) {
-    // Accept images only (case-insensitive)
-    if (!file.originalname.match(/\.(jpg|jpeg|jfif|png|gif|webp|bmp|tif|tiff)$/i)) {
-      return cb(new Error("Only image files are allowed!"), false);
-    }
-    cb(null, true);
-  },
+  fileFilter: imageFileFilter,
 });
 
 const CATEGORY_ALL = "All Categories";

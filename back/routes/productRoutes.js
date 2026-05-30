@@ -17,6 +17,7 @@ router.post("/products/filter", productController.filterProducts);
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { imageFileFilter } = require("../utils/imageUploadConfig");
 
 const uploadDir = path.join(__dirname, "..", "uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -36,6 +37,7 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     limits: { fileSize: 10 * 1024 * 1024 }, // increase to 10MB
+    fileFilter: imageFileFilter,
 });
 
 // Authentication required for these
