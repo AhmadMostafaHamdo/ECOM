@@ -3,7 +3,9 @@ const path = require("path");
 const ALLOWED_EXTENSIONS = [
   ".jpg",
   ".jpeg",
+  ".jfif",
   ".png",
+  ".jfif",
   ".webp",
   ".gif",
   ".avif",
@@ -17,7 +19,9 @@ const ALLOWED_EXTENSIONS = [
 
 const ALLOWED_MIMETYPES = [
   "image/jpeg",
+  "image/pjpeg",
   "image/png",
+  "image/jfif",
   "image/webp",
   "image/gif",
   "image/avif",
@@ -29,7 +33,7 @@ const ALLOWED_MIMETYPES = [
   "image/vnd.microsoft.icon"
 ];
 
-const SUPPORTED_IMAGE_FORMATS_MESSAGE = "File upload only supports image files: jpg, jpeg, png, webp, gif, avif, heic, heif, bmp, tiff, tif, ico";
+const SUPPORTED_IMAGE_FORMATS_MESSAGE = "File upload only supports image files: jpg, jpeg, jfif, png, webp, gif, avif, heic, heif, bmp, tiff, tif, ico";
 
 const DEFAULT_FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB default limit
 

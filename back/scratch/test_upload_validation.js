@@ -27,6 +27,11 @@ const testCases = [
     file: { originalname: "photo.ico", mimetype: "image/x-icon" },
     expectedValid: true
   },
+  {
+    name: "Valid JFIF image",
+    file: { originalname: "photo.jfif", mimetype: "image/jpeg" },
+    expectedValid: true
+  },
 
   // Invalid Cases
   {
