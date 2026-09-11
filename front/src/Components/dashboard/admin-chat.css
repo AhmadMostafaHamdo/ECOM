@@ -112,7 +112,9 @@
 .admin-chat-body {
   display: grid;
   grid-template-columns: var(--chat-sidebar-width) 1fr;
+  grid-template-rows: 1fr;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   background: var(--bg);
 }
@@ -123,6 +125,8 @@
   border-right: 1.5px solid var(--border);
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   z-index: 5;
 }
 
@@ -206,8 +210,10 @@
   box-shadow: 0 0 0 4px var(--primary-glow);
 }
 
-.admin-conv-list {
+.admin-conv-list,
+.admin-user-search-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -356,6 +362,8 @@
 .admin-messages-panel {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   background: var(--bg);
 }
 
@@ -446,6 +454,7 @@
 /* Bubbles */
 .admin-messages-area {
   flex: 1;
+  min-height: 0;
   padding: 2rem 2.5rem;
   display: flex;
   flex-direction: column;
@@ -531,7 +540,7 @@
   background: var(--surface-2);
   padding: 8px;
   border-radius: var(--radius-lg);
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   transition: all var(--transition-fast);
 }
 
