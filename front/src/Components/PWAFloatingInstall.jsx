@@ -68,7 +68,7 @@ const PWAFloatingInstall = ({ pwaInstall }) => {
             onClick={handleInstall}
             className="inline-flex min-h-14 items-center justify-center gap-3 rounded-full border-2 border-[var(--surface-1)] bg-[var(--primary)] px-6 text-sm font-extrabold text-white shadow-2xl transition hover:-translate-y-1 hover:bg-[var(--primary-dark)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
             title={t("pwa.installAction", "Install app")}
-            aria-label={`${t("pwa.installAction", "Install App")} ${t("pwa.appTitle", "Studio Commerce")}`}
+            aria-label={`${t("pwa.installAction", "Install App")} ${t("pwa.appTitle", "kik")}`}
           >
             <span className="grid h-8 w-8 place-items-center rounded-full bg-white/20">
               {pwaInstall.isIOSInstallCapable ? (

@@ -82,7 +82,7 @@ const PWAInstallPrompt = ({ pwaInstall }) => {
 
               <div className="min-w-0 flex-1">
                 <p className="mb-1 text-xs font-bold uppercase tracking-[0.08em] text-[var(--primary)]">
-                  {t("pwa.appTitle", "Studio Commerce")}
+                  {t("pwa.appTitle", "kik")}
                 </p>
                 <h2 id="pwa-install-title" className="text-lg font-extrabold leading-snug">
                   {t("pwa.installTitle", "Install our App")}

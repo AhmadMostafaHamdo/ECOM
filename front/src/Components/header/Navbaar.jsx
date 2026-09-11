@@ -34,7 +34,8 @@ import { Briefcase, Mail, LayoutDashboard, LogIn } from "lucide-react";
 
 
 const Navbaar = React.memo(({ onSearch }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
   const navigate = useNavigate();
   const { account, setAccount, setShowLoginPrompt } = useContext(Logincontext);
   const { isDark, toggleTheme } = useTheme();
@@ -139,7 +140,7 @@ const Navbaar = React.memo(({ onSearch }) => {
 
           <NavLink to="/" className="navlogo">
             <img src="/kik-2.png" alt="logo" />
-            <span className="logo_badge">{t('navigation.logoText', 'Studio Commerce')}</span>
+            <span className="logo_badge">{t('navigation.logoText', 'kik')}</span>
           </NavLink>
         </div>
 
@@ -246,8 +247,8 @@ const Navbaar = React.memo(({ onSearch }) => {
             open={Boolean(anchorEl)}
             onClose={() => setAnchorEl(null)}
             className="profile_popover"
-            transformOrigin={{ horizontal: "right", vertical: "top" }}
-            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            transformOrigin={{ horizontal: isRtl ? "left" : "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: isRtl ? "left" : "right", vertical: "bottom" }}
             PaperProps={{
               elevation: 8,
               className: "profile_menu_paper",

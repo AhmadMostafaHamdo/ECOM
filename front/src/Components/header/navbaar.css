@@ -9,6 +9,7 @@
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 8px 24px -16px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   transition: background 0.3s ease, border-color 0.3s ease;
@@ -124,17 +125,31 @@
 .desktop_items {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  padding-right: 12px;
+  margin-right: 4px;
+  border-right: 1px solid var(--border);
+}
+
+[dir="rtl"] .desktop_items {
+  padding-right: 0;
+  margin-right: 0;
+  border-right: none;
+  padding-left: 12px;
+  margin-left: 4px;
+  border-left: 1px solid var(--border);
 }
 
 .nav_pill_btn {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   text-decoration: none;
   color: var(--text-2);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
+  letter-spacing: 0.01em;
   font-family: var(--font);
   padding: 8px 16px;
   border-radius: var(--radius-md);
@@ -371,26 +386,39 @@
 /* Hamburger */
 .hamburgur {
   display: none !important;
-  padding: 8px !important;
-  border-radius: 8px !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--border) !important;
   background: var(--surface-2) !important;
-  color: var(--primary) !important;
+  color: var(--text-2) !important;
+  transition: all 0.2s ease !important;
 }
 
 .hamburgur:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary-hover) !important;
   background: var(--primary-light) !important;
 }
 
 /* Mobile search toggle */
 .mobile_search_toggle {
   display: none !important;
-  padding: 8px !important;
-  border-radius: 8px !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--border) !important;
   background: var(--surface-2) !important;
-  color: var(--primary) !important;
+  color: var(--text-2) !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0;
 }
 
 .mobile_search_toggle:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary-hover) !important;
   background: var(--primary-light) !important;
 }
 
@@ -514,6 +542,10 @@
   .logo_badge,
   .desktop_items {
     display: none;
+  }
+
+  .hamburgur {
+    display: flex !important;
   }
 }
 

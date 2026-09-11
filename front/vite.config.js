@@ -20,8 +20,8 @@ export default defineConfig({
         'pwa-512x512.png'
       ],
       manifest: {
-        name: 'Studio Commerce',
-        short_name: 'Studio Commerce',
+        name: 'kik',
+        short_name: 'kik',
         description: 'A modern commerce experience for Arabic and international shoppers.',
         display: 'standalone',
         orientation: 'portrait',

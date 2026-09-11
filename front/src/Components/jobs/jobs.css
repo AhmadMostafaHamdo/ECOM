@@ -112,6 +112,61 @@
   gap: var(--space-4);
 }
 
+.job-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.job-filters__field label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.job-filters__field input,
+.job-filters__field select {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.job-filters__field input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.job-filters__field input:focus,
+.job-filters__field select:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+.job-filters__reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-normal);
+}
+
+.job-filters__reset:hover {
+  color: var(--color-primary);
+}
+
 /* =========================================
    Results Section
 ========================================= */
@@ -146,6 +201,18 @@
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: 500;
+}
+
+.jobs_page_resultsCount {
+  background: var(--color-background);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+}
+
+.jobs_page_resultsCount strong {
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 /* =========================================
@@ -289,6 +356,27 @@
   font-size: var(--font-size-xs);
 }
 
+.job-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+[dir="rtl"] .job-card__cta {
+  transform: translateX(4px);
+}
+
+.job-card:hover .job-card__cta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 /* =========================================
    Badges
 ========================================= */
@@ -341,6 +429,17 @@
   justify-content: center;
   text-align: center;
   gap: var(--space-4);
+}
+
+.jobs_empty_state__icon {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: var(--color-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
 }
 
 .jobs_empty_state h3,
@@ -400,6 +499,25 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-4);
+}
+
+.job-details_header {
+  display: flex;
+}
+
+.job-details_loading,
+.job-details_empty {
+  padding: var(--space-8) var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.job-details_empty h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-primary);
 }
 
 .job-details_card {

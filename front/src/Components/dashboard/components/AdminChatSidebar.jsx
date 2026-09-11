@@ -44,7 +44,7 @@ const AdminChatSidebar = ({
     };
 
     return (
-        <div className={`admin-chat-sidebar ${activeConversation ? 'mobile-hidden' : ''}`}>
+        <div className="admin-chat-sidebar">
             <div className="admin-chat-tabs">
                 <button
                     className={`chat-tab ${activeTab === 'recent' ? 'active' : ''}`}
@@ -62,16 +62,7 @@ const AdminChatSidebar = ({
 
             <div className="admin-chat-search-wrap">
                 <div style={{ position: 'relative' }}>
-                    <Search
-                        size={16}
-                        style={{
-                            position: 'absolute',
-                            left: '14px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: 'var(--text-3)'
-                        }}
-                    />
+                    <Search size={16} className="admin-chat-search-icon" />
                     <input
                         type="text"
                         placeholder={activeTab === 'recent' ? t('adminChat.searchConversations') : t('adminChat.searchUsersPrompt', 'Search users by name or email...')}
@@ -116,7 +107,7 @@ const AdminChatSidebar = ({
                                                 {lastMsg?.createdAt && formatTime(lastMsg.createdAt)}
                                             </span>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                        <div className="admin-conv-preview-row">
                                             <p className="admin-conv-preview">
                                                 {lastMsg?.text || t('adminChat.noMessages')}
                                             </p>

@@ -205,7 +205,7 @@ const ReportsManagement = () => {
                     <table className="reports-table">
                         <thead>
                             <tr>
-                                {["type", "reported", "reporter", "reason", "status", "date", "actions"].map((h) => (
+                                {["type", "reported", "reporter", "reason", "statusLabel", "date", "actions"].map((h) => (
                                     <th key={h}>{t(`admin.reports.${h}`)}</th>
                                 ))}
                             </tr>

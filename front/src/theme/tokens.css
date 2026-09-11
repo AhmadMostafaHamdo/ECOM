@@ -111,6 +111,14 @@
   --motion-fast: 140ms var(--ease-standard);
   --motion-normal: 220ms var(--ease-standard);
   --motion-slow: 360ms var(--ease-emphasized);
+  --transition-normal: var(--motion-normal);
+
+  /* Aliases (font-size-* naming used by some feature stylesheets) */
+  --font-size-xs: var(--fs-xs);
+  --font-size-sm: var(--fs-sm);
+  --font-size-md: var(--fs-md);
+  --font-size-lg: var(--fs-lg);
+  --font-size-xl: var(--fs-xl);
 
   --font: var(--font-sans);
   --header-h: 72px;

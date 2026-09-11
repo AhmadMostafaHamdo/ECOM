@@ -39,11 +39,12 @@ exports.submitReport = asyncHandler(async (req, res) => {
  * @route   GET /api/admin/reports
  */
 exports.getReports = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, status = "all" } = req.query;
+    const { page = 1, limit = 10, status = "all", targetType } = req.query;
     const skip = (page - 1) * limit;
 
     let query = {};
     if (status !== "all") query.status = status;
+    if (targetType) query.targetType = targetType;
 
     const reports = await Report.find(query)
         .populate("reporter", "fname email")
@@ -56,12 +57,10 @@ exports.getReports = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         data: reports,
-        pagination: {
-            total,
-            page: parseInt(page),
-            limit: parseInt(limit),
-            totalPages: Math.ceil(total / limit)
-        }
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        total_pages: Math.ceil(total / limit)
     });
 });
 
@@ -70,10 +69,19 @@ exports.getReports = asyncHandler(async (req, res) => {
  * @route   GET /api/admin/reports/stats
  */
 exports.getReportStats = asyncHandler(async (req, res) => {
-    const stats = await Report.aggregate([
+    const statusStats = await Report.aggregate([
         {
             $group: {
                 _id: "$status",
+                count: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const typeStats = await Report.aggregate([
+        {
+            $group: {
+                _id: "$targetType",
                 count: { $sum: 1 }
             }
         }
@@ -88,7 +96,21 @@ exports.getReportStats = asyncHandler(async (req, res) => {
         }
     ]);
 
-    res.status(200).json({ statusStats: stats, reasonStats });
+    const byStatus = Object.fromEntries(statusStats.map((s) => [s._id, s.count]));
+    const byType = Object.fromEntries(typeStats.map((s) => [s._id, s.count]));
+    const total = statusStats.reduce((sum, s) => sum + s.count, 0);
+
+    res.status(200).json({
+        total,
+        pending: byStatus.pending || 0,
+        reviewed: byStatus.reviewed || 0,
+        resolved: byStatus.resolved || 0,
+        dismissed: byStatus.dismissed || 0,
+        productReports: byType.product || 0,
+        userReports: byType.user || 0,
+        statusStats,
+        reasonStats
+    });
 });
 
 /**

@@ -32,36 +32,39 @@ const CategoryCircleItem = ({ item, isActive, label, onClick }) => {
         className={`relative w-[60px] h-[60px] md:w-[68px] md:h-[68px] rounded-full p-[2.5px] transition-all duration-300
           ${
             isActive
-              ? "bg-gradient-to-br from-orange-400 via-orange-500 to-amber-600 shadow-[0_0_18px_4px_rgba(249,115,22,0.4)]"
+              ? "bg-gradient-to-br from-orange-400 via-orange-500 to-amber-600"
               : "bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-700 group-hover:from-orange-300 group-hover:to-orange-500"
           }`}
       >
-        {/* Inner circle */}
-        <div className="w-full h-full rounded-full overflow-hidden bg-[var(--surface-2)] flex items-center justify-center">
-          {imgUrl ? (
-            <>
-              <img
-                src={imgUrl}
-                alt={label}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  if (e.target.nextSibling) e.target.nextSibling.style.display = "flex";
-                }}
-              />
-              {/* Shown only on img error */}
-              <div
-                className="w-full h-full rounded-full items-center justify-center text-white font-bold text-lg select-none bg-gradient-to-br from-orange-400 to-amber-600"
-                style={{ display: "none" }}
-              >
+        {/* Gap between ring and image */}
+        <div className="w-full h-full rounded-full bg-[var(--surface)] p-[3px]">
+          {/* Inner circle */}
+          <div className="w-full h-full rounded-full overflow-hidden bg-[var(--surface-2)] flex items-center justify-center">
+            {imgUrl ? (
+              <>
+                <img
+                  src={imgUrl}
+                  alt={label}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    if (e.target.nextSibling) e.target.nextSibling.style.display = "flex";
+                  }}
+                />
+                {/* Shown only on img error */}
+                <div
+                  className="w-full h-full rounded-full items-center justify-center text-white font-bold text-lg select-none bg-gradient-to-br from-orange-400 to-amber-600"
+                  style={{ display: "none" }}
+                >
+                  {initial}
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-xl select-none bg-gradient-to-br from-orange-400 to-amber-600">
                 {initial}
               </div>
-            </>
-          ) : (
-            <div className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-xl select-none bg-gradient-to-br from-orange-400 to-amber-600">
-              {initial}
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Active dot */}
@@ -176,12 +179,15 @@ const Newnav = ({
   return (
     <nav
       dir={isRTL ? "rtl" : "ltr"}
-      style={{marginTop:"4rem"}}
+      className="bg-[var(--surface)] border-b border-[var(--border)]"
+      style={{ marginTop: "4rem" }}
     >
+      <SectionTitle>{t("navigation.shopByCategory", "Shop by Category")}</SectionTitle>
+
       {/* ── Categories row ── */}
       <div
         ref={catScrollRef}
-        className="no-scrollbar flex gap-4 px-4 md:px-6 pt-3 overflow-x-auto"
+        className="no-scrollbar flex gap-4 px-4 md:px-6 pt-3 pb-5 overflow-x-auto"
       >
         {/* Static "All Categories" — always first, never duplicated */}
         <CategoryCircleItem

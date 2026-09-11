@@ -182,6 +182,11 @@ const ProfilePage = () => {
 
   const initials = account?.fname ? account.fname[0].toUpperCase() : "?";
   const role = account?.role || "customer";
+  const roleLabel = role === "admin"
+    ? t("admin.adminRole", "Admin")
+    : role === "customer"
+      ? t("profile.customer", "Customer")
+      : t("admin.userRole", "User");
   const joinYear = account?.createdAt ? new Date(account.createdAt).getFullYear() : null;
 
   return (
@@ -211,7 +216,7 @@ const ProfilePage = () => {
               <div className="pp-hero__meta">
                 <span className="pp-hero__role">
                   <ShieldCheck size={12} />
-                  {role}
+                  {roleLabel}
                 </span>
                 {account?.email && (
                   <span className="pp-hero__email">
@@ -233,7 +238,7 @@ const ProfilePage = () => {
           <div className="pp-hero__stats">
             <Stat value={myProducts.length} label={t("profile.products", "Products")} />
             {joinYear && <Stat value={joinYear} label={t("profile.memberSince", "Member since")} />}
-            <Stat value={role === "admin" ? "Admin" : "Member"} label={t("profile.accountType", "Account type")} />
+            <Stat value={role === "admin" ? t("profile.admin", "Admin") : t("profile.member", "Member")} label={t("profile.accountType", "Account type")} />
           </div>
         </div>
       </section>
@@ -255,7 +260,7 @@ const ProfilePage = () => {
               <div className="pp-contact-card__avatar">{initials}</div>
               <div>
                 <div className="pp-contact-card__name">{account?.fname}</div>
-                <span className="pp-sidebar__badge">{role}</span>
+                <span className="pp-sidebar__badge">{roleLabel}</span>
               </div>
             </div>
 

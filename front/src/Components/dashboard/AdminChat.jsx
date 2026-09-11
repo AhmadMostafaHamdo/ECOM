@@ -70,7 +70,7 @@ const AdminChat = () => {
         try {
             const res = await axiosInstance.get(`/conversations/${convId}/messages`);
             if (res.status === 200) {
-                setMessages((res.data.messages || []).slice().reverse());
+                setMessages((res.data.data || []).slice());
                 setTimeout(scrollToBottom, 100);
             }
         } catch (err) {
@@ -163,7 +163,7 @@ const AdminChat = () => {
             });
 
             if (res.status === 200 || res.status === 201) {
-                const msg = res.data;
+                const msg = res.data.message;
                 setMessages(prev => [...prev, msg]);
                 setTimeout(scrollToBottom, 100);
                 fetchConversations();

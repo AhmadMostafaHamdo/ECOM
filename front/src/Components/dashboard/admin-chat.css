@@ -173,11 +173,30 @@
   padding-left: 40px;
   background: var(--surface-2);
   border: 1.5px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: 999px;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-1);
   transition: all var(--transition-fast);
+}
+
+[dir="rtl"] .admin-chat-search {
+  padding-left: 16px;
+  padding-right: 40px;
+}
+
+.admin-chat-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+[dir="rtl"] .admin-chat-search-icon {
+  left: auto;
+  right: 14px;
 }
 
 .admin-chat-search:focus {
@@ -243,7 +262,7 @@
 .admin-conv-avatar {
   width: 52px;
   height: 52px;
-  border-radius: 16px;
+  border-radius: 50%;
   background: var(--color-primary);
   color: var(--color-text-inverse);
   display: flex;
@@ -253,6 +272,13 @@
   font-size: 1.2rem;
   box-shadow: var(--shadow-md);
   transition: var(--transition-base);
+  flex-shrink: 0;
+}
+
+.admin-conv-avatar-sm {
+  width: 42px;
+  height: 42px;
+  font-size: 1rem;
 }
 
 .admin-conv-item:hover .admin-conv-avatar {
@@ -291,6 +317,13 @@
   text-overflow: ellipsis;
 }
 
+.admin-conv-preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .admin-conv-preview {
   font-size: 0.85rem;
   color: var(--text-2);
@@ -298,6 +331,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.4;
+  min-width: 0;
 }
 
 .admin-conv-time {
@@ -338,14 +372,33 @@
 .admin-msg-header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
+}
+
+.admin-msg-back {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.admin-msg-back:hover {
+  background: var(--surface-2);
 }
 
 .admin-msg-user-info h3 {
   font-weight: 800;
   color: var(--text-1);
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 .admin-msg-user-info p {
@@ -354,22 +407,53 @@
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.admin-msg-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
 }
 
 .admin-msg-header-actions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
+}
+
+.admin-msg-header-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.admin-msg-header-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
 }
 
 /* Bubbles */
 .admin-messages-area {
   flex: 1;
-  padding: 2.5rem;
+  padding: 2rem 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.6rem;
   overflow-y: auto;
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-attachment: local;
 }
 
 .admin-msg-bubble-wrap {
@@ -389,13 +473,21 @@
 }
 
 .admin-msg-bubble {
-  padding: 14px 20px;
-  border-radius: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px 10px;
+  padding: 10px 14px;
+  border-radius: 18px;
   font-size: 0.95rem;
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 500;
   box-shadow: var(--shadow-sm);
   position: relative;
+}
+
+.admin-msg-bubble-text {
+  word-break: break-word;
 }
 
 .mine .admin-msg-bubble {
@@ -413,11 +505,16 @@
 }
 
 .admin-msg-time {
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: var(--text-3);
-  margin: 6px 4px;
-  text-transform: uppercase;
+  margin-left: auto;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+.mine .admin-msg-time {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 /* Input Area */
@@ -566,18 +663,11 @@
 }
 
 @media (max-width: 768px) {
-  .admin-chat-body {
-    grid-template-columns: 1fr;
+  :root {
+    --chat-sidebar-width: 240px;
   }
 
-  .admin-chat-sidebar {
-    display: none;
-  }
-
-  .admin-chat-sidebar.mobile-visible {
+  .admin-msg-back {
     display: flex;
-    position: absolute;
-    inset: 0;
-    width: 100%;
   }
 }

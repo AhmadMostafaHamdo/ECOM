@@ -11,6 +11,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import StoreIcon from "@mui/icons-material/Store";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LoginIcon from "@mui/icons-material/Login";
@@ -69,6 +70,10 @@ const Rightheader = ({ userlog, logclose }) => {
             <DashboardIcon /> {t('navigation.dashboard', 'Dashboard')}
           </NavLink>
         )}
+
+        <NavLink to="/jobs" onClick={logclose}>
+          <WorkOutlineIcon /> {t('navigation.jobOpportunities', 'Jobs')}
+        </NavLink>
 
         <NavLink to="/contact" onClick={logclose}>
           <ContactSupportIcon /> {t('navigation.contact', 'Contact Us')}

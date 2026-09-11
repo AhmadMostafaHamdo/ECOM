@@ -48,7 +48,7 @@ const Footer = () => {
         {/* Brand intro */}
         <div className="footer_intro">
           <img src="/kik-2.png" alt="logo" className="footer_logo" />
-          <h3>{t("footer.studioCommerce", "Studio Commerce")}</h3>
+          <h3>{t("footer.studioCommerce", "kik")}</h3>
           <p>{t("footer.tagline", "The global marketplace for quality products. Connect with sellers worldwide.")}</p>
           <div className="social_links">
             <a href="#" className="social_link" aria-label="Facebook">
@@ -105,7 +105,7 @@ const Footer = () => {
           <NavLink to="/contact">{t("navigation.contact", "Contact Us")}</NavLink>
         </p>
         <small>
-          © {year} {t("footer.studioCommerce", "Studio Commerce")}. {t("footer.allRightsReserved", "All rights reserved.")}
+          © {year} {t("footer.studioCommerce", "kik")}. {t("footer.allRightsReserved", "All rights reserved.")}
         </small>
       </div>
     </footer>

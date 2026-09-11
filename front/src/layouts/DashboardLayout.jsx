@@ -97,9 +97,9 @@ const DashboardLayout = () => {
         {/* Brand */}
         <div className="dl-sidebar__header">
           <NavLink to="/dashboard" className="dl-brand" onClick={closeSidebar}>
-            <div className="dl-brand__mark">SC</div>
+            <div className="dl-brand__mark">K</div>
             <div className="dl-brand__copy">
-              <strong>Studio Commerce</strong>
+              <strong>kik</strong>
               <span>{t("admin.dashboard")}</span>
             </div>
           </NavLink>

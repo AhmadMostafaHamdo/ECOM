@@ -30,27 +30,26 @@ const AdminMessagesPanel = ({
                             <button
                                 className="admin-msg-back"
                                 onClick={() => setActiveConversation(null)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-1)', padding: '8px' }}
                             >
-                                <ChevronLeft size={24} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
+                                <ChevronLeft size={22} style={{ transform: isRtl ? 'rotate(180deg)' : 'none' }} />
                             </button>
-                            <div className="admin-conv-avatar">
-                                {otherParticipant.fname?.[0]?.toUpperCase() || <User size={20} />}
+                            <div className="admin-conv-avatar admin-conv-avatar-sm">
+                                {otherParticipant.fname?.[0]?.toUpperCase() || <User size={18} />}
                             </div>
                             <div className="admin-msg-user-info">
                                 <h3>{otherParticipant.fname} {otherParticipant.lname}</h3>
                                 <p>
-                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} />
+                                    <span className="admin-msg-status-dot" />
                                     {t('adminChat.activeNow')}
                                 </p>
                             </div>
                         </div>
                         <div className="admin-msg-header-actions">
-                            <button style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: '8px' }}>
-                                <Info size={20} />
+                            <button className="admin-msg-header-btn">
+                                <Info size={19} />
                             </button>
-                            <button style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: '8px' }}>
-                                <MoreHorizontal size={20} />
+                            <button className="admin-msg-header-btn">
+                                <MoreHorizontal size={19} />
                             </button>
                         </div>
                     </div>
@@ -80,9 +79,9 @@ const AdminMessagesPanel = ({
                                             className={`admin-msg-bubble-wrap ${isMine ? 'mine' : 'theirs'}`}
                                         >
                                             <div className="admin-msg-bubble">
-                                                {msg.text}
+                                                <span className="admin-msg-bubble-text">{msg.text}</span>
+                                                <span className="admin-msg-time">{formatTime(msg.createdAt)}</span>
                                             </div>
-                                            <span className="admin-msg-time">{formatTime(msg.createdAt)}</span>
                                         </motion.div>
                                     );
                                 })
