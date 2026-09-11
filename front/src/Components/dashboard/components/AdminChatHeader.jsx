@@ -14,17 +14,17 @@ const AdminChatHeader = ({ conversations, account }) => {
         <div
           style={{
             background: "var(--primary-glow)",
-            padding: "12px",
-            borderRadius: "16px",
+            padding: "10px",
+            borderRadius: "14px",
             color: "var(--primary)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <MessageSquare size={32} />
+          <MessageSquare size={24} />
         </div>
-        <div style={{ marginLeft: "1rem" }}>
+        <div style={{ marginLeft: "0.85rem" }}>
           <h1 style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             {t("adminChat.customerSupport")}
             <ShieldCheck size={20} style={{ color: "#808080" }} />
